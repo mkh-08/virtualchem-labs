@@ -8,9 +8,9 @@
     <style>
         /* ── LOCAL TOKENS ── */
         :root {
-            --accent: var(--purple);
-            --accent-dim: var(--purple-dim);
-            --accent-hover: #6366f1;
+            --accent: #a78bfa;
+            --accent-dim: rgba(167,139,250,0.1);
+            --accent-hover: #8b7cf8;
             --tube-glass: rgba(255,255,255,0.05);
         }
 
@@ -63,7 +63,7 @@
         .controls .primary-btn {
             background: var(--purple-dim);
             color: var(--purple);
-            border-color: rgba(129,140,248,0.25);
+            border-color: rgba(167,139,250,0.25);
         }
         .controls .primary-btn:hover { background: rgba(129,140,248,0.2); }
 
@@ -172,7 +172,7 @@
         .fraction-tab.active {
             background: var(--purple-dim);
             color: var(--purple);
-            border-color: rgba(129,140,248,0.3);
+            border-color: rgba(167,139,250,0.3);
             font-weight: 700;
         }
         .fraction-tab:hover:not(.active) { border-color: var(--border-lite); color: var(--text-main); }
@@ -201,7 +201,7 @@
         .exam-nav-btn.active {
             background: var(--purple-dim);
             color: var(--purple);
-            border-color: rgba(129,140,248,0.3);
+            border-color: rgba(167,139,250,0.3);
             font-weight: 700;
         }
 
@@ -560,7 +560,7 @@
         </div>
 
         <div id="exam-rows-container"></div>
-        <button onclick="submitExam()" style="background:var(--purple-dim); color:var(--purple); border:1px solid rgba(129,140,248,0.25); padding:10px; border-radius:6px; font-family:var(--font-body); font-weight:700; cursor:pointer; margin-top:15px; width:100%; font-size:13px;">Submit Final Answers</button>
+        <button onclick="submitExam()" style="background:var(--purple-dim); color:var(--purple); border:1px solid rgba(167,139,250,0.25); padding:10px; border-radius:6px; font-family:var(--font-body); font-weight:700; cursor:pointer; margin-top:15px; width:100%; font-size:13px;">Submit Final Answers</button>
         <div id="exam-results" style="margin-top: 15px; font-size:1.2rem; font-weight: bold; text-align: center;"></div>
     </div>
 </div>
@@ -572,7 +572,7 @@
             <button class="close-modal" onclick="closeModal('mix-modal')" aria-label="Close dialog">×</button>
         </div>
         <div class="mix-grid" id="mix-checkboxes"></div>
-        <button onclick="applyMixture()" style="background:var(--purple-dim); color:var(--purple); border:1px solid rgba(129,140,248,0.25); padding:10px; border-radius:6px; font-family:var(--font-body); font-weight:700; cursor:pointer; width:100%; font-size:13px;">Create Mixture</button>
+        <button onclick="applyMixture()" style="background:var(--purple-dim); color:var(--purple); border:1px solid rgba(167,139,250,0.25); padding:10px; border-radius:6px; font-family:var(--font-body); font-weight:700; cursor:pointer; width:100%; font-size:13px;">Create Mixture</button>
     </div>
 </div>
 

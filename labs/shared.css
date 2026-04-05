@@ -10,32 +10,32 @@
 /* ── DESIGN TOKENS ── */
 :root {
   /* Backgrounds */
-  --bg-base:     #0b0f1a;
-  --bg-panel:    #131929;
-  --bg-inset:    #080d16;
+  --bg-base:     #080c14;
+  --bg-panel:    #0f1623;
+  --bg-inset:    #050810;
   --bg-hover:    rgba(255,255,255,0.04);
 
   /* Text */
   --text-main:   #f1f5f9;
   --text-muted:  #64748b;
-  --text-dim:    #334155;
+  --text-dim:    #2d3f58;
 
   /* Borders */
-  --border:      #1e2d45;
+  --border:      #1a2840;
   --border-lite: #243550;
 
   /* Accents */
   --blue:        #38bdf8;
-  --blue-dim:    rgba(56,189,248,0.12);
+  --blue-dim:    rgba(56,189,248,0.1);
   --blue-hover:  #0ea5e9;
   --green:       #34d399;
-  --green-dim:   rgba(52,211,153,0.12);
-  --purple:      #818cf8;
-  --purple-dim:  rgba(129,140,248,0.12);
+  --green-dim:   rgba(52,211,153,0.1);
+  --purple:      #a78bfa;
+  --purple-dim:  rgba(167,139,250,0.1);
   --amber:       #fbbf24;
-  --amber-dim:   rgba(251,191,36,0.12);
+  --amber-dim:   rgba(251,191,36,0.1);
   --red:         #f87171;
-  --red-dim:     rgba(248,113,113,0.12);
+  --red-dim:     rgba(248,113,113,0.1);
 
   /* Timing */
   --t-fast:  0.15s;
@@ -120,7 +120,7 @@ body {
 /* Organic active link */
 .snav-green { color: var(--green) !important; background: var(--green-dim) !important; }
 /* Inorganic active link */
-.snav-purple { color: var(--purple) !important; background: var(--purple-dim) !important; }
+.snav-purple { color: #a78bfa !important; background: rgba(167,139,250,0.1) !important; }
 
 @media (max-width: 600px) { .site-nav-links { display: none; } }
 
