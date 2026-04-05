@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Qualitative Analysis — VirtualChem by MKh</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* ── SHARED SITE NAV ── */
+        .site-nav {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(11,15,26,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #1e2d45;
+            padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 48px; font-family: 'Inter', sans-serif;
+        }
+        .site-nav-brand {
+            font-size: 14px; font-weight: 700; letter-spacing: 0.04em;
+            color: #38bdf8; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .site-nav-links { display: flex; gap: 4px; }
+        .site-nav-links a {
+            padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+            color: #64748b; text-decoration: none; transition: all 0.2s;
+        }
+        .site-nav-links a:hover { color: #f1f5f9; background: #1e2d45; }
+        .site-nav-links a.snav-active { color: #34d399; background: rgba(52,211,153,0.08); }
+        @media (max-width: 600px) { .site-nav-links { display: none; } }
+    </style>
+    <style>
+        /* ── ORGANIC LAB LOCAL TOKENS (mapped to shared) ── */
+        :root {
+            --bg-dark:      var(--bg-base);
+            --panel-bg:     var(--bg-panel);
+            --panel-border: var(--border);
+            --accent-blue:  var(--blue);
+            --accent-green: var(--green);
+            --accent-red:   var(--red);
+            --accent-orange: var(--amber);
+            --accent-purple: var(--purple);
+            --vial-glass:   rgba(255,255,255,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-base);
+            color: var(--text-main);
+            display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden;
+        }
+        body > header { flex-shrink: 0; }
+        #workspace { flex: 1; min-height: 0; }
+
+        /* ── HEADER ── */
+        header {
+            background: var(--bg-inset);
+            padding: 10px 20px;
+            display: flex; flex-wrap: wrap; gap: 8px;
+            justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        header h1 {
+            font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
+            color: var(--green);
+        }
+        .controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+        button {
+            font-family: var(--font-body);
+            background: rgba(255,255,255,0.06);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 7px 13px; border-radius: var(--r-sm);
+            cursor: pointer;
+            transition: background var(--t-fast) var(--ease),
+                        border-color var(--t-fast) var(--ease),
+                        transform var(--t-fast) var(--ease);
+            font-weight: 600; font-size: 12px; white-space: nowrap;
+        }
+        button:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--border-lite); }
+        button:active:not(:disabled) { transform: scale(0.97); }
+        button:disabled { opacity: 0.45; cursor: not-allowed; }
+        button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+        .btn-primary { background: var(--green); color: #000; border: none; }
+        .btn-primary:hover:not(:disabled) { background: #2ec990; box-shadow: 0 0 0 4px var(--green-dim); }
+
+        .btn-exam { background: var(--purple); color: #fff; border: none; }
+        .btn-exam:hover:not(:disabled) { background: #6d77e8; box-shadow: 0 0 0 4px var(--purple-dim); }
+
+        .btn-sheet { background: var(--amber); color: #000; border: none; display: none; }
+        .btn-sheet:hover:not(:disabled) { background: #f0a800; }
+
+        #set-nav {
+            display: none; gap: 4px; align-items: center;
+            padding: 0 8px;
+            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+        }
+
+        /* ── WORKSPACE LAYOUT ── */
+        #workspace { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        @media (min-width: 1024px) { #workspace { flex-direction: row; } }
+
+        /* ── REAGENTS PANEL ── */
+        #reagents-panel {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            overflow-y: auto; max-height: 40vh;
+        }
+        @media (min-width: 1024px) {
+            #reagents-panel {
+                flex: 0 0 340px; max-height: none;
+                border-right: 1px solid var(--border); border-bottom: none;
+            }
+        }
+
+        .reagent-group { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        .reagent-group h3 {
+            margin: 0 0 10px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--amber);
+        }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+        .reagent-btn {
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            padding: 9px 6px; border-radius: var(--r-sm);
+            color: var(--text-muted);
+            font-family: var(--font-body); font-size: 11px; font-weight: 500;
+            text-align: center; cursor: pointer;
+            transition: background var(--t-fast) var(--ease),
+                        border-color var(--t-fast) var(--ease),
+                        color var(--t-fast) var(--ease);
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .reagent-btn span.icon { font-size: 1.1rem; }
+        .reagent-btn:hover {
+            background: rgba(52,211,153,0.08);
+            border-color: var(--green);
+            color: var(--text-main);
+        }
+        .reagent-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+        .reagent-btn.clicked {
+            background: var(--green-dim);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        /* ── BENCH PANEL ── */
+        #bench-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; }
+
+        #visual-bench {
+            flex: 0 0 160px;
+            display: flex; justify-content: center; align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: radial-gradient(circle at 50% 70%, rgba(52,211,153,0.06) 0%, var(--bg-inset) 70%);
+            position: relative;
+        }
+        @media (min-width: 1024px) { #visual-bench { flex: 0 0 200px; } }
+
+        /* ── VIAL ── */
+        .vial-container {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            opacity: 0.25;
+            transform: scale(0.95);
+            transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+        }
+        .vial-container.active { opacity: 1; transform: scale(1); }
+
+        .vial {
+            width: 54px; height: 88px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: none; border-radius: 0 0 27px 27px;
+            position: relative; overflow: hidden;
+            background: var(--vial-glass);
+            box-shadow: inset 2px 0 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .vial-liquid {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+            background: transparent;
+            transition: background-color var(--t-slow) var(--ease), height var(--t-mid) var(--ease);
+        }
+        /* subtle glass shine */
+        .vial::after {
+            content: '';
+            position: absolute; top: 0; left: 6px; width: 6px; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0.08), transparent);
+            pointer-events: none;
+        }
+        #vial-label {
+            font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+            color: var(--green);
+            background: var(--bg-inset); padding: 3px 10px; border-radius: var(--r-sm);
+            border: 1px solid var(--border);
+        }
+
+        /* ── LOG ── */
+        #log-container { flex: 1; display: flex; flex-direction: column; background: var(--bg-inset); overflow: hidden; }
+        .log-header {
+            padding: 9px 16px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0;
+        }
+        .log-header h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .log-controls button { font-size: 11px; padding: 4px 9px; background: transparent; border-color: var(--border); color: var(--text-muted); }
+        .log-controls button:hover { color: var(--text-main); }
+
+        #action-log {
+            flex: 1; padding: 12px 14px; overflow-y: auto;
+            font-family: var(--font-mono); font-size: 12px; line-height: 1.65;
+        }
+
+        .log-entry { margin-bottom: 10px; border-left: 2px solid transparent; padding: 4px 10px; word-wrap: break-word; border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+        .log-entry.system { border-left-color: var(--border); color: var(--text-muted); }
+        .log-entry.action { border-left-color: var(--blue); color: var(--text-main); }
+        .log-entry.result { border-left-color: var(--green); background: rgba(52,211,153,0.06); color: #a7f3d0; }
+        .log-entry.warning { border-left-color: var(--amber); background: rgba(251,191,36,0.06); color: #fde68a; }
+        .log-entry.error { border-left-color: var(--red); background: rgba(248,113,113,0.06); color: #fca5a5; }
+        .log-time { color: var(--text-muted); font-size: 10px; margin-right: 6px; opacity: 0.7; }
+        .log-obs { font-weight: 600; display: block; margin-top: 3px; }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(5,8,18,0.88);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            justify-content: center; align-items: center; z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay[style*="flex"] { display: flex; }
+        .modal-content {
+            background: var(--bg-panel);
+            padding: 24px; border-radius: var(--r-lg);
+            width: 95%; max-width: 820px; max-height: 90vh; overflow-y: auto;
+            border: 1px solid var(--border-lite);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;
+        }
+        .modal-header h2 { margin: 0; font-size: 16px; font-weight: 700; }
+        .modal-close {
+            background: none; border: none; color: var(--text-muted);
+            font-size: 22px; line-height: 1; cursor: pointer; padding: 0;
+            transition: color var(--t-fast);
+        }
+        .modal-close:hover { color: var(--red); }
+
+        .truth-box {
+            background: var(--bg-inset); border: 1px dashed var(--border-lite);
+            padding: 14px; margin-bottom: 18px; text-align: center;
+            border-radius: var(--r-md);
+        }
+        .hidden-truth { filter: blur(6px); user-select: none; transition: filter var(--t-slow) var(--ease); }
+        .hidden-truth.revealed { filter: none; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+        th { background: var(--bg-inset); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; position: sticky; top: 0; }
+        tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+        tr:hover td { background: rgba(255,255,255,0.025); }
+        td { font-family: var(--font-mono); }
+
+        /* ── EXAM SHEET ── */
+        .candidate-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            margin-bottom: 18px; background: var(--bg-inset);
+            padding: 14px; border: 1px solid var(--border); border-radius: var(--r-md);
+        }
+        .exam-row {
+            display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+            margin-bottom: 10px; background: rgba(255,255,255,0.025);
+            padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-sm);
+            transition: border-color var(--t-fast);
+        }
+        .exam-row:hover { border-color: var(--border-lite); }
+        .exam-row label { font-weight: 700; color: var(--blue); font-size: 12px; }
+        .exam-row select {
+            width: 100%; padding: 7px 10px;
+            background: var(--bg-inset); color: var(--text-main);
+            border: 1px solid var(--border); font-size: 13px; border-radius: var(--r-sm);
+            font-family: var(--font-body);
+            transition: border-color var(--t-fast), box-shadow var(--t-fast);
+        }
+        .exam-row select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); outline: none; }
+        .exam-res { margin-top: 4px; font-weight: 700; font-size: 12px; }
+
+        @media (min-width: 640px) {
+            .exam-row { flex-direction: row; align-items: center; }
+            .exam-row label { width: 110px; flex-shrink: 0; }
+            .exam-row select { flex: 1; }
+            .exam-res { margin-top: 0; margin-left: 12px; width: 240px; }
+        }
+        @media (max-width: 640px) { .candidate-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav class="site-nav" role="navigation" aria-label="Site navigation">
+    <a href="../index.html" class="site-nav-brand">⚗️ VirtualChem Labs</a>
+    <div class="site-nav-links">
+        <a href="../index.html">Home</a>
+        <a href="titration.html">Titration</a>
+        <a href="organic.html" class="snav-active">Organic</a>
+        <a href="inorganic.html">Inorganic</a>
+    </div>
+</nav>
+
+    <header>
+        <h1>Virtual Lab_1 by MKh </h1>
+        <div class="controls">
+            <button class="btn-primary" onclick="requestNewUnknown()">Single Random</button>
+            <button class="btn-exam" onclick="generateSet(6)">New Exam Set</button>
+            
+            <div id="set-nav">
+                <button id="btn-prev" onclick="navSet(-1)" aria-label="Previous compound">◄ Prev</button>
+                <button id="btn-next" onclick="navSet(1)" aria-label="Next compound">Next ►</button>
+            </div>
+
+            <button id="btn-exam-sheet" class="btn-sheet" onclick="openExamSheet()">📝 Exam Sheet</button>
+            <button onclick="openModal()">Compare Data</button>
+        </div>
+    </header>
+
+    <div id="workspace">
+        <div id="reagents-panel">
+            <div class="reagent-group">
+                <h3>Physical & Elemental</h3>
+                <div class="grid-2col">
+                    <button class="reagent-btn" onclick="runTest('mp')" role="button" aria-label="Melting Point Test"><span class="icon">🌡️</span> MP</button>
+                    <button class="reagent-btn" onclick="runTest('bp')" role="button" aria-label="Boiling Point Test"><span class="icon">⚗️</span> BP</button>
+                    <button class="reagent-btn" onclick="runTest('ignition')" role="button" aria-label="Ignition Test"><span class="icon">🔥</span> Ignition</button>
+                    <button class="reagent-btn" onclick="runTest('lassaigne')" role="button" aria-label="Lassaigne Sodium Fusion Test"><span class="icon">🧪</span> Lassaigne (Na)</button>
+                    <button class="reagent-btn" onclick="runTest('beilstein')" role="button" aria-label="Beilstein Copper Test"><span class="icon">🔗</span> Beilstein (Cu)</button>
+                </div>
+            </div>
+            <div class="reagent-group">
+                <h3>Solubility Profile</h3>
+                <div class="grid-2col">
+                    <button class="reagent-btn" onclick="runTest('sol_water')" role="button" aria-label="Water Solubility"><span class="icon">💧</span> Water</button>
+                    <button class="reagent-btn" onclick="runTest('sol_ether')" role="button" aria-label="Ether Solubility"><span class="icon">🛢️</span> Ether</button>
+                    <button class="reagent-btn" onclick="runTest('sol_hcl')" role="button" aria-label="5% HCl Solubility"><span class="icon">🔴</span> 5% HCl</button>
+                    <button class="reagent-btn" onclick="runTest('sol_naoh')" role="button" aria-label="5% NaOH Solubility"><span class="icon">🔵</span> 5% NaOH</button>
+                    <button class="reagent-btn" onclick="runTest('sol_nahco3')" role="button" aria-label="5% Sodium Bicarbonate Solubility"><span class="icon">🫧</span> 5% NaHCO₃</button>
+                </div>
+            </div>
+            <div class="reagent-group">
+                <h3>Functional Group Tests</h3>
+                <div class="grid-2col">
+                    <button class="reagent-btn" onclick="runTest('lucas')">Lucas Reagent</button>
+                    <button class="reagent-btn" onclick="runTest('ceric')">Ceric Amm. Nit.</button>
+                    <button class="reagent-btn" onclick="runTest('iodoform')">Iodoform (I₂/NaOH)</button>
+                    <button class="reagent-btn" onclick="runTest('dnp24')">2,4-DNP</button>
+                    <button class="reagent-btn" onclick="runTest('tollen')">Tollen's Reagent</button>
+                    <button class="reagent-btn" onclick="runTest('fehling')">Fehling's A+B</button>
+                    <button class="reagent-btn" onclick="runTest('fecl3')">Neutral FeCl₃</button>
+                    <button class="reagent-btn" onclick="runTest('hinsberg')">Hinsberg Reagent</button>
+                    <button class="reagent-btn" onclick="runTest('nitrous')">NaNO₂/HCl (0°C)</button>
+                    <button class="reagent-btn" onclick="runTest('carbylamine')">Carbylamine</button>
+                    <button class="reagent-btn" onclick="runTest('sodalime')">Soda Lime Heat</button>
+                    <button class="reagent-btn" onclick="runTest('phthalimide')">Phthalimide Test</button>
+                    <button class="reagent-btn" onclick="runTest('fluorescein')">Fluorescein Test</button>
+                    <button class="reagent-btn" onclick="runTest('zincdust')">Zinc Dust Distill.</button>
+                    <button class="reagent-btn" onclick="runTest('bromine_water')">Bromine Water</button>
+                    <button class="reagent-btn" onclick="runTest('kmno4')">KMnO₄ (alk.)</button>
+                    <button class="reagent-btn" onclick="runTest('benedict')">Benedict's Test</button>
+                    <button class="reagent-btn" onclick="runTest('lead_acetate')">Lead Acetate (Pb(OAc)₂)</button>
+                    <button class="reagent-btn" onclick="runTest('hg_acetate')">Hg(OAc)₂ (Alkynes)</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="bench-panel">
+            <div id="visual-bench">
+                <div class="vial-container" id="vial-ui">
+                    <div class="vial" role="img" aria-label="Sample vial"><div class="vial-liquid" id="vial-color"></div></div>
+                    <div id="vial-label" aria-live="polite">Unknown #--</div>
+                </div>
+            </div>
+            <div id="log-container">
+                <div class="log-header">
+                    <h2>Laboratory Log</h2>
+                    <div class="log-controls">
+                        <button onclick="clearLog()" aria-label="Clear log">🗑️ Clear Log</button>
+                        <button onclick="copyLog()" aria-label="Copy log to clipboard">📋 Copy Log</button>
+                    </div>
+                </div>
+                <div id="action-log" role="log" aria-live="polite" aria-atomic="false">
+                    <div class="log-entry system">System initialized. Awaiting unknown selection...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Standard Data Matrix</h2>
+                <div>
+                    <button id="btn-print" onclick="window.print()" style="margin-right:10px;" aria-label="Print data">🖨️ Print</button>
+                    <button class="modal-close" onclick="closeModal('modal-overlay')" aria-label="Close dialog">✖</button>
+                </div>
+            </div>
+            <div class="truth-box">
+                <button id="btn-reveal" onclick="toggleReveal()" class="btn-primary" style="margin-bottom: 10px;">👁️ Reveal Identity</button>
+                <div id="truth-data" class="hidden-truth" aria-live="polite">
+                    <h3 id="modal-chem-name" style="margin:5px 0; color: var(--accent-green);"></h3>
+                    <p id="modal-chem-class" style="margin:0; color: #ccc;"></p>
+                </div>
+            </div>
+            <div id="modal-table-container"></div>
+        </div>
+    </div>
+
+    <div id="exam-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="exam-title">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="exam-title">📝 Interactive Exam Assignment Sheet</h2>
+                <button class="modal-close" onclick="closeModal('exam-modal')" aria-label="Close exam sheet">✖</button>
+            </div>
+            
+            <p><strong>Candidate Pool:</strong> The 6 unknowns on your bench belong to the following list of 10 possible compounds. Assign each unknown to its correct identity based on your experimental findings.</p>
+            
+            <div class="candidate-grid" id="exam-candidates-list"></div>
+
+            <div id="exam-form"></div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button id="btn-submit-exam" class="btn-primary" onclick="gradeExam()" style="padding: 10px 20px; font-size: 1.1rem;">Submit Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * VIRTUAL ORGANIC QUALITATIVE ANALYSIS LAB v2.0 PRODUCTION
+         * ✅ Complete Exam Obfuscation (ALL tests have examText)
+         * ✅ Log Memory Management (FIFO rotation)
+         * ✅ Error Handling & Validation
+         * ✅ Mobile Responsive
+         * ✅ Accessibility Improvements
+         * ============================================================================
+         */
+
+        // --- 100 COMPOUND DATABASE ---
+        const dbFactory = [
+            { n:"n-Hexane", c:"Aliphatic Hydrocarbon", state:"L", mp:-95, bp:69, arom:false, odor:"Gasoline-like", color:"Clear" },
+            { n:"Cyclohexane", c:"Aliphatic Hydrocarbon", state:"L", mp:6.5, bp:80, arom:false, odor:"Petroleum", color:"Clear" },
+            { n:"Toluene", c:"Aromatic Hydrocarbon", state:"L", mp:-95, bp:111, arom:true, odor:"Sweet, pungent", color:"Clear" },
+            { n:"Naphthalene", c:"Aromatic Hydrocarbon", state:"S", mp:80, bp:218, arom:true, odor:"Mothballs", color:"White crystalline" },
+            { n:"Anthracene", c:"Aromatic Hydrocarbon", state:"S", mp:215, bp:340, arom:true, odor:"Mild", color:"Colorless/Pale yellow solid", fluoresces:true },
+            { n:"1-Hexene", c:"Aliphatic Alkene", state:"L", mp:-140, bp:63, arom:false, odor:"Petroleum", color:"Clear", unsat:true },
+            { n:"Cyclohexene", c:"Aliphatic Alkene", state:"L", mp:-104, bp:83, arom:false, odor:"Sweetish", color:"Clear", unsat:true },
+            { n:"Biphenyl", c:"Aromatic Hydrocarbon", state:"S", mp:69, bp:255, arom:true, odor:"Pleasant", color:"White solid" },
+            { n:"o-Xylene", c:"Aromatic Hydrocarbon", state:"L", mp:-25, bp:144, arom:true, odor:"Sweet", color:"Clear" },
+            { n:"m-Xylene", c:"Aromatic Hydrocarbon", state:"L", mp:-48, bp:139, arom:true, odor:"Sweet", color:"Clear" },
+            { n:"Chlorobenzene", c:"Aryl Halide", state:"L", mp:-45, bp:132, arom:true, odor:"Almond-like", color:"Clear", hal:"Cl" },
+            { n:"Bromobenzene", c:"Aryl Halide", state:"L", mp:-31, bp:156, arom:true, odor:"Aromatic", color:"Clear", hal:"Br" },
+            { n:"Iodobenzene", c:"Aryl Halide", state:"L", mp:-29, bp:188, arom:true, odor:"Characteristic", color:"Clear", hal:"I" },
+            { n:"1-Chlorobutane", c:"Alkyl Halide", state:"L", mp:-123, bp:78, arom:false, odor:"Pungent", color:"Clear", hal:"Cl" },
+            { n:"1-Bromobutane", c:"Alkyl Halide", state:"L", mp:-112, bp:101, arom:false, odor:"Pungent", color:"Clear", hal:"Br" },
+            { n:"Benzyl chloride", c:"Aralkyl Halide", state:"L", mp:-39, bp:179, arom:true, odor:"Irritating (Lachrymator)", color:"Clear", hal:"Cl", reactiveHal:true },
+            { n:"Chloroform", c:"Alkyl Halide", state:"L", mp:-63, bp:61, arom:false, odor:"Sweet, heavy", color:"Clear", hal:"Cl" },
+            { n:"Iodoform", c:"Alkyl Halide", state:"S", mp:120, bp:218, arom:false, odor:"Antiseptic", color:"Yellow powder", hal:"I" },
+            { n:"p-Dichlorobenzene", c:"Aryl Halide", state:"S", mp:53, bp:174, arom:true, odor:"Camphoraceous", color:"White crystals", hal:"Cl" },
+            { n:"2-Bromopropane", c:"Alkyl Halide", state:"L", mp:-89, bp:59, arom:false, odor:"Sweet", color:"Clear", hal:"Br" },
+            { n:"Methanol", c:"Primary Alcohol", state:"L", mp:-98, bp:65, arom:false, odor:"Alcoholic", color:"Clear", oh:"1", methylK:false },
+            { n:"Ethanol", c:"Primary Alcohol", state:"L", mp:-114, bp:78, arom:false, odor:"Alcoholic", color:"Clear", oh:"1", methylK:true },
+            { n:"1-Propanol", c:"Primary Alcohol", state:"L", mp:-126, bp:97, arom:false, odor:"Mild alcoholic", color:"Clear", oh:"1" },
+            { n:"2-Propanol", c:"Secondary Alcohol", state:"L", mp:-89, bp:82, arom:false, odor:"Rubbing alcohol", color:"Clear", oh:"2", methylK:true },
+            { n:"1-Butanol", c:"Primary Alcohol", state:"L", mp:-90, bp:117, arom:false, odor:"Fusel oil", color:"Clear", oh:"1" },
+            { n:"2-Butanol", c:"Secondary Alcohol", state:"L", mp:-115, bp:99, arom:false, odor:"Sweet", color:"Clear", oh:"2", methylK:true },
+            { n:"t-Butyl alcohol", c:"Tertiary Alcohol", state:"L", mp:25, bp:82, arom:false, odor:"Camphor-like", color:"Clear", oh:"3" },
+            { n:"Benzyl alcohol", c:"Aromatic Alcohol", state:"L", mp:-15, bp:205, arom:true, odor:"Faint aromatic", color:"Clear", oh:"1" },
+            { n:"Ethylene glycol", c:"Diol", state:"L", mp:-13, bp:197, arom:false, odor:"Odorless", color:"Clear, viscous", oh:"1" },
+            { n:"Glycerol", c:"Triol", state:"L", mp:18, bp:290, arom:false, odor:"Odorless", color:"Clear, syrupy", oh:"1" },
+            { n:"Phenol", c:"Phenol", state:"S", mp:41, bp:182, arom:true, odor:"Medicinal/Carbolic", color:"Colorless to pinkish", phenol:true },
+            { n:"o-Cresol", c:"Phenol", state:"S", mp:30, bp:191, arom:true, odor:"Medicinal", color:"Colorless/Yellowish", phenol:true },
+            { n:"m-Cresol", c:"Phenol", state:"L", mp:11, bp:202, arom:true, odor:"Medicinal", color:"Clear", phenol:true },
+            { n:"p-Cresol", c:"Phenol", state:"S", mp:35, bp:201, arom:true, odor:"Medicinal", color:"White crystalline", phenol:true },
+            { n:"1-Naphthol", c:"Phenol", state:"S", mp:96, bp:288, arom:true, odor:"Phenolic", color:"Brownish solid", phenol:true, naphthol:"1" },
+            { n:"2-Naphthol", c:"Phenol", state:"S", mp:122, bp:285, arom:true, odor:"Phenolic", color:"White/beige leaflets", phenol:true, naphthol:"2" },
+            { n:"Resorcinol", c:"Phenol (Diol)", state:"S", mp:110, bp:277, arom:true, odor:"Faint", color:"White solid", phenol:true, fluoresces:true },
+            { n:"Hydroquinone", c:"Phenol (Diol)", state:"S", mp:172, bp:287, arom:true, odor:"Odorless", color:"White needles", phenol:true },
+            { n:"Catechol", c:"Phenol (Diol)", state:"S", mp:105, bp:245, arom:true, odor:"Phenolic", color:"White crystals", phenol:true },
+            { n:"Picric acid", c:"Phenol (Nitro)", state:"S", mp:122, bp:300, arom:true, odor:"Odorless", color:"Yellow crystals", phenol:true, nitro:true, strongAcid:true },
+            { n:"Diethyl ether", c:"Aliphatic Ether", state:"L", mp:-116, bp:35, arom:false, odor:"Sweet, ethereal", color:"Clear" },
+            { n:"Anisole", c:"Aromatic Ether", state:"L", mp:-37, bp:154, arom:true, odor:"Anise seed", color:"Clear" },
+            { n:"Diphenyl ether", c:"Aromatic Ether", state:"S", mp:26, bp:258, arom:true, odor:"Geranium-like", color:"Colorless solid" },
+            { n:"THF (Tetrahydrofuran)", c:"Cyclic Ether", state:"L", mp:-108, bp:66, arom:false, odor:"Ethereal", color:"Clear" },
+            { n:"1,4-Dioxane", c:"Cyclic Ether", state:"L", mp:11, bp:101, arom:false, odor:"Mild ethereal", color:"Clear" },
+            { n:"Formaldehyde (aq)", c:"Aliphatic Aldehyde", state:"L", mp:0, bp:100, arom:false, odor:"Pungent, suffocating", color:"Clear", ald:true, noAlphaH:true },
+            { n:"Acetaldehyde", c:"Aliphatic Aldehyde", state:"L", mp:-123, bp:20, arom:false, odor:"Pungent, fruity", color:"Clear", ald:true, methylK:true },
+            { n:"Propanal", c:"Aliphatic Aldehyde", state:"L", mp:-81, bp:48, arom:false, odor:"Suffocating", color:"Clear", ald:true },
+            { n:"Butanal", c:"Aliphatic Aldehyde", state:"L", mp:-96, bp:75, arom:false, odor:"Acrid", color:"Clear", ald:true },
+            { n:"Benzaldehyde", c:"Aromatic Aldehyde", state:"L", mp:-26, bp:178, arom:true, odor:"Bitter almonds", color:"Clear", ald:true, noAlphaH:true },
+            { n:"Salicylaldehyde", c:"Aromatic Aldehyde/Phenol", state:"L", mp:-7, bp:197, arom:true, odor:"Bitter almonds", color:"Clear", ald:true, phenol:true, noAlphaH:true },
+            { n:"Cinnamaldehyde", c:"Aromatic Aldehyde", state:"L", mp:-7, bp:246, arom:true, odor:"Cinnamon", color:"Yellowish liquid", ald:true, unsat:true },
+            { n:"Anisaldehyde", c:"Aromatic Aldehyde", state:"L", mp:-1, bp:248, arom:true, odor:"Floral/Licorice", color:"Clear", ald:true, noAlphaH:true },
+            { n:"Vanillin", c:"Aromatic Aldehyde/Phenol", state:"S", mp:81, bp:285, arom:true, odor:"Vanilla", color:"White crystals", ald:true, phenol:true, noAlphaH:true },
+            { n:"Chloral hydrate", c:"Gem-diol (Aldehyde eq.)", state:"S", mp:57, bp:98, arom:false, odor:"Pungent", color:"White solid", ald:true, hal:"Cl", methylK:true },
+            { n:"Acetone", c:"Aliphatic Ketone", state:"L", mp:-95, bp:56, arom:false, odor:"Nail polish remover", color:"Clear", ket:true, methylK:true },
+            { n:"2-Butanone (MEK)", c:"Aliphatic Ketone", state:"L", mp:-86, bp:80, arom:false, odor:"Sweet, sharp", color:"Clear", ket:true, methylK:true },
+            { n:"3-Pentanone", c:"Aliphatic Ketone", state:"L", mp:-39, bp:102, arom:false, odor:"Acetone-like", color:"Clear", ket:true, methylK:false },
+            { n:"Cyclohexanone", c:"Alicyclic Ketone", state:"L", mp:-16, bp:155, arom:false, odor:"Peppermint/Acetone", color:"Clear", ket:true, methylK:false },
+            { n:"Acetophenone", c:"Aromatic Ketone", state:"L", mp:20, bp:202, arom:true, odor:"Sweet floral", color:"Clear", ket:true, methylK:true },
+            { n:"Benzophenone", c:"Aromatic Ketone", state:"S", mp:48, bp:305, arom:true, odor:"Geranium/Rose", color:"White solid", ket:true, methylK:false },
+            { n:"Propiophenone", c:"Aromatic Ketone", state:"L", mp:18, bp:218, arom:true, odor:"Floral", color:"Clear", ket:true, methylK:false },
+            { n:"Cyclopentanone", c:"Alicyclic Ketone", state:"L", mp:-51, bp:130, arom:false, odor:"Minty", color:"Clear", ket:true, methylK:false },
+            { n:"Methyl isobutyl ketone", c:"Aliphatic Ketone", state:"L", mp:-84, bp:116, arom:false, odor:"Sweet", color:"Clear", ket:true, methylK:true },
+            { n:"Camphor", c:"Terpenoid Ketone", state:"S", mp:175, bp:204, arom:false, odor:"Strong camphor", color:"White crystals", ket:true, methylK:false },
+            { n:"Formic acid", c:"Carboxylic Acid", state:"L", mp:8, bp:100, arom:false, odor:"Pungent, penetrating", color:"Clear", acid:true, reducesTollen:true },
+            { n:"Acetic acid", c:"Carboxylic Acid", state:"L", mp:16, bp:118, arom:false, odor:"Vinegar", color:"Clear", acid:true },
+            { n:"Propionic acid", c:"Carboxylic Acid", state:"L", mp:-21, bp:141, arom:false, odor:"Rancid", color:"Clear", acid:true },
+            { n:"Butyric acid", c:"Carboxylic Acid", state:"L", mp:-8, bp:163, arom:false, odor:"Vomit / Rancid butter", color:"Clear", acid:true },
+            { n:"Benzoic acid", c:"Aromatic Carboxylic Acid", state:"S", mp:122, bp:249, arom:true, odor:"Faint pleasant", color:"White needles", acid:true },
+            { n:"Salicylic acid", c:"Aromatic Acid / Phenol", state:"S", mp:159, bp:211, arom:true, odor:"Odorless", color:"White solid", acid:true, phenol:true },
+            { n:"Phthalic acid", c:"Aromatic Dicarboxylic Acid", state:"S", mp:210, bp:300, arom:true, odor:"Odorless", color:"White solid", acid:true, phthalic:true },
+            { n:"Oxalic acid", c:"Dicarboxylic Acid", state:"S", mp:101, bp:150, arom:false, odor:"Odorless", color:"White crystals", acid:true },
+            { n:"Cinnamic acid", c:"Aromatic Acid", state:"S", mp:133, bp:300, arom:true, odor:"Faint balsamic", color:"White crystals", acid:true, unsat:true },
+            { n:"Anthranilic acid", c:"Aromatic Amino Acid", state:"S", mp:146, bp:200, arom:true, odor:"Sweetish", color:"Yellowish powder", acid:true, amine:"1", aromAmine:true },
+            { n:"Ethyl acetate", c:"Aliphatic Ester", state:"L", mp:-83, bp:77, arom:false, odor:"Fruity / Glue", color:"Clear", ester:true },
+            { n:"Methyl salicylate", c:"Aromatic Ester / Phenol", state:"L", mp:-8, bp:222, arom:true, odor:"Wintergreen", color:"Clear", ester:true, phenol:true },
+            { n:"Benzyl acetate", c:"Aralkyl Ester", state:"L", mp:-51, bp:212, arom:true, odor:"Jasmine", color:"Clear", ester:true },
+            { n:"Phenyl benzoate", c:"Aromatic Ester", state:"S", mp:70, bp:314, arom:true, odor:"Faint", color:"White crystals", ester:true },
+            { n:"Ethyl butyrate", c:"Aliphatic Ester", state:"L", mp:-93, bp:121, arom:false, odor:"Pineapple", color:"Clear", ester:true },
+            { n:"Methylamine (aq)", c:"Primary Aliphatic Amine", state:"L", mp:0, bp:100, arom:false, odor:"Fishy/Ammonia", color:"Clear", amine:"1" },
+            { n:"Diethylamine", c:"Secondary Aliphatic Amine", state:"L", mp:-50, bp:55, arom:false, odor:"Ammoniacal", color:"Clear", amine:"2" },
+            { n:"Triethylamine", c:"Tertiary Aliphatic Amine", state:"L", mp:-114, bp:89, arom:false, odor:"Fishy", color:"Clear", amine:"3" },
+            { n:"Aniline", c:"Primary Aromatic Amine", state:"L", mp:-6, bp:184, arom:true, odor:"Musty/Fishy", color:"Brownish liquid", amine:"1", aromAmine:true },
+            { n:"N-Methylaniline", c:"Secondary Aromatic Amine", state:"L", mp:-57, bp:196, arom:true, odor:"Faint aniline", color:"Yellowish liquid", amine:"2", aromAmine:true },
+            { n:"N,N-Dimethylaniline", c:"Tertiary Aromatic Amine", state:"L", mp:2, bp:194, arom:true, odor:"Pungent", color:"Yellowish liquid", amine:"3", aromAmine:true },
+            { n:"o-Toluidine", c:"Primary Aromatic Amine", state:"L", mp:-23, bp:200, arom:true, odor:"Aromatic", color:"Reddish liquid", amine:"1", aromAmine:true },
+            { n:"p-Toluidine", c:"Primary Aromatic Amine", state:"S", mp:43, bp:200, arom:true, odor:"Aromatic", color:"White leaflets", amine:"1", aromAmine:true },
+            { n:"1-Naphthylamine", c:"Primary Aromatic Amine", state:"S", mp:50, bp:300, arom:true, odor:"Unpleasant", color:"Reddish needles", amine:"1", aromAmine:true },
+            { n:"Diphenylamine", c:"Secondary Aromatic Amine", state:"S", mp:52, bp:302, arom:true, odor:"Floral/Pleasant", color:"White solid", amine:"2", aromAmine:true },
+            { n:"Nitrobenzene", c:"Aromatic Nitro", state:"L", mp:6, bp:211, arom:true, odor:"Bitter almonds", color:"Pale yellow liquid", nitro:true },
+            { n:"o-Nitrotoluene", c:"Aromatic Nitro", state:"L", mp:-9, bp:222, arom:true, odor:"Almond-like", color:"Yellow liquid", nitro:true },
+            { n:"m-Dinitrobenzene", c:"Aromatic Nitro", state:"S", mp:90, bp:291, arom:true, odor:"Faint", color:"Pale yellow crystals", nitro:true },
+            { n:"p-Nitrotoluene", c:"Aromatic Nitro", state:"S", mp:51, bp:238, arom:true, odor:"Weak almond", color:"Yellow crystals", nitro:true },
+            { n:"Nitromethane", c:"Aliphatic Nitro", state:"L", mp:-29, bp:101, arom:false, odor:"Fruity/Pungent", color:"Clear", nitro:true },
+            { n:"Formamide", c:"Aliphatic Amide", state:"L", mp:2, bp:210, arom:false, odor:"Faint ammonia", color:"Clear", amide:true },
+            { n:"Acetamide", c:"Aliphatic Amide", state:"S", mp:81, bp:221, arom:false, odor:"Mousy", color:"White crystals", amide:true },
+            { n:"Benzamide", c:"Aromatic Amide", state:"S", mp:130, bp:288, arom:true, odor:"Odorless", color:"White powder", amide:true },
+            { n:"Urea", c:"Diamide", state:"S", mp:133, bp:200, arom:false, odor:"Ammonia (old)", color:"White solid", amide:true },
+            { n:"Acetanilide", c:"Substituted Amide", state:"S", mp:114, bp:304, arom:true, odor:"Odorless", color:"White leaflets", amide:true },
+
+            // --- ALKYNES ---
+            { n:"Acetylene (aq)", c:"Terminal Alkyne", state:"L", mp:-82, bp:-84, arom:false, odor:"Garlic-like", color:"Clear", unsat:true, alkyne:true, terminal:true },
+            { n:"Propyne", c:"Terminal Alkyne", state:"L", mp:-102, bp:-23, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:true },
+            { n:"1-Butyne", c:"Terminal Alkyne", state:"L", mp:-126, bp:8, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:true },
+            { n:"1-Hexyne", c:"Terminal Alkyne", state:"L", mp:-132, bp:71, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:true },
+            { n:"1-Octyne", c:"Terminal Alkyne", state:"L", mp:-79, bp:126, arom:false, odor:"Mild petroleum", color:"Clear", unsat:true, alkyne:true, terminal:true },
+            { n:"2-Butyne", c:"Internal Alkyne", state:"L", mp:-32, bp:27, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:false },
+            { n:"2-Pentyne", c:"Internal Alkyne", state:"L", mp:-101, bp:56, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:false },
+            { n:"Phenylacetylene", c:"Aromatic Terminal Alkyne", state:"L", mp:-45, bp:142, arom:true, odor:"Pungent", color:"Clear", unsat:true, alkyne:true, terminal:true },
+
+            // --- THIOLS & THIOETHERS ---
+            { n:"Methanethiol", c:"Aliphatic Thiol", state:"L", mp:-123, bp:6, arom:false, odor:"Rotten egg / Cabbage (very pungent)", color:"Clear", thiol:true },
+            { n:"Ethanethiol", c:"Aliphatic Thiol", state:"L", mp:-148, bp:35, arom:false, odor:"Leek / Garlic (intense)", color:"Clear", thiol:true },
+            { n:"1-Butanethiol", c:"Aliphatic Thiol", state:"L", mp:-116, bp:98, arom:false, odor:"Skunk-like", color:"Clear", thiol:true },
+            { n:"Thiophenol", c:"Aromatic Thiol", state:"L", mp:-15, bp:168, arom:true, odor:"Repulsive, garlic", color:"Clear", thiol:true },
+            { n:"Dimethyl sulfide", c:"Thioether", state:"L", mp:-98, bp:37, arom:false, odor:"Disagreeable, sweetish", color:"Clear", thioether:true },
+            { n:"Diethyl sulfide", c:"Thioether", state:"L", mp:-104, bp:92, arom:false, odor:"Disagreeable", color:"Clear", thioether:true },
+            { n:"Diphenyl sulfide", c:"Aromatic Thioether", state:"L", mp:-25, bp:296, arom:true, odor:"Mild", color:"Clear", thioether:true },
+
+            // --- CARBOHYDRATES (simple, aqueous) ---
+            { n:"D-Glucose (aq)", c:"Aldohexose (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true },
+            { n:"D-Fructose (aq)", c:"Ketohexose (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ket:true, sugar:true, reducing:true, methylK:false },
+            { n:"D-Galactose (aq)", c:"Aldohexose (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true },
+            { n:"Maltose (aq)", c:"Disaccharide (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true },
+            { n:"Sucrose (aq)", c:"Disaccharide (Non-reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", sugar:true, reducing:false },
+            { n:"Lactose (aq)", c:"Disaccharide (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true }
+        ];
+
+        // --- THE RULE-BASED TEST ENGINE WITH EXAM OBFUSCATION ---
+        const Engine = {
+            mp: (c, isDeterministic=false, isExam=false) => {
+                if(c.state === 'L') return "Error: Sample is liquid at room temp. Use BP apparatus.";
+                if(isDeterministic) return `Observed mp: ${c.mp.toFixed(1)} °C`;
+                
+                let err = (Math.random()*2 - 1).toFixed(1);
+                let val = (c.mp + parseFloat(err)).toFixed(1);
+                if(Math.random() < 0.05) val = (c.mp - 15).toFixed(1) + " (Contaminated/Wet sample suspected)";
+                
+                if(isExam) return `Melting point observed: ${val.split(' ')[0]} °C`;
+                return `Observed mp: ${val} °C`;
+            },
+            
+            bp: (c, isDeterministic=false, isExam=false) => {
+                if(c.state === 'S') return "Error: Sample is solid at room temp. Use MP apparatus.";
+                if(isDeterministic) return `Observed bp: ${c.bp.toFixed(1)} °C`;
+                
+                let err = (Math.random()*2 - 1).toFixed(1);
+                let val = (c.bp + parseFloat(err)).toFixed(1);
+                
+                if(isExam) return `Boiling point observed: ${val} °C`;
+                return `Observed bp: ${val} °C`;
+            },
+            
+            ignition: (c, isDeterministic=false, isExam=false) => {
+                let result;
+                if(c.hal) result = "Burns with green-tinged edges. Smoky.";
+                else if(c.arom) result = "Burns with a highly luminous, sooty flame.";
+                else if(c.unsat) result = "Burns with a luminous, slightly sooty flame.";
+                else result = "Burns with a clean, non-sooty, blue/yellow flame.";
+                
+                if(isExam) {
+                    if(c.hal) return "Burns with greenish tint at edges. Produces smoke.";
+                    if(c.arom) return "Burns with very luminous, heavily sooty flame.";
+                    if(c.unsat) return "Burns with luminous flame, moderate soot.";
+                    return "Burns with clean flame, minimal smoke.";
+                }
+                return result;
+            },
+            
+            lassaigne: (c, isDeterministic=false, isExam=false) => {
+                let r = [];
+                if(c.hal) r.push(`Halogen (${c.hal}) Present`);
+                if(c.amine || c.nitro || c.amide || c.n === 'Urea') r.push("Nitrogen Present");
+                if(c.thiol || c.thioether) r.push("Sulfur Present");
+
+                if(isExam) {
+                    let er = [];
+                    if(c.hal) er.push("Halogen detected (AgNO₃ positive)");
+                    if(c.amine || c.nitro || c.amide || c.n === 'Urea') er.push("Nitrogen detected (Prussian Blue)");
+                    if(c.thiol || c.thioether) er.push("Sulfur detected (Na₂S positive, lead acetate paper turns black)");
+                    return er.length ? er.join(', ') : "N, S, Halogens not detected.";
+                }
+
+                if(r.length === 0) return "N, S, Halogens absent.";
+                return r.join(', ') + " confirmed by Lassaigne extract.";
+            },
+            
+            beilstein: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.hal ? "Positive: Green flame observed." : "Negative: No green flame.";
+                return c.hal ? "Positive: Brilliant green flame observed." : "Negative: No green flame.";
+            },
+            
+            sol_water: (c, isDeterministic=false, isExam=false) => {
+                let result;
+                if (c.phenol && c.bp < 220) result = "Sparingly soluble (soluble in hot water)";
+                else if (c.oh || c.amine || c.acid || c.ket || c.ald || c.amide) {
+                    if (c.arom && c.bp > 150) result = "Insoluble / Sparingly soluble";
+                    else if (c.bp > 110) result = "Partially soluble";
+                    else result = "Soluble";
+                } else result = "Insoluble";
+                
+                if(isExam) {
+                    if(result.includes("Sparingly")) return "Sparingly soluble";
+                    if(result === "Soluble") return "Soluble";
+                    if(result === "Partially soluble") return "Partially soluble";
+                    return "Insoluble";
+                }
+                return result;
+            },
+            
+            sol_ether: (c, isDeterministic=false, isExam=false) => 
+                c.n === 'Urea' || c.n === 'Ethylene glycol' ? "Insoluble" : "Soluble",
+            
+            sol_hcl: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.amine ? "Soluble (salt formation)" : "Insoluble";
+                return c.amine ? "Soluble (forms salt)" : "Insoluble";
+            },
+            
+            sol_naoh: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.acid || c.phenol ? "Soluble (salt formation)" : "Insoluble";
+                return c.acid || c.phenol ? "Soluble (forms salt)" : "Insoluble";
+            },
+            
+            sol_nahco3: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.acid || c.strongAcid ? "Soluble with gas evolution" : "Insoluble";
+                return c.acid || c.strongAcid ? "Soluble with effervescence (CO2 gas)" : "Insoluble";
+            },
+            
+            lucas: (c, isDeterministic=false, isExam=false) => {
+                if(!c.oh || c.phenol || c.arom) return "No reaction (not an aliphatic alcohol).";
+                
+                if(isExam) {
+                    if(c.oh === "3") return "Immediate cloudiness and layer separation.";
+                    if(c.oh === "2") return "Cloudiness after 5-10 minutes.";
+                    return "No cloudiness after 30 minutes.";
+                }
+                
+                if(c.oh === "3") return "Immediate turbidity and separation of layers.";
+                if(c.oh === "2") return "Turbidity appears after 5-10 minutes.";
+                return "Solution remains clear. No turbidity after 30 mins.";
+            },
+            
+            ceric: (c, isDeterministic=false, isExam=false) => {
+                if(c.oh && !c.phenol) return isExam ? "Positive: Red/pink coloration." : "Positive: Solution turns red/pink.";
+                if(c.phenol) return isExam ? "Dark coloration (brown/black)." : "Dark brown/black coloration.";
+                return isExam ? "Negative: No color change." : "Negative: Yellow solution remains.";
+            },
+            
+            iodoform: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.methylK ? "Positive: Yellow precipitate with characteristic odor." : "Negative: No yellow precipitate.";
+                return c.methylK ? "Positive: Yellow precipitate (CHI3) with characteristic antiseptic smell." : "Negative: No yellow precipitate.";
+            },
+            
+            dnp24: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return (c.ket || c.ald) ? `Positive: ${c.arom ? 'Orange-red' : 'Yellow'} crystalline precipitate.` : "Negative.";
+                return (c.ket || c.ald) ? `Positive: ${c.arom ? 'Red/Orange' : 'Yellow'} crystalline precipitate.` : "Negative.";
+            },
+            
+            tollen: (c, isDeterministic=false, isExam=false) => {
+                if(c.acid && !c.reducesTollen) return isExam ? "Test failed (neutralization)." : "Reagent destroyed (neutralized by acid). False negative possible.";
+                if(c.ald || c.reducesTollen) return isExam ? "Positive: Silver mirror formed." : "Positive: Brilliant silver mirror formed on tube walls.";
+                return "Negative: No silver mirror.";
+            },
+            
+            fehling: (c, isDeterministic=false, isExam=false) => {
+                if(c.acid && !c.reducesTollen) return isExam ? "Test failed (neutralization)." : "Reagent neutralized.";
+                if(c.ald && !c.arom) return isExam ? "Positive: Brick-red precipitate." : "Positive: Brick-red precipitate (Cu2O).";
+                if(c.ald && c.arom) return isExam ? "Negative: No precipitate." : "Negative: Aromatic aldehydes do not reduce Fehling's.";
+                return "Negative.";
+            },
+            
+            fecl3: (c, isDeterministic=false, isExam=false) => {
+                if(c.phenol) {
+                    let color, examColor;
+                    if(c.n.includes('1-Naphthol')) { color = "Purple/violet coloration."; examColor = "Purple coloration."; }
+                    else if(c.n.includes('2-Naphthol')) { color = "Green coloration."; examColor = "Green coloration."; }
+                    else if(c.n.includes('Resorcinol') || c.n.includes('Catechol') || c.n.includes('Hydroquinone')) { color = "Dark green to black coloration."; examColor = "Dark coloration."; }
+                    else if(c.n.includes('Salicyl')) { color = "Red-violet coloration (chelate complex)."; examColor = "Red-violet coloration."; }
+                    else if(c.n.includes('Picric')) { color = "No characteristic color change (nitro groups dominate)."; examColor = "No clear FeCl₃ color."; }
+                    else { color = "Intense violet/blue-violet coloration."; examColor = "Violet coloration."; }
+                    return isExam ? `Positive: ${examColor}` : `Positive: ${color}`;
+                }
+                if(c.acid && c.arom && !c.phenol) return isExam ? "Buff-colored precipitate." : "Buff-colored precipitate (iron carboxylate).";
+                if(c.acid && !c.arom) return isExam ? "Reddish-brown color." : "Reddish-brown coloration (iron carboxylate).";
+                if(c.thiol || c.thioether) return isExam ? "Dark precipitate (iron sulfide)." : "Dark precipitate forms (Fe³⁺ reacts with sulfur compounds).";
+                return "Negative.";
+            },
+            
+            hinsberg: (c, isDeterministic=false, isExam=false) => {
+                if(!c.amine) return "No reaction.";
+                
+                if(isExam) {
+                    if(c.amine === "1") return "Precipitate forms, soluble in excess NaOH.";
+                    if(c.amine === "2") return "Precipitate forms, insoluble in NaOH.";
+                    return "No precipitate.";
+                }
+                
+                if(c.amine === "1") return "Precipitate forms, which dissolves in excess NaOH (soluble sulfonamide).";
+                if(c.amine === "2") return "Precipitate forms, completely insoluble in NaOH.";
+                return "No precipitate initially. (Tertiary amine unreactive).";
+            },
+            
+            nitrous: (c, isDeterministic=false, isExam=false) => {
+                if(!c.amine) return "No reaction.";
+                
+                if(isExam) {
+                    if(c.amine === "1" && c.aromAmine) return "Remains clear at 0°C. Couples with beta-naphthol to give colored dye.";
+                    if(c.amine === "1" && !c.aromAmine) return "Gas evolution (effervescence).";
+                    if(c.amine === "2") return "Yellow oily layer forms.";
+                    return "No visible change.";
+                }
+                
+                if(c.amine === "1" && c.aromAmine) return "Clear solution at 0°C (Diazonium salt formed). Adding beta-naphthol yields brilliant orange-red dye.";
+                if(c.amine === "1" && !c.aromAmine) return "Brisk effervescence (N2 gas) evolved.";
+                if(c.amine === "2") return "Yellow oily layer separates (N-nitrosamine).";
+                return "No visible change / nitrite salt forms.";
+            },
+            
+            carbylamine: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.amine === "1" ? "Positive: Offensive odor detected." : "Negative.";
+                return c.amine === "1" ? "Positive: Intolerable, offensive odor of isocyanide detected!" : "Negative.";
+            },
+            
+            sodalime: (c, isDeterministic=false, isExam=false) => {
+                if(c.acid && c.arom) return isExam ? "Aromatic hydrocarbon vapor evolved." : "Benzene derivatives evolved (sweet odor).";
+                if(c.amide || c.n === 'Urea') return isExam ? "Ammonia gas evolved (basic gas)." : "Ammonia gas evolved (turns damp red litmus blue).";
+                return "No characteristic gas evolved.";
+            },
+            
+            phthalimide: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.amine === "1" ? "Positive: Sample melts to clear liquid." : "Negative.";
+                return c.amine === "1" ? "Positive: Water vapor evolved, melts to clear liquid." : "Negative.";
+            },
+            
+            fluorescein: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return (c.phenol && c.n === 'Resorcinol') || c.phthalic ? "Positive: Strong fluorescence observed." : "Negative.";
+                return (c.phenol && c.n === 'Resorcinol') || c.phthalic ? "Positive: Intense yellow-green fluorescence under UV/light." : "Negative.";
+            },
+            
+            zincdust: (c, isDeterministic=false, isExam=false) => {
+                if(isExam) return c.phenol ? "Aromatic hydrocarbon evolved." : "No specific reaction.";
+                return c.phenol ? "Benzene/Aromatic hydrocarbon evolved." : "No specific reaction.";
+            },
+
+            bromine_water: (c, isDeterministic=false, isExam=false) => {
+                // Decolorizes Br2 water: alkenes, alkynes, phenols, thiols, aldehydes
+                if(c.alkyne) {
+                    return isExam ? "Positive: Rapid decolorization (addition reaction)." :
+                        "Positive: Rapid decolorization. Alkynes add Br₂ across the triple bond (dibromoalkene then tetrabromoalkane).";
+                }
+                if(c.unsat && !c.alkyne) {
+                    return isExam ? "Positive: Rapid decolorization." :
+                        "Positive: Bromine water rapidly decolorized. Br₂ adds across the C=C double bond.";
+                }
+                if(c.phenol) {
+                    return isExam ? "Positive: White precipitate forms (bromophenol)." :
+                        "Positive: White/cream precipitate of tribromophenol forms. Bromine water decolorized.";
+                }
+                if(c.ald && !c.arom) {
+                    return isExam ? "Positive: Slow decolorization." :
+                        "Positive: Slow decolorization (oxidation of aldehyde to acid).";
+                }
+                if(c.thiol) {
+                    return isExam ? "Positive: Rapid decolorization (thiol oxidized to disulfide)." :
+                        "Positive: Rapid decolorization. Thiol (RSH) is oxidized to disulfide (RSSR).";
+                }
+                return isExam ? "Negative: No decolorization." : "Negative: Bromine water retains its orange-brown color.";
+            },
+
+            kmno4: (c, isDeterministic=false, isExam=false) => {
+                // Baeyer's test: decolorizes alkaline KMnO4 for alkenes, alkynes, aldehydes, thiols
+                if(c.alkyne) {
+                    return isExam ? "Positive: Purple color discharged, brown precipitate." :
+                        "Positive (Baeyer's Test): Purple KMnO₄ immediately decolorized. Brown MnO₂ precipitate forms. Alkynes are oxidized.";
+                }
+                if(c.unsat && !c.alkyne) {
+                    return isExam ? "Positive: Purple color discharged, brown precipitate." :
+                        "Positive (Baeyer's Test): Rapid decolorization of purple KMnO₄. Brown MnO₂ precipitate. Alkene oxidized to diol.";
+                }
+                if(c.ald) {
+                    return isExam ? "Positive: Purple decolorized (aldehyde oxidized)." :
+                        "Positive: KMnO₄ decolorized. Aldehyde oxidized to carboxylic acid.";
+                }
+                if(c.thiol) {
+                    return isExam ? "Positive: Purple decolorized (thiol oxidized)." :
+                        "Positive: KMnO₄ decolorized. Thiol oxidized to sulfonic acid or disulfide.";
+                }
+                if(c.phenol) {
+                    return isExam ? "Positive: Slow decolorization." :
+                        "Positive: Slow decolorization. Phenols are slowly oxidized by KMnO₄.";
+                }
+                return isExam ? "Negative: Purple color persists." : "Negative: KMnO₄ retains its purple color. No oxidizable unsaturation.";
+            },
+
+            benedict: (c, isDeterministic=false, isExam=false) => {
+                // Benedict's test: reducing sugars, aliphatic aldehydes
+                if(c.reducing) {
+                    return isExam ? "Positive: Brick-red/yellow precipitate on heating." :
+                        "Positive: Brick-red Cu₂O precipitate forms on heating. Reducing sugar confirmed.";
+                }
+                if(c.sugar && !c.reducing) {
+                    return isExam ? "Negative: Solution remains blue." :
+                        "Negative: Solution remains blue. Non-reducing sugar (e.g., sucrose) does not reduce Cu²⁺.";
+                }
+                if(c.ald && !c.arom) {
+                    return isExam ? "Positive: Brick-red precipitate." :
+                        "Positive: Brick-red precipitate (Cu₂O). Aliphatic aldehyde reduces Cu²⁺ in alkaline medium.";
+                }
+                if(c.ald && c.arom) {
+                    return isExam ? "Negative (aromatic aldehyde)." :
+                        "Negative: Aromatic aldehydes do not reduce Benedict's reagent.";
+                }
+                return isExam ? "Negative." : "Negative: No reducing group present.";
+            },
+
+            lead_acetate: (c, isDeterministic=false, isExam=false) => {
+                // Lead acetate paper test for H2S / sulfur compounds
+                if(c.thiol) {
+                    return isExam ? "Positive: Lead acetate paper turns black." :
+                        "Positive: Lead acetate paper turns BLACK. Thiol (RSH) releases H₂S-like sulfur compound. PbS precipitate confirms sulfur.";
+                }
+                if(c.thioether) {
+                    return isExam ? "Weakly positive or negative." :
+                        "Weakly positive or negative: Thioethers do not easily release H₂S. No clear blackening of lead acetate paper.";
+                }
+                return isExam ? "Negative." : "Negative: No blackening of lead acetate paper. Sulfur absent.";
+            },
+
+            hg_acetate: (c, isDeterministic=false, isExam=false) => {
+                // Mercuric acetate / Nessler's-type test for terminal alkynes → mercury acetylide precipitate
+                if(c.alkyne && c.terminal) {
+                    return isExam ? "Positive: White/yellow precipitate forms." :
+                        "Positive: White mercury(II) acetylide precipitate (RC≡C–Hg–O₂CCH₃) forms. Confirms terminal alkyne (acidic C–H on sp carbon).";
+                }
+                if(c.alkyne && !c.terminal) {
+                    return isExam ? "Negative: No precipitate." :
+                        "Negative: Internal alkynes have no acidic terminal H. No precipitate with Hg(OAc)₂.";
+                }
+                return isExam ? "Negative." : "Negative: No alkyne C–H. No precipitate.";
+            }
+        };
+
+        // --- CONSTANTS ---
+        const MAX_LOG_ENTRIES = 100;
+
+        // --- FINGERPRINTING INITIALIZATION ---
+        const chemKeys = ['ignition', 'lassaigne', 'beilstein', 'sol_water', 'sol_ether', 'sol_hcl', 'sol_naoh', 'sol_nahco3', 'lucas', 'ceric', 'iodoform', 'dnp24', 'tollen', 'fehling', 'fecl3', 'hinsberg', 'nitrous', 'carbylamine', 'sodalime', 'phthalimide', 'fluorescein', 'zincdust', 'bromine_water', 'kmno4', 'benedict', 'lead_acetate', 'hg_acetate'];
+        
+        try {
+            dbFactory.forEach(c => {
+                let fp = `${c.state}|${c.mp}|${c.bp}`;
+                chemKeys.forEach(k => { fp += '|' + Engine[k](c, true, false); });
+                c.fingerprint = fp;
+            });
+        } catch (error) {
+            console.error("Fingerprinting initialization error:", error);
+        }
+
+        // --- STATE MANAGEMENT ---
+        let currentU = null;
+        let uCounter = 0;
+        let sessionLog = [];
+        const logEl = document.getElementById('action-log');
+        
+        let currentSet = [];
+        let currentSetIndex = 0;
+        let setCounter = 0;
+        let isExamMode = false;
+        let examCandidates = [];
+
+        // --- MODE CONTROLS ---
+        function requestNewUnknown() {
+            try {
+                isExamMode = false;
+                document.getElementById('set-nav').style.display = 'none';
+                document.getElementById('btn-exam-sheet').style.display = 'none';
+                
+                const idx = Math.floor(Math.random() * dbFactory.length);
+                currentU = dbFactory[idx];
+                uCounter++;
+                
+                loadUI(`Unk #${uCounter}`);
+                addLog('system', `Requested Single Random Unknown (ID #${uCounter}). Visual: ${currentU.color}, State: ${currentU.state === 'S' ? 'Solid' : 'Liquid'}, Odor: ${currentU.odor}.`);
+            } catch (error) {
+                addLog('error', `Error loading unknown: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function generateSet(size = 6) {
+            try {
+                isExamMode = true;
+                document.getElementById('set-nav').style.display = 'flex';
+                document.getElementById('btn-exam-sheet').style.display = 'inline-block';
+                
+                setCounter++;
+                currentSet = [];
+                examCandidates = [];
+                
+                // Fisher-Yates shuffle
+                let shuffled = [...dbFactory];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+
+                let seenFPs = new Set();
+                
+                // Get 6 unique unknowns
+                for (let c of shuffled) {
+                    if (!seenFPs.has(c.fingerprint)) {
+                        seenFPs.add(c.fingerprint);
+                        currentSet.push(c);
+                        if (currentSet.length === size) break;
+                    }
+                }
+                
+                // Get 4 unique distractors
+                let distractors = [];
+                for (let c of shuffled) {
+                    if (!seenFPs.has(c.fingerprint)) {
+                        seenFPs.add(c.fingerprint);
+                        distractors.push(c);
+                        if (distractors.length === 4) break;
+                    }
+                }
+
+                // Combine and alphabetize for the Exam Sheet
+                examCandidates = [...currentSet, ...distractors];
+                examCandidates.sort((a, b) => a.n.localeCompare(b.n));
+
+                currentSetIndex = 0;
+                loadSetUnknown();
+                buildExamSheet();
+                addLog('system', `🚨 EXAM MODE: A pool of 10 candidate compounds has been generated. Click "Exam Sheet" to view them and submit your final answers.`);
+            } catch (error) {
+                addLog('error', `Error generating exam: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function navSet(direction) {
+            try {
+                let newIndex = currentSetIndex + direction;
+                if (newIndex >= 0 && newIndex < currentSet.length) {
+                    currentSetIndex = newIndex;
+                    loadSetUnknown();
+                }
+            } catch (error) {
+                addLog('error', `Navigation error: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function loadSetUnknown() {
+            try {
+                currentU = currentSet[currentSetIndex];
+                document.getElementById('btn-prev').disabled = (currentSetIndex === 0);
+                document.getElementById('btn-next').disabled = (currentSetIndex === currentSet.length - 1);
+                
+                loadUI(`Set ${setCounter} - Unk ${currentSetIndex + 1}/${currentSet.length}`);
+                addLog('system', `Loaded Set #${setCounter}, Compound ${currentSetIndex + 1}. Visual: ${currentU.color}, State: ${currentU.state === 'S' ? 'Solid' : 'Liquid'}, Odor: ${currentU.odor}.`);
+            } catch (error) {
+                addLog('error', `Error loading set unknown: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function loadUI(labelStr) {
+            try {
+                const vialLabel = document.getElementById('vial-label');
+                if (vialLabel) vialLabel.textContent = labelStr;
+                
+                const vialUI = document.getElementById('vial-ui');
+                if (vialUI) vialUI.className = "vial-container active";
+                
+                const vialColor = document.getElementById('vial-color');
+                if (vialColor && currentU) {
+                    vialColor.style.backgroundColor = 
+                        currentU.color.includes("Yellow") ? "rgba(255,235,59,0.7)" :
+                        currentU.color.includes("Brown") ? "rgba(121,85,72,0.8)" : 
+                        currentU.color.includes("Red") ? "rgba(244,67,54,0.7)" : "rgba(255,255,255,0.1)";
+                }
+
+                const truthData = document.getElementById('truth-data');
+                if (truthData) truthData.className = 'hidden-truth';
+                
+                const revealBtn = document.getElementById('btn-reveal');
+                if (revealBtn) {
+                    revealBtn.style.display = 'inline-block';
+                    revealBtn.disabled = false;
+                }
+
+                logEl.innerHTML = ''; 
+                sessionLog = [];
+            } catch (error) {
+                console.error("UI loading error:", error);
+            }
+        }
+
+        // --- UTILS ---
+        function clearLog() {
+            try {
+                if(!currentU) return;
+                logEl.innerHTML = ''; 
+                sessionLog = [];
+                let label = isExamMode ? `Set #${setCounter}, Compound ${currentSetIndex + 1}` : `Unknown #${uCounter}`;
+                addLog('system', `Log cleared. Continuing analysis of ${label}.`);
+            } catch (error) {
+                console.error("Clear log error:", error);
+            }
+        }
+
+        function addLog(type, text, obs = null) {
+            try {
+                const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'log-time';
+                timeSpan.textContent = `[${time}]`;
+                entry.appendChild(timeSpan);
+                
+                const textNode = document.createTextNode(' ' + text);
+                entry.appendChild(textNode);
+                
+                if (obs) {
+                    const obsSpan = document.createElement('div');
+                    obsSpan.className = 'log-obs';
+                    obsSpan.textContent = '↳ ' + obs;
+                    entry.appendChild(obsSpan);
+                }
+                
+                logEl.appendChild(entry);
+                
+                // Memory Management: FIFO rotation
+                while (logEl.children.length > MAX_LOG_ENTRIES) {
+                    logEl.removeChild(logEl.firstChild);
+                }
+                
+                logEl.scrollTop = logEl.scrollHeight;
+                sessionLog.push(`[${time}] ${text} ${obs ? '-> ' + obs : ''}`);
+                
+                // Session log rotation
+                if (sessionLog.length > MAX_LOG_ENTRIES) {
+                    sessionLog.shift();
+                }
+            } catch (error) {
+                console.error("Logging error:", error);
+            }
+        }
+
+        function copyLog() {
+            try {
+                navigator.clipboard.writeText("IChO Lab Session Log\n" + sessionLog.join("\n"))
+                    .then(() => alert("Log copied to clipboard!"))
+                    .catch(() => alert("Copy failed. Please try again."));
+            } catch (error) {
+                console.error("Copy log error:", error);
+                alert("Copy failed.");
+            }
+        }
+
+        function btnEffect(btn) {
+            try {
+                btn.classList.add('clicked');
+                setTimeout(() => btn.classList.remove('clicked'), 200);
+            } catch (error) {
+                console.error("Button effect error:", error);
+            }
+        }
+
+        function runTest(testID) {
+            try {
+                if (!currentU) { 
+                    alert("Select an unknown or generate a set first!"); 
+                    return; 
+                }
+                
+                btnEffect(event.currentTarget);
+                
+                const actionMap = {
+                    'mp': "Determined Melting Point.", 'bp': "Determined Boiling Point.",
+                    'ignition': "Ignited sample on spatula.", 'lassaigne': "Performed Lassaigne's Na Fusion.",
+                    'beilstein': "Performed Beilstein Cu wire test.",
+                    'sol_water': "Tested solubility in Water.", 'sol_ether': "Tested solubility in Ether.",
+                    'sol_hcl': "Tested solubility in 5% HCl.", 'sol_naoh': "Tested solubility in 5% NaOH.",
+                    'sol_nahco3': "Tested solubility in 5% NaHCO3.",
+                    'lucas': "Added Lucas Reagent (ZnCl2/HCl).", 'ceric': "Added Ceric Ammonium Nitrate.",
+                    'iodoform': "Heated with I2 and NaOH.", 'dnp24': "Added 2,4-Dinitrophenylhydrazine.",
+                    'tollen': "Added Tollen's Reagent and warmed.", 'fehling': "Added Fehling's A+B and heated.",
+                    'fecl3': "Added Neutral FeCl3.", 'hinsberg': "Reacted with PhSO2Cl + NaOH.",
+                    'nitrous': "Added NaNO2 + HCl at 0-5°C.", 'carbylamine': "Heated with CHCl3 + KOH.",
+                    'sodalime': "Heated strongly with soda lime.", 'phthalimide': "Heated with Phthalic Anhydride.",
+                    'fluorescein': "Heated with Phthalic Anhydride & H2SO4, poured into NaOH.",
+                    'zincdust': "Distilled over Zinc Dust.",
+                    'bromine_water': "Added Bromine Water (Br₂ in water).",
+                    'kmno4': "Added Alkaline KMnO₄ (Baeyer's Reagent).",
+                    'benedict': "Added Benedict's Reagent and heated in boiling water bath.",
+                    'lead_acetate': "Applied Lead Acetate paper test.",
+                    'hg_acetate': "Added Mercuric Acetate solution."
+                };
+
+                const action = actionMap[testID];
+                let res = Engine[testID](currentU, false, isExamMode);
+                
+                let type = 'result';
+                if (res.includes("Error") || res.includes("Cannot") || res.includes("Warning") || res.includes("Destroyed") || res.includes("failed")) type = 'error';
+                else if (res.includes("Negative") || res.includes("No reaction") || res.includes("No visible")) type = 'warning';
+                
+                addLog('action', action, res);
+            } catch (error) {
+                addLog('error', `Test error: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        // --- DATA MODAL LOGIC ---
+        function openModal() {
+            try {
+                if (!currentU) { 
+                    alert("Select an unknown first!"); 
+                    return; 
+                }
+                
+                document.getElementById('modal-overlay').style.display = 'flex';
+                
+                let html = `<table><tr><th style="width: 25%;">Property / Test</th><th>Theoretical Result</th></tr>`;
+                html += `<tr><td style="font-weight:bold; color:var(--accent-orange);">Odor</td><td style="font-weight:bold;">${currentU.odor}</td></tr>`;
+
+                const testKeys = ['mp', 'bp', ...chemKeys];
+                testKeys.forEach(k => {
+                    let tempState = currentU.state; 
+                    let res = Engine[k](currentU, true, false); 
+                    if(k==='mp' && tempState==='L') res = "N/A (Liquid)";
+                    if(k==='bp' && tempState==='S') res = "N/A (Solid)";
+                    
+                    const nameMap = {
+                        'mp':'MP','bp':'BP','ignition':'Ignition','lassaigne':'Lassaigne (Na)','beilstein':'Beilstein (Cu)',
+                        'sol_water':'Sol. Water','sol_ether':'Sol. Ether','sol_hcl':'Sol. HCl','sol_naoh':'Sol. NaOH','sol_nahco3':'Sol. NaHCO₃',
+                        'lucas':'Lucas Reagent','ceric':'Ceric Amm. Nit.','iodoform':'Iodoform (I₂/NaOH)','dnp24':'2,4-DNP',
+                        'tollen':"Tollen's",'fehling':"Fehling's A+B",'fecl3':'FeCl₃','hinsberg':'Hinsberg',
+                        'nitrous':'NaNO₂/HCl (0°C)','carbylamine':'Carbylamine','sodalime':'Soda Lime',
+                        'phthalimide':'Phthalimide','fluorescein':'Fluorescein','zincdust':'Zinc Dust',
+                        'bromine_water':'Bromine Water','kmno4':'KMnO₄ (alk.)','benedict':"Benedict's",
+                        'lead_acetate':'Lead Acetate','hg_acetate':'Hg(OAc)₂'
+                    };
+                    let displayName = nameMap[k] || k.replace('sol_','Sol. ');
+                    html += `<tr><td style="font-weight:bold;text-transform:capitalize;">${displayName}</td><td>${res}</td></tr>`;
+                });
+                html += `</table>`;
+                
+                document.getElementById('modal-table-container').innerHTML = html;
+            } catch (error) {
+                console.error("Modal open error:", error);
+                alert("Error opening modal.");
+            }
+        }
+
+        function closeModal(id) { 
+            try {
+                const modal = document.getElementById(id);
+                if (modal) modal.style.display = 'none';
+            } catch (error) {
+                console.error("Modal close error:", error);
+            }
+        }
+        
+        function toggleReveal() {
+            try {
+                const dataDiv = document.getElementById('truth-data');
+                const btn = document.getElementById('btn-reveal');
+                const nameEl = document.getElementById('modal-chem-name');
+                const classEl = document.getElementById('modal-chem-class');
+                
+                if (nameEl && currentU) nameEl.textContent = currentU.n;
+                if (classEl && currentU) classEl.textContent = currentU.c;
+                if (dataDiv) dataDiv.classList.add('revealed');
+                if (btn) btn.style.display = 'none';
+            } catch (error) {
+                console.error("Reveal toggle error:", error);
+            }
+        }
+
+        // --- EXAM SHEET LOGIC ---
+        function buildExamSheet() {
+            try {
+                let listHTML = '';
+                examCandidates.forEach(c => {
+                    listHTML += `<div>• <strong>${c.n}</strong> <span style="color:#aaa; font-size:0.85rem;">(${c.c})</span></div>`;
+                });
+                document.getElementById('exam-candidates-list').innerHTML = listHTML;
+
+                let formHTML = '';
+                for(let i=0; i<currentSet.length; i++) {
+                    formHTML += `<div class="exam-row">
+                        <label for="exam-ans-${i}">Unknown ${i+1}:</label>
+                        <select id="exam-ans-${i}">
+                            <option value="">-- Select Compound --</option>`;
+                    examCandidates.forEach(c => {
+                        formHTML += `<option value="${c.n}">${c.n}</option>`;
+                    });
+                    formHTML += `</select><div id="exam-res-${i}" class="exam-res"></div></div>`;
+                }
+                document.getElementById('exam-form').innerHTML = formHTML;
+                document.getElementById('btn-submit-exam').style.display = 'inline-block';
+            } catch (error) {
+                console.error("Exam sheet build error:", error);
+            }
+        }
+
+        function openExamSheet() {
+            try {
+                document.getElementById('exam-modal').style.display = 'flex';
+            } catch (error) {
+                console.error("Exam sheet open error:", error);
+            }
+        }
+
+        function gradeExam() {
+            try {
+                let correctCount = 0;
+                let allAnswered = true;
+
+                for(let i=0; i<currentSet.length; i++) {
+                    const sel = document.getElementById(`exam-ans-${i}`);
+                    if (sel && !sel.value) allAnswered = false;
+                }
+
+                if(!allAnswered) {
+                    if(!confirm("You have unassigned unknowns. Are you sure you want to submit?")) return;
+                }
+
+                for(let i=0; i<currentSet.length; i++) {
+                    let sel = document.getElementById(`exam-ans-${i}`);
+                    let resDiv = document.getElementById(`exam-res-${i}`);
+                    
+                    if (!sel || !resDiv || !currentSet[i]) continue;
+                    
+                    let trueName = currentSet[i].n;
+
+                    sel.disabled = true;
+                    
+                    if(sel.value === trueName) {
+                        resDiv.innerHTML = '✅ Correct';
+                        resDiv.style.color = 'var(--accent-green)';
+                        correctCount++;
+                    } else {
+                        resDiv.innerHTML = `❌ Expected: ${trueName}`;
+                        resDiv.style.color = 'var(--accent-red)';
+                    }
+                }
+                
+                const submitBtn = document.getElementById('btn-submit-exam');
+                if (submitBtn) submitBtn.style.display = 'none';
+                
+                alert(`Exam Graded: You identified ${correctCount} out of ${currentSet.length} compounds correctly.`);
+            } catch (error) {
+                console.error("Exam grading error:", error);
+                alert("Error grading exam.");
+            }
+        }
+    </script>
+</body>
+</html>

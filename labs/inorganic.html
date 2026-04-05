@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inorganic Qualitative Analysis — VirtualChem by MKh</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* ── LOCAL TOKENS ── */
+        :root {
+            --accent: var(--purple);
+            --accent-dim: var(--purple-dim);
+            --accent-hover: #6366f1;
+            --tube-glass: rgba(255,255,255,0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            background: var(--bg-base);
+            color: var(--text-main);
+            display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden;
+        }
+        body > header { flex-shrink: 0; }
+        main { flex: 1; min-height: 0; }
+
+        /* ── APP HEADER ── */
+        header {
+            background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(129,140,248,0.06) 100%);
+            padding: 12px 20px;
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+        h1 {
+            margin: 0;
+            font-size: var(--font-size-md);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--purple);
+        }
+        .controls { display: flex; flex-wrap: wrap; gap: 6px; }
+        .controls button {
+            font-family: var(--font-body);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            padding: 7px 13px;
+            border-radius: var(--r-sm);
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: background var(--t-fast) var(--ease),
+                        color var(--t-fast) var(--ease),
+                        border-color var(--t-fast) var(--ease);
+            white-space: nowrap;
+        }
+        .controls button:hover { background: rgba(255,255,255,0.09); color: var(--text-main); border-color: var(--border-lite); }
+        .controls button:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+        .controls .primary-btn {
+            background: var(--purple-dim);
+            color: var(--purple);
+            border-color: rgba(129,140,248,0.25);
+        }
+        .controls .primary-btn:hover { background: rgba(129,140,248,0.2); }
+
+        /* ── LAYOUT ── */
+        main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        @media (min-width: 1024px) {
+            main { display: grid; grid-template-columns: 300px 1fr 360px; }
+        }
+
+        /* ── REAGENT PANEL ── */
+        .reagents {
+            background: var(--bg-panel);
+            padding: var(--sp-4);
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            max-height: 300px;
+        }
+        @media (min-width: 1024px) { .reagents { max-height: none; } }
+
+        .reagent-group { margin-bottom: var(--sp-5); }
+        .reagent-group h3 {
+            font-size: var(--font-size-xs);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: var(--sp-2);
+            margin: 0 0 var(--sp-2) 0;
+        }
+        .reagent-btn {
+            display: block; width: 100%;
+            font-family: var(--font-body);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 6px var(--sp-3);
+            margin-bottom: 3px;
+            text-align: left;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            transition: background var(--t-fast) var(--ease),
+                        color var(--t-fast) var(--ease),
+                        border-color var(--t-fast) var(--ease);
+        }
+        .reagent-btn:hover { background: var(--bg-hover); color: var(--text-main); border-color: var(--border); }
+        .reagent-btn:focus-visible { outline: 2px solid var(--purple); outline-offset: -2px; }
+
+        .heat-btn {
+            background: rgba(251,191,36,0.1) !important;
+            border: 1px solid rgba(251,191,36,0.25) !important;
+            color: var(--amber) !important;
+            font-weight: 700 !important;
+            text-align: center;
+            margin-bottom: var(--sp-2);
+            padding: 9px var(--sp-3) !important;
+            transition: background var(--t-fast) var(--ease) !important;
+        }
+        .heat-btn:hover { background: rgba(251,191,36,0.18) !important; }
+        .heat-btn.active-heat {
+            background: rgba(251,191,36,0.22) !important;
+            color: var(--amber) !important;
+            box-shadow: 0 0 0 3px rgba(251,191,36,0.15);
+        }
+
+        .gas-btn {
+            background: rgba(56,189,248,0.08) !important;
+            border: 1px solid rgba(56,189,248,0.2) !important;
+            color: var(--blue) !important;
+            font-weight: 700 !important;
+            text-align: center;
+            margin-bottom: var(--sp-4);
+        }
+        .gas-btn:hover { background: rgba(56,189,248,0.15) !important; }
+
+        /* ── BENCH ── */
+        .bench {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            position: relative; padding: 20px 10px;
+            background: radial-gradient(circle at center, var(--bg-panel) 0%, var(--bg-base) 100%);
+            overflow-y: auto; flex: 1;
+        }
+
+        .fraction-tabs {
+            display: flex; gap: var(--sp-1);
+            margin-bottom: var(--sp-4);
+            flex-wrap: wrap; justify-content: center; max-width: 95%;
+        }
+        .fraction-tab {
+            font-family: var(--font-body);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 12px;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: background var(--t-fast) var(--ease),
+                        color var(--t-fast) var(--ease),
+                        border-color var(--t-fast) var(--ease);
+        }
+        .fraction-tab.active {
+            background: var(--purple-dim);
+            color: var(--purple);
+            border-color: rgba(129,140,248,0.3);
+            font-weight: 700;
+        }
+        .fraction-tab:hover:not(.active) { border-color: var(--border-lite); color: var(--text-main); }
+        .fraction-tab:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+        #exam-nav {
+            display: none; gap: var(--sp-2);
+            margin-bottom: var(--sp-5);
+            flex-wrap: wrap; justify-content: center;
+            background: var(--bg-inset);
+            padding: var(--sp-3) var(--sp-4);
+            border-radius: var(--r-md);
+            border: 1px solid var(--border);
+        }
+        .exam-nav-btn {
+            font-family: var(--font-body);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 12px; border-radius: var(--r-sm);
+            cursor: pointer; transition: background var(--t-fast) var(--ease);
+        }
+        .exam-nav-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+        .exam-nav-btn.active {
+            background: var(--purple-dim);
+            color: var(--purple);
+            border-color: rgba(129,140,248,0.3);
+            font-weight: 700;
+        }
+
+        .unknown-label {
+            background: var(--bg-inset);
+            padding: 5px 18px;
+            border-radius: var(--r-sm);
+            font-family: var(--font-mono);
+            font-size: var(--font-size-md);
+            border: 1px solid var(--border-lite);
+            margin-bottom: var(--sp-4);
+            color: var(--purple);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── TEST TUBE ── */
+        .test-tube-container { position: relative; width: 90px; height: 300px; margin: 10px 0; }
+        .test-tube {
+            width: 100%; height: 100%;
+            background: var(--tube-glass);
+            border: 3px solid rgba(255,255,255,0.22);
+            border-top: none;
+            border-radius: 0 0 45px 45px;
+            position: relative; overflow: hidden;
+            box-shadow: inset -4px -4px 16px rgba(0,0,0,0.5),
+                        inset 3px 0 8px rgba(255,255,255,0.03);
+            z-index: 2;
+            transition: box-shadow var(--t-mid) var(--ease),
+                        border-color var(--t-mid) var(--ease);
+        }
+        .test-tube::after {
+            content: '';
+            position: absolute; top: 8px; left: 8px;
+            width: 12px; height: 60%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .test-tube.heated {
+            box-shadow: inset -4px -4px 16px rgba(0,0,0,0.5),
+                        inset 0 -30px 40px rgba(251,191,36,0.25);
+            border-bottom-color: var(--amber);
+        }
+
+        .liquid { position: absolute; bottom: 0; width: 100%; height: 60%; background-color: transparent; transition: all 0.5s ease; }
+        .precipitate {
+            position: absolute; bottom: 0; width: 100%; height: 0%;
+            background-color: transparent;
+            border-radius: 0 0 42px 42px;
+            transition: all 0.5s ease;
+            box-shadow: inset 0 8px 10px rgba(0,0,0,0.35);
+            z-index: 3;
+        }
+
+        .gas-container { position: absolute; bottom: 0; width: 100%; height: 100%; overflow: hidden; z-index: 4; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .gas-container.active { opacity: 1; }
+        @keyframes rise { 0% { bottom: 0; opacity: 1; transform: translateX(0); } 100% { bottom: 100%; opacity: 0; transform: translateX(10px); } }
+        .bubble { position: absolute; background: rgba(255,255,255,0.55); border-radius: 50%; width: 5px; height: 5px; animation: rise 1.2s linear infinite; }
+
+        .flame-overlay {
+            display: none; position: absolute; top: -90px; left: 50%;
+            transform: translateX(-50%);
+            width: 110px; height: 160px;
+            background: radial-gradient(ellipse at bottom, #ffcc00 10%, #ff6600 40%, transparent 70%);
+            border-radius: 50% 50% 20% 20%;
+            z-index: 5; opacity: 0.85;
+            filter: blur(4px);
+            animation: flicker 0.1s infinite alternate;
+        }
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+            100% { transform: translateX(-50%) scale(1.05) skewX(2deg); opacity: 0.95; }
+        }
+
+        /* ── BENCH CONTROLS ── */
+        .bench-controls { margin-top: var(--sp-5); display: flex; gap: var(--sp-2); flex-wrap: wrap; justify-content: center; }
+        .bench-controls button {
+            font-family: var(--font-body);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px; border-radius: var(--r-sm);
+            cursor: pointer;
+            transition: background var(--t-fast) var(--ease),
+                        color var(--t-fast) var(--ease);
+        }
+        .bench-controls button:hover { background: rgba(255,255,255,0.09); color: var(--text-main); border-color: var(--border-lite); }
+        .sep-btn {
+            background: var(--blue-dim) !important;
+            color: var(--blue) !important;
+            border-color: rgba(56,189,248,0.25) !important;
+        }
+        .sep-btn:hover { background: rgba(56,189,248,0.2) !important; }
+
+        /* ── LOG PANEL ── */
+        .log-panel {
+            background: var(--bg-inset);
+            display: flex; flex-direction: column;
+            border-left: 1px solid var(--border);
+            overflow: hidden; max-height: 250px;
+        }
+        @media (min-width: 1024px) { .log-panel { max-height: none; border-top: none; } }
+        @media (max-width: 1023px) { .log-panel { border-left: none; border-top: 1px solid var(--border); } }
+
+        .log-header {
+            padding: var(--sp-3) var(--sp-4);
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: var(--font-size-sm); font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .log-actions { display: flex; gap: var(--sp-3); font-size: var(--font-size-xs); cursor: pointer; }
+        .log-actions span { color: var(--text-muted); transition: color var(--t-fast); }
+        .log-actions span:hover { color: var(--text-main); }
+        .log-content {
+            flex: 1; padding: var(--sp-4);
+            overflow-y: auto;
+            font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+        .log-entry {
+            margin-bottom: var(--sp-3);
+            border-bottom: 1px dashed rgba(255,255,255,0.04);
+            padding-bottom: var(--sp-2);
+            word-wrap: break-word;
+        }
+        .log-time { color: var(--text-dim); margin-right: 6px; font-size: 10px; }
+        .log-tube { color: var(--purple); font-weight: 700; margin-right: 4px; }
+        .log-sys { color: var(--text-muted); }
+        .log-act { color: var(--blue); font-weight: 700; }
+        .log-res { color: #a7f3d0; padding-left: 12px; border-left: 2px solid var(--green); display: block; margin-top: 3px; }
+        .log-err { color: var(--red); }
+
+        /* ── MODALS ── */
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(5,8,18,0.88);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 500;
+            justify-content: center; align-items: center;
+            padding: var(--sp-5);
+        }
+        .modal.open, .modal[style*="flex"] { display: flex; }
+        .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-lite);
+            border-radius: var(--r-lg);
+            width: 95%; max-width: 860px;
+            max-height: 88vh; overflow-y: auto;
+            padding: var(--sp-6);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: var(--sp-4); margin-bottom: var(--sp-5);
+        }
+        .modal-header h2 { margin: 0; font-size: var(--font-size-lg); font-weight: 700; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0; transition: color var(--t-fast); }
+        .close-modal:hover { color: var(--text-main); }
+
+        /* ── TABLE ── */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: var(--font-size-sm); }
+        th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+        th { background: var(--bg-inset); color: var(--text-muted); font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.06em; position: sticky; top: 0; }
+        td { font-family: var(--font-mono); font-size: 12px; }
+        tbody tr:hover { background: var(--bg-hover); }
+
+        /* ── EXAM ROWS ── */
+        .exam-row {
+            display: flex; flex-direction: column; gap: var(--sp-3);
+            background: var(--bg-panel);
+            padding: var(--sp-3) var(--sp-4);
+            margin-bottom: var(--sp-2);
+            border-radius: var(--r-sm);
+            border-left: 3px solid var(--border);
+            transition: background var(--t-fast);
+        }
+        @media (min-width: 640px) {
+            .exam-row { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+        select {
+            font-family: var(--font-body);
+            font-size: var(--font-size-sm);
+            background: var(--bg-inset);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 7px 10px; border-radius: var(--r-sm);
+            outline: none; width: 100%; max-width: 260px;
+            transition: border-color var(--t-fast);
+        }
+        select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-dim); }
+        .correct-ans { border-left-color: var(--green); background: var(--green-dim); }
+        .wrong-ans { border-left-color: var(--red); background: var(--red-dim); }
+
+        /* ── CANDIDATE POOL ── */
+        .candidate-pool {
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            padding: var(--sp-4); border-radius: var(--r-sm);
+            margin-bottom: var(--sp-5);
+            font-size: var(--font-size-sm);
+        }
+        .candidate-pool span {
+            display: inline-block;
+            background: var(--bg-panel);
+            color: var(--text-main);
+            padding: 3px 10px; margin: 3px;
+            border-radius: 99px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        /* ── MIX GRID ── */
+        .mix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--sp-2); margin-bottom: var(--sp-5); }
+        .mix-label {
+            display: flex; align-items: center; gap: var(--sp-2);
+            background: var(--bg-panel);
+            padding: var(--sp-2) var(--sp-3);
+            border-radius: var(--r-sm);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: border-color var(--t-fast);
+        }
+        .mix-label:hover { border-color: var(--border-lite); }
+    </style>
+</head>
+<body>
+
+<nav class="site-nav" role="navigation" aria-label="Site navigation">
+    <a href="../index.html" class="site-nav-brand">⚗️ VirtualChem Labs</a>
+    <div class="site-nav-links">
+        <a href="../index.html">Home</a>
+        <a href="titration.html">Titration</a>
+        <a href="organic.html">Organic</a>
+        <a href="inorganic.html" class="snav-active">Inorganic</a>
+    </div>
+</nav>
+
+<header>
+    <h1>Inorganic Qualitative Analysis</h1>
+    <div class="controls">
+        <button onclick="resetCurrentSession()">Wash Tubes</button>
+        <button onclick="setMode('single')">Random Single</button>
+        <button onclick="openModal('mix-modal')">Synthesize Mixture</button>
+        <button class="primary-btn" onclick="generateExam()">New Exam Set</button>
+        <button onclick="openModal('exam-modal')" id="btn-exam-sheet" style="display:none;" class="primary-btn">Exam Sheet</button>
+        <button onclick="buildCompareData(); openModal('data-modal')">Reference Data</button>
+        <button onclick="openModal('manual-modal')">Lab Manual</button>
+    </div>
+</header>
+
+<main>
+    <div class="reagents">
+        <button class="reagent-btn heat-btn" onclick="toggleHeat()" id="btn-heat" aria-pressed="false">🔥 BURNER: OFF</button>
+        <button class="reagent-btn gas-btn" onclick="testEvolvedGas()" id="btn-gas">💨 Test Evolved Gas</button>
+        
+        <div class="reagent-group">
+            <h3>Physical & General</h3>
+            <button class="reagent-btn" onclick="processReagent('flame')">Flame Test</button>
+            <button class="reagent-btn" onclick="processReagent('ph')">pH (Litmus Paper)</button>
+            <button class="reagent-btn" onclick="processReagent('smell')">Test Odor</button>
+            <button class="reagent-btn" onclick="processReagent('hot_water')">Hot Water (Wash Ppt)</button>
+        </div>
+        <div class="reagent-group">
+            <h3>Group Separation</h3>
+            <button class="reagent-btn" onclick="processReagent('hcl_dil')">Dilute HCl (Group I)</button>
+            <button class="reagent-btn" onclick="processReagent('h2s_acid')">H₂S (acidic) (Group II)</button>
+            <button class="reagent-btn" onclick="processReagent('nh3_nh4cl')">NH₃ + NH₄Cl buffer</button>
+            <button class="reagent-btn" onclick="processReagent('nh42s')">(NH₄)₂S (Group III)</button>
+            <button class="reagent-btn" onclick="processReagent('nh42co3')">(NH₄)₂CO₃ (Group IV)</button>
+        </div>
+        <div class="reagent-group">
+            <h3>Alkalis</h3>
+            <button class="reagent-btn" onclick="processReagent('naoh_drop')">NaOH (dropwise)</button>
+            <button class="reagent-btn" onclick="processReagent('naoh_xs')">NaOH (excess)</button>
+            <button class="reagent-btn" onclick="processReagent('nh3_drop')">NH₃ (aq) (dropwise)</button>
+            <button class="reagent-btn" onclick="processReagent('nh3_xs')">NH₃ (aq) (excess)</button>
+        </div>
+        <div class="reagent-group">
+            <h3>Specific Confirmatory</h3>
+            <button class="reagent-btn" onclick="processReagent('ki')">KI (Potassium Iodide)</button>
+            <button class="reagent-btn" onclick="processReagent('k2cro4')">K₂CrO₄</button>
+            <button class="reagent-btn" onclick="processReagent('k4fecn6')">K₄[Fe(CN)₆]</button>
+            <button class="reagent-btn" onclick="processReagent('kscn')">KSCN</button>
+            <button class="reagent-btn" onclick="processReagent('kscn_amyl')">KSCN + Amyl Alcohol</button>
+            <button class="reagent-btn" onclick="processReagent('dmg')">Dimethylglyoxime (DMG)</button>
+            <button class="reagent-btn" onclick="processReagent('aluminon')">Aluminon Reagent</button>
+            <button class="reagent-btn" onclick="processReagent('h2o2_naoh')">H₂O₂ + NaOH</button>
+            <button class="reagent-btn" onclick="processReagent('amm_oxalate')">(NH₄)₂C₂O₄ (Oxalate)</button>
+            <button class="reagent-btn" onclick="processReagent('amm_phosphate')">(NH₄)₂HPO₄ (Phosphate)</button>
+        </div>
+        <div class="reagent-group">
+            <h3>Anion Tests</h3>
+            <button class="reagent-btn" onclick="processReagent('bacl2')">BaCl₂</button>
+            <button class="reagent-btn" onclick="processReagent('agno3')">AgNO₃ + HNO₃</button>
+            <button class="reagent-btn" onclick="processReagent('ccl4_cl2')">Cl₂ water + CCl₄</button>
+            <button class="reagent-btn" onclick="processReagent('amm_molybdate')">Ammonium Molybdate</button>
+            <button class="reagent-btn" onclick="processReagent('brown_ring')">Brown Ring Test</button>
+        </div>
+    </div>
+
+    <div class="bench">
+        <div id="exam-nav"></div>
+        
+        <div class="unknown-label" id="unknown-label">Initializing...</div>
+        <div class="fraction-tabs" id="fraction-tabs" role="tablist" aria-label="Sample Fractions"></div>
+        
+        <div class="test-tube-container">
+            <div class="flame-overlay" id="flame-visual" aria-hidden="true"></div>
+            <div class="test-tube" id="visual-tube" role="img" aria-label="Test tube visualization">
+                <div class="liquid" id="tube-liquid"></div>
+                <div class="precipitate" id="tube-ppt"></div>
+                <div class="gas-container" id="tube-gas"></div>
+            </div>
+        </div>
+
+        <div class="bench-controls">
+            <button class="sep-btn" onclick="centrifugeAndSeparate()">Centrifuge & Separate</button>
+            <button onclick="discardCurrentFraction()">Discard Fraction</button>
+        </div>
+        <p style="font-size:11px; color:var(--text-dim); margin-top:10px; text-align:center; max-width:90%;">Tip: 'Centrifuge & Separate' auto-discards the mixed parent fraction to prevent clutter.</p>
+    </div>
+
+    <div class="log-panel">
+        <div class="log-header">
+            <span>Laboratory Log</span>
+            <div class="log-actions">
+                <span onclick="copyLog()" role="button" tabindex="0" aria-label="Copy log">📋 Copy</span>
+                <span onclick="clearLog()" role="button" tabindex="0" aria-label="Clear log">🗑️ Clear</span>
+            </div>
+        </div>
+        <div class="log-content" id="log-content" role="log" aria-live="polite" aria-atomic="false"></div>
+    </div>
+</main>
+
+<div class="modal" id="exam-modal" role="dialog" aria-modal="true" aria-labelledby="exam-title">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="exam-title">Practical Exam: Identification</h2>
+            <button class="close-modal" onclick="closeModal('exam-modal')" aria-label="Close dialog">×</button>
+        </div>
+        
+        <div class="candidate-pool">
+            <strong style="color:var(--purple);">Candidate Pool (10 Ions):</strong><br>
+            <div id="candidate-list" style="margin-top: 10px;"></div>
+        </div>
+
+        <div id="exam-rows-container"></div>
+        <button onclick="submitExam()" style="background:var(--purple-dim); color:var(--purple); border:1px solid rgba(129,140,248,0.25); padding:10px; border-radius:6px; font-family:var(--font-body); font-weight:700; cursor:pointer; margin-top:15px; width:100%; font-size:13px;">Submit Final Answers</button>
+        <div id="exam-results" style="margin-top: 15px; font-size:1.2rem; font-weight: bold; text-align: center;"></div>
+    </div>
+</div>
+
+<div class="modal" id="mix-modal" role="dialog" aria-modal="true" aria-labelledby="mix-title">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="mix-title">Synthesize Custom Mixture</h2>
+            <button class="close-modal" onclick="closeModal('mix-modal')" aria-label="Close dialog">×</button>
+        </div>
+        <div class="mix-grid" id="mix-checkboxes"></div>
+        <button onclick="applyMixture()" style="background:var(--purple-dim); color:var(--purple); border:1px solid rgba(129,140,248,0.25); padding:10px; border-radius:6px; font-family:var(--font-body); font-weight:700; cursor:pointer; width:100%; font-size:13px;">Create Mixture</button>
+    </div>
+</div>
+
+<div class="modal" id="data-modal" role="dialog" aria-modal="true" aria-labelledby="data-title">
+    <div class="modal-content" style="max-width: 95%;">
+        <div class="modal-header">
+            <h2 id="data-title">Theoretical Reference Data</h2>
+            <button class="close-modal" onclick="closeModal('data-modal')" aria-label="Close dialog">×</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Legend: <strong>PPT</strong> = Precipitate, <strong>GAS</strong> = Gas Evolution, <strong>DISSOLVE</strong> = Precipitate Dissolves, <strong>COLOR</strong> = Color Change</p>
+        <div style="overflow-x:auto;">
+            <table id="data-table"></table>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="manual-modal" role="dialog" aria-modal="true" aria-labelledby="manual-title">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="manual-title">Laboratory Manual & Protocol</h2>
+            <button class="close-modal" onclick="closeModal('manual-modal')" aria-label="Close dialog">×</button>
+        </div>
+        
+        <h3>How to Use the Virtual Interface</h3>
+        <ul>
+            <li><b>State Tracking:</b> The engine tracks liquid and solid phases. Adding reagents updates the pH and visual state automatically.</li>
+            <li><b>Centrifuging:</b> If a precipitate forms, click <i>"Centrifuge & Separate"</i>. The engine will split the solid and liquid into two new independent tabs and discard the mixed parent fraction to keep your workspace clean.</li>
+            <li><b>Gas Testing:</b> If you observe bubbles, immediately click <i>"Test Evolved Gas"</i> to apply chemical indicator tests (e.g., Limewater, Litmus). If you add another reagent, the gas headspace is lost.</li>
+            <li><b>Heat:</b> Toggle the Burner to simulate boiling/warming. A glowing base indicates the tube is heated. Ensure heat is ON before applying reagents that require it (e.g., NaOH for NH₄⁺).</li>
+        </ul>
+
+        <h3>Systematic Cation Separation</h3>
+        <ul>
+            <li><b>Group I (Ag⁺, Pb²⁺, Hg₂²⁺):</b> Ppt with dilute HCl.</li>
+            <li><b>Group II (Cu²⁺, Bi³⁺, Cd²⁺, Hg²⁺, Sn²⁺, Sb³⁺):</b> To filtrate (acidic), add H₂S. HgS is black and insoluble even in conc. HNO₃.</li>
+            <li><b>Group III (Fe³⁺, Fe²⁺, Al³⁺, Cr³⁺, Ni²⁺, Co²⁺, Zn²⁺, Mn²⁺):</b> To filtrate, add NH₃/NH₄Cl buffer, then (NH₄)₂S. Fe²⁺ gives black FeS; Fe³⁺ gives Fe₂S₃.</li>
+            <li><b>Group IV (Ba²⁺, Sr²⁺, Ca²⁺):</b> To filtrate, add (NH₄)₂CO₃.</li>
+            <li><b>Group V (Mg²⁺, Na⁺, K⁺, NH₄⁺):</b> Soluble remainder. Test specifically.</li>
+        </ul>
+        
+        <h3>Systematic Anion Scheme</h3>
+        <p style="color:var(--amber); font-size:12px; font-weight:600;">*Note: In real bench analysis, cations and anions are analyzed from separate stock portions of the original salt. While the engine allows you to mix them here for practice, be aware of complex cross-reactions.*</p>
+        <ul>
+            <li><b>Volatile Acids:</b> Add dil HCl. CO₃²⁻ gives CO₂, SO₃²⁻ gives SO₂, NO₂⁻ gives brown NO₂, CN⁻ gives toxic HCN.</li>
+            <li><b>Barium Chloride Group:</b> BaCl₂ ppts SO₄²⁻, SO₃²⁻, PO₄³⁻, C₂O₄²⁻. Only BaSO₄ is insoluble in HCl.</li>
+            <li><b>Silver Nitrate Group:</b> AgNO₃ ppts Halides (Cl⁻ white, Br⁻ pale yellow, I⁻ yellow), also CN⁻ (white), SCN⁻ (white).</li>
+            <li><b>Soluble:</b> NO₃⁻ (Brown ring test).</li>
+        </ul>
+
+        <h3>Key Ion Distinctions</h3>
+        <ul>
+            <li><b>Fe²⁺ vs Fe³⁺:</b> Fe²⁺ gives green ppt with NaOH (darkens to brown in air), deep blue with K₃[Fe(CN)₆]. Fe³⁺ gives red-brown ppt, blood-red with KSCN, Prussian Blue with K₄[Fe(CN)₆].</li>
+            <li><b>Al³⁺ vs Zn²⁺:</b> Both give white ppt with NaOH, both dissolve in excess NaOH. Al³⁺ does NOT dissolve in excess NH₃; Zn²⁺ does. Aluminon gives red lake only with Al³⁺.</li>
+            <li><b>Hg²⁺ vs Hg₂²⁺:</b> Hg²⁺ gives scarlet-red ppt with KI (dissolves in excess). Hg₂²⁺ gives white calomel (Hg₂Cl₂) with HCl; turns black with NH₃.</li>
+            <li><b>Co²⁺:</b> Blue ppt with NaOH → turns pink on heating. Intense blue in amyl alcohol with KSCN. Most reliable confirmatory test.</li>
+            <li><b>Gas tests:</b> NH₃ → blue litmus; CO₂ → limewater milky; SO₂ → K₂Cr₂O₇ turns green; HCN → Prussian Blue paper; H₂S → lead acetate paper turns black.</li>
+        </ul>
+
+        <h3>Amphoteric Hydroxides</h3>
+        <p>Al(OH)₃, Zn(OH)₂, Cr(OH)₃, and Pb(OH)₂ dissolve in both excess acid AND excess NaOH. This is a critical distinguishing property. Mg(OH)₂, Fe(OH)₂, Fe(OH)₃ do NOT dissolve in excess NaOH.</p>
+    </div>
+</div>
+
+<script>
+/**
+ * ============================================================================
+ * ELITE OLYMPIAD VIRTUAL LAB ENGINE v3.5 PRODUCTION
+ * ✅ Complete Exam Obfuscation (ALL reactions have examText)
+ * ✅ Log Memory Management (FIFO rotation)
+ * ✅ Subtractive Color Blending (Chemically Accurate)
+ * ✅ Error Handling & Validation
+ * ✅ Mobile Responsive
+ * ✅ Accessibility Improvements
+ * ============================================================================
+ */
+
+const DB = [
+    // ==================== GROUP I ====================
+    { id: 'ag', name: 'Silver(I) (Ag⁺)', type: 'cation', group: 'I', aqColor: 'transparent',
+      reactions: {
+          'hcl_dil': { action: 'ppt', formula: 'AgCl', color: '#ffffff', 
+                       text: 'White curdy ppt of AgCl forms.', 
+                       examText: 'A white curdy precipitate forms.' },
+          'h2s_acid': { action: 'ppt', formula: 'Ag2S', color: '#111111', 
+                        text: 'Black ppt of Ag2S forms.', 
+                        examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Ag2O', color: '#6b4226', 
+                         text: 'Brown ppt of Ag2O forms.', 
+                         examText: 'A brown precipitate forms.' },
+          'nh3_drop': { action: 'ppt', formula: 'Ag2O', color: '#6b4226', 
+                        text: 'Brown ppt forms.', 
+                        examText: 'A brown precipitate forms.' },
+          'nh3_xs': { action: 'dissolve', target: 'Ag2O', 
+                      text: 'Ppt dissolves to colorless [Ag(NH3)2]⁺.', 
+                      examText: 'The precipitate dissolves to form a colorless solution.' },
+          'nh3_xs_cl': { action: 'dissolve', target: 'AgCl', 
+                         text: 'AgCl dissolves in excess NH3 to [Ag(NH3)2]⁺.', 
+                         examText: 'The white precipitate dissolves in excess reagent.' },
+          'k2cro4': { action: 'ppt', formula: 'Ag2CrO4', color: '#8a3324', 
+                      text: 'Brick-red ppt of Ag2CrO4 forms.', 
+                      examText: 'A brick-red precipitate forms.' },
+          'ki': { action: 'ppt', formula: 'AgI', color: '#fffacd', 
+                  text: 'Yellow ppt of AgI forms.', 
+                  examText: 'A yellow precipitate forms.' }
+      }
+    },
+    { id: 'pb', name: 'Lead(II) (Pb²⁺)', type: 'cation', group: 'I/II', aqColor: 'transparent', 
+      flame: 'radial-gradient(ellipse, #b0c4de, #87cefa)',
+      reactions: {
+          'hcl_dil': { action: 'ppt', formula: 'PbCl2', color: '#f8f8f8', 
+                       text: 'White crystalline ppt of PbCl2 forms.', 
+                       examText: 'A white crystalline precipitate forms.' },
+          'hot_water': { action: 'dissolve', target: 'PbCl2', 
+                         text: 'PbCl2 dissolves completely in hot water.', 
+                         examText: 'The white precipitate dissolves completely in hot water.' },
+          'h2s_acid': { action: 'ppt', formula: 'PbS', color: '#0a0a0a', 
+                        text: 'Black ppt of PbS forms.', 
+                        examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Pb(OH)2', color: '#ffffff', 
+                         text: 'White ppt of Pb(OH)2 forms.', 
+                         examText: 'A white precipitate forms.' },
+          'naoh_xs': { action: 'dissolve', target: 'Pb(OH)2', 
+                       text: 'Ppt dissolves forming plumbate [Pb(OH)4]²⁻.', 
+                       examText: 'The precipitate dissolves in excess reagent.' },
+          'k2cro4': { action: 'ppt', formula: 'PbCrO4', color: '#ffd700', 
+                      text: 'Yellow ppt of PbCrO4 forms.', 
+                      examText: 'A yellow precipitate forms.' },
+          'ki': { action: 'ppt', formula: 'PbI2', color: '#ffd700', 
+                  text: 'Yellow ppt of PbI2 forms (dissolves in hot water).', 
+                  examText: 'A yellow precipitate forms.' }
+      }
+    },
+    { id: 'hg1', name: 'Mercury(I) (Hg₂²⁺)', type: 'cation', group: 'I', aqColor: 'transparent',
+      reactions: {
+          'hcl_dil': { action: 'ppt', formula: 'Hg2Cl2', color: '#ffffff', 
+                       text: 'White ppt of Hg2Cl2 (calomel) forms.', 
+                       examText: 'A white precipitate forms.' },
+          'nh3_xs_cl': { action: 'color_change_solid', target: 'Hg2Cl2', color: '#111111', 
+                         text: 'White Hg2Cl2 turns BLACK due to formation of Hg + Hg(NH2)Cl.', 
+                         examText: 'The white precipitate turns BLACK.' },
+          'ki': { action: 'ppt', formula: 'Hg2I2', color: '#556b2f', 
+                  text: 'Green-yellow ppt of Hg2I2 forms.', 
+                  examText: 'A green-yellow precipitate forms.' }
+      }
+    },
+    
+    // ==================== GROUP II ====================
+    { id: 'cu', name: 'Copper(II) (Cu²⁺)', type: 'cation', group: 'II', aqColor: '#87ceeb', 
+      flame: 'radial-gradient(ellipse, #00fa9a, #006400)',
+      reactions: {
+          'h2s_acid': { action: 'ppt', formula: 'CuS', color: '#050505', 
+                        text: 'Black ppt of CuS forms.', 
+                        examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Cu(OH)2', color: '#add8e6', 
+                         text: 'Pale blue ppt of Cu(OH)2 forms.', 
+                         examText: 'A pale blue precipitate forms.' },
+          'nh3_drop': { action: 'ppt', formula: 'Cu(OH)2', color: '#add8e6', 
+                        text: 'Pale blue ppt forms.', 
+                        examText: 'A pale blue precipitate forms.' },
+          'nh3_xs': { action: 'dissolve_color', target: 'Cu(OH)2', color: '#00008b', 
+                      text: 'Dissolves forming deep blue [Cu(NH3)4]²⁺.', 
+                      examText: 'The precipitate dissolves forming a deep blue solution.' },
+          'k4fecn6': { action: 'ppt', formula: 'Cu2[Fe(CN)6]', color: '#8b0000', 
+                       text: 'Red-brown ppt of copper ferrocyanide forms.', 
+                       examText: 'A red-brown precipitate forms.' }
+      }
+    },
+    { id: 'bi', name: 'Bismuth(III) (Bi³⁺)', type: 'cation', group: 'II', aqColor: 'transparent',
+      reactions: {
+          'h2s_acid': { action: 'ppt', formula: 'Bi2S3', color: '#331a00', 
+                        text: 'Brown-black ppt of Bi2S3 forms.', 
+                        examText: 'A brown-black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Bi(OH)3', color: '#ffffff', 
+                         text: 'White ppt of Bi(OH)3 forms (insoluble in xs).', 
+                         examText: 'A white precipitate forms (insoluble in excess).' },
+          'ki': { action: 'ppt', formula: 'BiI3', color: '#000000', 
+                  text: 'Black ppt of BiI3 forms, soluble in excess to orange [BiI4]-.', 
+                  examText: 'A black precipitate forms.' }
+      }
+    },
+    { id: 'cd', name: 'Cadmium (Cd²⁺)', type: 'cation', group: 'II', aqColor: 'transparent',
+      reactions: {
+          'h2s_acid': { action: 'ppt', formula: 'CdS', color: '#ffd700', 
+                        text: 'Bright yellow ppt of CdS forms.', 
+                        examText: 'A bright yellow precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Cd(OH)2', color: '#ffffff', 
+                         text: 'White ppt forms.', 
+                         examText: 'A white precipitate forms.' },
+          'nh3_xs': { action: 'dissolve', target: 'Cd(OH)2', 
+                      text: 'Dissolves to colorless [Cd(NH3)4]²⁺.', 
+                      examText: 'The precipitate dissolves to form a colorless solution.' }
+      }
+    },
+    
+    // ==================== GROUP III ====================
+    { id: 'fe3', name: 'Iron(III) (Fe³⁺)', type: 'cation', group: 'III', aqColor: '#eedd82',
+      reactions: {
+          'nh42s': { action: 'ppt', formula: 'Fe2S3', color: '#1a1a1a',
+                     text: 'Black ppt of Fe₂S₃ forms (some reduction to FeS also occurs).',
+                     examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Fe(OH)3', color: '#8b4513',
+                         text: 'Red-brown gelatinous ppt of Fe(OH)₃ forms.',
+                         examText: 'A red-brown gelatinous precipitate forms.' },
+          'naoh_xs':   { action: 'none',
+                         text: 'Fe(OH)₃ is NOT dissolved by excess NaOH (unlike Al³⁺ and Cr³⁺). Ppt remains red-brown.',
+                         examText: 'The precipitate does not dissolve in excess NaOH.' },
+          'nh3_drop':  { action: 'ppt', formula: 'Fe(OH)3', color: '#8b4513',
+                         text: 'Red-brown ppt of Fe(OH)₃ forms.',
+                         examText: 'A red-brown precipitate forms.' },
+          'nh3_xs':    { action: 'none',
+                         text: 'Fe(OH)₃ does NOT dissolve in excess NH₃.',
+                         examText: 'The precipitate does not dissolve in excess NH₃.' },
+          'k4fecn6':   { action: 'ppt', formula: 'Fe4[Fe(CN)6]3', color: '#000080',
+                         text: 'Prussian Blue ppt of Fe₄[Fe(CN)₆]₃ forms. This is a specific test for Fe³⁺.',
+                         examText: 'A deep blue precipitate forms.' },
+          'kscn':      { action: 'color_change', color: '#8b0000',
+                         text: 'Solution turns deep blood-red due to [Fe(SCN)]²⁺. Most sensitive test for Fe³⁺.',
+                         examText: 'Solution turns deep blood-red.' },
+          'ki':        { action: 'color_change', color: '#b8860b',
+                         text: 'Fe³⁺ oxidizes I⁻ to I₂. Solution turns brown (iodine liberated, Fe³⁺→Fe²⁺).',
+                         examText: 'The solution turns brown (redox reaction).' }
+      }
+    },
+    { id: 'al', name: 'Aluminum (Al³⁺)', type: 'cation', group: 'III', aqColor: 'transparent',
+      reactions: {
+          'nh3_nh4cl': { action: 'ppt', formula: 'Al(OH)3', color: '#f5f5f5',
+                         text: 'White gelatinous ppt of Al(OH)₃ forms. (NH₄Cl prevents excess ppt dissolution.)',
+                         examText: 'A white gelatinous precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Al(OH)3', color: '#f5f5f5',
+                         text: 'White gelatinous ppt of Al(OH)₃ forms.',
+                         examText: 'A white precipitate forms.' },
+          'naoh_xs':   { action: 'dissolve', target: 'Al(OH)3',
+                         text: 'Al(OH)₃ is amphoteric. Ppt dissolves in excess NaOH → colourless [Al(OH)₄]⁻ (aluminate).',
+                         examText: 'The precipitate dissolves in excess reagent forming a colourless solution.' },
+          'nh3_xs':    { action: 'none',
+                         text: 'Ppt does NOT dissolve in excess NH₃ (unlike Zn²⁺ and Cu²⁺). This distinguishes Al³⁺.',
+                         examText: 'The precipitate does not dissolve in excess NH₃.' },
+          'aluminon':  { action: 'color_change', color: '#ff4040',
+                         text: 'Red lake (adsorption complex) forms with aluminon reagent — specific test for Al³⁺.',
+                         examText: 'A red coloration develops.' },
+          'flame':     { action: 'none',
+                         text: 'No characteristic flame color for Al³⁺.',
+                         examText: 'No distinctive flame color.' }
+      }
+    },
+    { id: 'cr', name: 'Chromium(III) (Cr³⁺)', type: 'cation', group: 'III', aqColor: '#2e8b57',
+      reactions: {
+          'nh3_nh4cl': { action: 'ppt', formula: 'Cr(OH)3', color: '#8fbc8f', 
+                         text: 'Grey-green ppt of Cr(OH)3 forms.', 
+                         examText: 'A grey-green precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Cr(OH)3', color: '#8fbc8f', 
+                         text: 'Grey-green ppt forms.', 
+                         examText: 'A grey-green precipitate forms.' },
+          'naoh_xs': { action: 'dissolve_color', target: 'Cr(OH)3', color: '#3cb371', 
+                       text: 'Dissolves to green chromite [Cr(OH)4]⁻.', 
+                       examText: 'The precipitate dissolves forming a green solution.' },
+          'h2o2_naoh': { action: 'color_change', color: '#ffff00', 
+                         text: 'Oxidation occurs. Green solution turns yellow (CrO4²⁻).', 
+                         examText: 'The green solution turns yellow upon oxidation.' }
+      }
+    },
+    { id: 'co', name: 'Cobalt(II) (Co²⁺)', type: 'cation', group: 'III', aqColor: '#ffb6c1',
+      reactions: {
+          'nh42s': { action: 'ppt', formula: 'CoS', color: '#000000',
+                     text: 'Black ppt of CoS forms.',
+                     examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Co(OH)2', color: '#0000ff',
+                         text: 'Blue basic salt ppt of Co(OH)₂ forms.',
+                         examText: 'A blue precipitate forms.' },
+          'naoh_xs':   { action: 'none',
+                         text: 'Ppt does NOT dissolve in excess NaOH (Co(OH)₂ is not amphoteric).',
+                         examText: 'The precipitate does not dissolve in excess NaOH.' },
+          'naoh_heat': { action: 'color_change_solid', target: 'Co(OH)2', color: '#ffc0cb',
+                         text: 'Blue Co(OH)₂ ppt turns PINK Co(OH)₂ (or CoO·OH) upon heating.',
+                         examText: 'The blue precipitate turns pink upon heating.' },
+          'nh3_xs':    { action: 'dissolve_color', target: 'Co(OH)2', color: '#8b0000',
+                         text: 'In excess NH₃, Co²⁺ forms a yellowish-brown complex [Co(NH₃)₆]²⁺ (rapidly oxidizes to [Co(NH₃)₆]³⁺ which is dark brown/red).',
+                         examText: 'The precipitate dissolves forming a brown/red solution on standing.' },
+          'kscn_amyl': { action: 'color_change', color: '#0000cd',
+                         text: 'KSCN + amyl alcohol: Amyl layer turns intense blue [Co(SCN)₄]²⁻. Specific confirmatory test for Co²⁺.',
+                         examText: 'The organic layer turns intense blue.' }
+      }
+    },
+    { id: 'ni', name: 'Nickel(II) (Ni²⁺)', type: 'cation', group: 'III', aqColor: '#90ee90',
+      reactions: {
+          'nh42s': { action: 'ppt', formula: 'NiS', color: '#000000', 
+                     text: 'Black ppt of NiS forms.', 
+                     examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Ni(OH)2', color: '#3cb371', 
+                         text: 'Apple-green ppt of Ni(OH)2 forms.', 
+                         examText: 'An apple-green precipitate forms.' },
+          'nh3_xs': { action: 'dissolve_color', target: 'Ni(OH)2', color: '#4169e1', 
+                      text: 'Dissolves to form blue [Ni(NH3)6]²⁺.', 
+                      examText: 'The precipitate dissolves forming a blue solution.' },
+          'dmg': { action: 'ppt', formula: 'Ni(DMG)2', color: '#dc143c', 
+                   text: 'Cherry-red ppt of Ni-DMG complex forms.', 
+                   examText: 'A cherry-red precipitate forms.' }
+      }
+    },
+    { id: 'zn', name: 'Zinc (Zn²⁺)', type: 'cation', group: 'III', aqColor: 'transparent',
+      reactions: {
+          'nh42s': { action: 'ppt', formula: 'ZnS', color: '#ffffff',
+                     text: 'White ppt of ZnS forms (soluble in dilute acids).',
+                     examText: 'A white precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Zn(OH)2', color: '#ffffff',
+                         text: 'White gelatinous ppt of Zn(OH)₂ forms.',
+                         examText: 'A white precipitate forms.' },
+          'naoh_xs':   { action: 'dissolve', target: 'Zn(OH)2',
+                         text: 'Zn(OH)₂ is amphoteric. Ppt dissolves in excess NaOH → colourless [Zn(OH)₄]²⁻ (zincate). Key distinction from Mg²⁺.',
+                         examText: 'The precipitate dissolves in excess reagent (amphoteric).' },
+          'nh3_xs':    { action: 'dissolve', target: 'Zn(OH)2',
+                         text: 'Ppt dissolves in excess NH₃ to give colourless [Zn(NH₃)₄]²⁺.',
+                         examText: 'The precipitate dissolves in excess NH₃.' },
+          'k4fecn6':   { action: 'ppt', formula: 'Zn2[Fe(CN)6]', color: '#f0f8ff',
+                         text: 'White/bluish-white ppt of zinc ferrocyanide forms.',
+                         examText: 'A white precipitate forms.' },
+          'flame':     { action: 'none',
+                         text: 'No distinctive flame color. Blue-green with cobalt glass filter.',
+                         examText: 'No distinctive flame color.' }
+      }
+    },
+    { id: 'mn', name: 'Manganese(II) (Mn²⁺)', type: 'cation', group: 'III', aqColor: '#ffebcd',
+      reactions: {
+          'nh42s': { action: 'ppt', formula: 'MnS', color: '#ffb6c1', 
+                     text: 'Flesh/pink ppt of MnS forms.', 
+                     examText: 'A flesh-colored/pink precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Mn(OH)2', color: '#ffffff', 
+                         text: 'White ppt forms.', 
+                         examText: 'A white precipitate forms.' },
+          'naoh_heat': { action: 'color_change_solid', target: 'Mn(OH)2', color: '#8b4513', 
+                         text: 'White ppt rapidly darkens to brown MnO(OH)2 in air/heat.', 
+                         examText: 'The white precipitate rapidly darkens to brown.' }
+      }
+    },
+    
+    // ==================== GROUP IV ====================
+    { id: 'ba', name: 'Barium (Ba²⁺)', type: 'cation', group: 'IV', aqColor: 'transparent', 
+      flame: 'radial-gradient(ellipse, #adff2f, #32cd32)',
+      reactions: {
+          'nh42co3': { action: 'ppt', formula: 'BaCO3', color: '#ffffff', 
+                       text: 'White ppt of BaCO3 forms.', 
+                       examText: 'A white precipitate forms.' },
+          'k2cro4': { action: 'ppt', formula: 'BaCrO4', color: '#ffd700', 
+                      text: 'Yellow ppt of BaCrO4 forms.', 
+                      examText: 'A yellow precipitate forms.' }
+      }
+    },
+    { id: 'sr', name: 'Strontium (Sr²⁺)', type: 'cation', group: 'IV', aqColor: 'transparent', 
+      flame: 'radial-gradient(ellipse, #dc143c, #b22222)',
+      reactions: {
+          'nh42co3': { action: 'ppt', formula: 'SrCO3', color: '#ffffff', 
+                       text: 'White ppt of SrCO3 forms.', 
+                       examText: 'A white precipitate forms.' },
+          'amm_oxalate': { action: 'ppt', formula: 'SrC2O4', color: '#ffffff', 
+                           text: 'White ppt of Strontium Oxalate forms.', 
+                           examText: 'A white precipitate forms.' }
+      }
+    },
+    { id: 'ca', name: 'Calcium (Ca²⁺)', type: 'cation', group: 'IV', aqColor: 'transparent', 
+      flame: 'radial-gradient(ellipse, #ff4500, #8b0000)',
+      reactions: {
+          'nh42co3': { action: 'ppt', formula: 'CaCO3', color: '#ffffff', 
+                       text: 'White ppt of CaCO3 forms.', 
+                       examText: 'A white precipitate forms.' },
+          'amm_oxalate': { action: 'ppt', formula: 'CaC2O4', color: '#ffffff', 
+                           text: 'White ppt of Calcium Oxalate forms.', 
+                           examText: 'A white precipitate forms.' }
+      }
+    },
+    
+    // ==================== GROUP V ====================
+    { id: 'mg', name: 'Magnesium (Mg²⁺)', type: 'cation', group: 'V', aqColor: 'transparent',
+      reactions: {
+          'naoh_drop': { action: 'ppt', formula: 'Mg(OH)2', color: '#ffffff', 
+                         text: 'White ppt of Mg(OH)2 forms.', 
+                         examText: 'A white precipitate forms.' },
+          'amm_phosphate': { action: 'ppt', formula: 'MgNH4PO4', color: '#ffffff', 
+                             text: 'White crystalline ppt of MgNH4PO4 forms.', 
+                             examText: 'A white crystalline precipitate forms.' }
+      }
+    },
+    { id: 'nh4', name: 'Ammonium (NH₄⁺)', type: 'cation', group: 'V', aqColor: 'transparent',
+      reactions: {
+          'naoh_heat': { action: 'gas', gasId: 'NH3', 
+                         text: 'Ammonia gas evolves on heating with NaOH.', 
+                         examText: 'A colorless gas with a sharp, choking odor evolves on heating.' },
+          'smell': { action: 'none', 
+                     text: 'Slight ammoniacal odor detected.', 
+                     examText: 'A sharp, pungent odor is detected.' }
+      }
+    },
+    { id: 'k', name: 'Potassium (K⁺)', type: 'cation', group: 'V', aqColor: 'transparent', 
+      flame: 'radial-gradient(ellipse, #dda0dd, #da70d6)',
+      reactions: {}
+    },
+    { id: 'na', name: 'Sodium (Na⁺)', type: 'cation', group: 'V', aqColor: 'transparent', 
+      flame: 'radial-gradient(ellipse, #ffd700, #ffa500)',
+      reactions: {}
+    },
+    
+    // ==================== ANIONS ====================
+    { id: 'cl', name: 'Chloride (Cl⁻)', type: 'anion', group: 'Halide', aqColor: 'transparent',
+      reactions: {
+          'agno3': { action: 'ppt', formula: 'AgCl', color: '#ffffff', 
+                     text: 'White curdy ppt of AgCl forms.', 
+                     examText: 'A white curdy precipitate forms.' }
+      }
+    },
+    { id: 'br', name: 'Bromide (Br⁻)', type: 'anion', group: 'Halide', aqColor: 'transparent',
+      reactions: {
+          'agno3': { action: 'ppt', formula: 'AgBr', color: '#ffffe0', 
+                     text: 'Pale yellow ppt of AgBr forms.', 
+                     examText: 'A pale yellow precipitate forms.' },
+          'ccl4_cl2': { action: 'color_change', color: '#ff8c00', 
+                        text: 'CCl4 layer turns orange due to extracted Br2.', 
+                        examText: 'The organic layer turns orange.' }
+      }
+    },
+    { id: 'i', name: 'Iodide (I⁻)', type: 'anion', group: 'Halide', aqColor: 'transparent',
+      reactions: {
+          'agno3': { action: 'ppt', formula: 'AgI', color: '#fffacd', 
+                     text: 'Yellow ppt of AgI forms.', 
+                     examText: 'A yellow precipitate forms.' },
+          'ccl4_cl2': { action: 'color_change', color: '#8a2be2', 
+                        text: 'CCl4 layer turns violet due to extracted I2.', 
+                        examText: 'The organic layer turns violet.' }
+      }
+    },
+    { id: 'so4', name: 'Sulfate (SO₄²⁻)', type: 'anion', group: 'Sulfate', aqColor: 'transparent',
+      reactions: {
+          'bacl2': { action: 'ppt', formula: 'BaSO4', color: '#ffffff', 
+                     text: 'White ppt of BaSO4 forms (insoluble in acids).', 
+                     examText: 'A white precipitate forms (insoluble in acids).' }
+      }
+    },
+    { id: 'so3', name: 'Sulfite (SO₃²⁻)', type: 'anion', group: 'Volatile', aqColor: 'transparent',
+      reactions: {
+          'hcl_dil': { action: 'gas', gasId: 'SO2', 
+                       text: 'Pungent SO2 gas evolves.', 
+                       examText: 'A colorless gas with a choking odor evolves.' },
+          'bacl2': { action: 'ppt', formula: 'BaSO3', color: '#ffffff', 
+                     text: 'White ppt forms (soluble in dil HCl).', 
+                     examText: 'A white precipitate forms (soluble in dilute acid).' },
+          'smell': { action: 'none', 
+                     text: 'Smells of burning sulfur (SO2).', 
+                     examText: 'A sharp, burning odor is detected.' }
+      }
+    },
+    { id: 'co3', name: 'Carbonate (CO₃²⁻)', type: 'anion', group: 'Volatile', aqColor: 'transparent',
+      reactions: {
+          'hcl_dil': { action: 'gas', gasId: 'CO2', 
+                       text: 'Brisk effervescence. CO2 gas evolves.', 
+                       examText: 'Brisk effervescence. A colorless, odorless gas evolves.' },
+          'bacl2': { action: 'ppt', formula: 'BaCO3', color: '#ffffff', 
+                     text: 'White ppt forms (soluble in HCl).', 
+                     examText: 'A white precipitate forms (soluble in acid).' },
+          'agno3': { action: 'ppt', formula: 'Ag2CO3', color: '#ffffe0', 
+                     text: 'Pale yellow ppt forms.', 
+                     examText: 'A pale yellow precipitate forms.' }
+      }
+    },
+    { id: 'no2', name: 'Nitrite (NO₂⁻)', type: 'anion', group: 'Volatile', aqColor: 'transparent',
+      reactions: {
+          'hcl_dil': { action: 'gas', gasId: 'NO2', 
+                       text: 'Brown NO2 gas evolves.', 
+                       examText: 'A brown, pungent gas evolves.' },
+          'ki': { action: 'color_change', color: '#b8860b', 
+                  text: 'Iodine liberated, turning solution brown/yellow.', 
+                  examText: 'The solution turns brown/yellow.' },
+          'smell': { action: 'none', 
+                     text: 'Pungent, sweetish odor of NO2.', 
+                     examText: 'A distinct, pungent odor is detected.' }
+      }
+    },
+    { id: 'po4', name: 'Phosphate (PO₄³⁻)', type: 'anion', group: 'Barium', aqColor: 'transparent',
+      reactions: {
+          'bacl2': { action: 'ppt', formula: 'Ba3(PO4)2', color: '#ffffff', 
+                     text: 'White ppt forms (soluble in acid).', 
+                     examText: 'A white precipitate forms (soluble in acid).' },
+          'amm_molybdate': { action: 'ppt', formula: 'AmmMoly', color: '#ffd700', 
+                             text: 'Canary yellow ppt forms on heating with HNO3.', 
+                             examText: 'A canary yellow precipitate forms on heating.' }
+      }
+    },
+    { id: 'no3', name: 'Nitrate (NO₃⁻)', type: 'anion', group: 'Soluble', aqColor: 'transparent',
+      reactions: {
+          'brown_ring': { action: 'color_change', color: '#4a2511',
+                          text: 'A brown ring of [Fe(H2O)5(NO)]²⁺ forms at junction.',
+                          examText: 'A brown ring forms at the interface of the two liquids.' }
+      }
+    },
+
+    // ==================== ADDITIONAL CATIONS ====================
+    { id: 'hg2', name: 'Mercury(II) (Hg²⁺)', type: 'cation', group: 'II', aqColor: 'transparent',
+      reactions: {
+          'h2s_acid': { action: 'ppt', formula: 'HgS', color: '#000000',
+                        text: 'Black ppt of HgS forms (extremely insoluble).',
+                        examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'HgO', color: '#ff8c00',
+                         text: 'Orange-yellow ppt of HgO forms.',
+                         examText: 'An orange-yellow precipitate forms.' },
+          'nh3_drop':  { action: 'ppt', formula: 'Hg(NH2)Cl', color: '#ffffff',
+                         text: 'White ppt of millon\'s base (aminomercury chloride) forms.',
+                         examText: 'A white precipitate forms.' },
+          'ki':        { action: 'ppt', formula: 'HgI2', color: '#ff4500',
+                         text: 'Scarlet-red ppt of HgI₂ forms; dissolves in excess KI to give colorless [HgI₄]²⁻.',
+                         examText: 'A scarlet-red precipitate forms.' },
+          'kscn':      { action: 'ppt', formula: 'Hg(SCN)2', color: '#ffffff',
+                         text: 'White ppt of Hg(SCN)₂ forms (Pharaoh\'s serpent precursor).',
+                         examText: 'A white precipitate forms.' }
+      }
+    },
+    { id: 'fe2', name: 'Iron(II) (Fe²⁺)', type: 'cation', group: 'III', aqColor: '#90ee90',
+      reactions: {
+          'nh42s': { action: 'ppt', formula: 'FeS', color: '#1a1a1a',
+                     text: 'Black ppt of FeS forms.',
+                     examText: 'A black precipitate forms.' },
+          'naoh_drop': { action: 'ppt', formula: 'Fe(OH)2', color: '#5f9ea0',
+                         text: 'Dirty-green/blue-green ppt of Fe(OH)₂ forms, rapidly oxidizing to brown Fe(OH)₃ in air.',
+                         examText: 'A green precipitate forms, quickly darkening to brown in air.' },
+          'nh3_drop':  { action: 'ppt', formula: 'Fe(OH)2', color: '#5f9ea0',
+                         text: 'Green ppt of Fe(OH)₂ forms.',
+                         examText: 'A green precipitate forms.' },
+          'k4fecn6':   { action: 'color_change', color: '#00008b',
+                         text: 'Turnbull\'s Blue (deep blue coloration/ppt) with K₃[Fe(CN)₆]. Note: Fe²⁺ gives deep blue with ferricyanide.',
+                         examText: 'A deep blue color/precipitate forms.' },
+          'kscn':      { action: 'none',
+                         text: 'No characteristic color change with Fe²⁺ (KSCN test is specific to Fe³⁺).',
+                         examText: 'No significant color change.' },
+          'h2o2_naoh': { action: 'color_change', color: '#8b4513',
+                         text: 'Fe²⁺ oxidized to Fe³⁺ by H₂O₂. Red-brown Fe(OH)₃ ppt forms.',
+                         examText: 'Oxidation occurs. Red-brown precipitate forms.' }
+      }
+    },
+
+    // ==================== ADDITIONAL ANIONS ====================
+    { id: 'cn', name: 'Cyanide (CN⁻)', type: 'anion', group: 'Complex', aqColor: 'transparent',
+      reactions: {
+          'hcl_dil': { action: 'gas', gasId: 'HCN',
+                       text: 'DANGER: Extremely toxic HCN gas (bitter almond odor) evolved. pH turns acidic.',
+                       examText: 'A colorless, very toxic gas with faint bitter almond odor evolves.' },
+          'agno3':   { action: 'ppt', formula: 'AgCN', color: '#fffacd',
+                       text: 'White ppt of AgCN forms (insoluble in dilute HNO₃, soluble in excess CN⁻).',
+                       examText: 'A white precipitate forms.' },
+          'k4fecn6': { action: 'none',
+                       text: 'No reaction (CN⁻ itself is the cyanide ligand — does not react with ferrocyanide).',
+                       examText: 'No characteristic precipitate.' },
+          'smell':   { action: 'none',
+                       text: 'CAUTION: Faint bitter almond odor (extremely hazardous — do not inhale).',
+                       examText: 'A faint characteristic odor may be detected (hazardous).' }
+      }
+    },
+    { id: 'scn', name: 'Thiocyanate (SCN⁻)', type: 'anion', group: 'Complex', aqColor: 'transparent',
+      reactions: {
+          'agno3':   { action: 'ppt', formula: 'AgSCN', color: '#fffacd',
+                       text: 'White ppt of AgSCN forms (insoluble in HNO₃).',
+                       examText: 'A white precipitate forms.' },
+          'hcl_dil': { action: 'none',
+                       text: 'No precipitate with dilute HCl.',
+                       examText: 'No reaction.' },
+          'flame':   { action: 'none',
+                       text: 'No distinctive flame color from SCN⁻ itself.',
+                       examText: 'No flame color.' },
+          'smell':   { action: 'none',
+                       text: 'No odor at room temperature.',
+                       examText: 'No characteristic odor.' }
+      }
+    },
+    { id: 'ox', name: 'Oxalate (C₂O₄²⁻)', type: 'anion', group: 'Barium', aqColor: 'transparent',
+      reactions: {
+          'bacl2':   { action: 'ppt', formula: 'BaC2O4', color: '#ffffff',
+                       text: 'White ppt of BaC₂O₄ forms (slightly soluble in acids).',
+                       examText: 'A white precipitate forms.' },
+          'agno3':   { action: 'ppt', formula: 'Ag2C2O4', color: '#fffacd',
+                       text: 'White ppt of Ag₂C₂O₄ forms.',
+                       examText: 'A white precipitate forms.' },
+          'hcl_dil': { action: 'none',
+                       text: 'Oxalate dissolves in hot dilute HCl (soluble in mineral acids).',
+                       examText: 'Precipitate dissolves in dilute acid.' }
+      }
+    }
+];
+
+// ==================== STATE MANAGEMENT ====================
+const MAX_LOG_ENTRIES = 100;
+let isHeated = false;
+let currentMode = 'single';
+let examData = { active: false, submitted: false, unknowns: [], candidates: [], index: 0 };
+let originalMixture = [];
+let fractions = {};
+let activeFractionId = null;
+let fractionCounter = 0;
+let lastEvolvedGas = null;
+
+class Fraction {
+    constructor(name, aqueousIds, solidObjs) {
+        this.id = 'frac_' + fractionCounter++;
+        this.name = name;
+        this.aqueous = [...aqueousIds]; 
+        this.solid = [...solidObjs];    
+        this.overrideColor = null;
+        this.ph = 'Neutral';
+    }
+}
+
+// ==================== CORE FUNCTIONS ====================
+function initFractions(ionsArray) {
+    fractions = {};
+    fractionCounter = 0;
+    lastEvolvedGas = null;
+    let rootName = examData.active ? `Tube ${examData.index + 1} Original` : "Original Sample";
+    let root = new Fraction(rootName, ionsArray.map(i => i.id), []);
+    fractions[root.id] = root;
+    switchFraction(root.id);
+}
+
+function switchFraction(id) {
+    if (!fractions[id]) {
+        log("Error: Invalid fraction ID.", "err");
+        return;
+    }
+    activeFractionId = id;
+    renderTabs();
+    updateVisuals();
+    log(`Switched to: ${fractions[id].name}`, 'sys');
+}
+
+function renderTabs() {
+    const container = document.getElementById('fraction-tabs');
+    container.innerHTML = '';
+    Object.values(fractions).forEach(frac => {
+        let btn = document.createElement('button');
+        btn.className = `fraction-tab ${frac.id === activeFractionId ? 'active' : ''}`;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', frac.id === activeFractionId);
+        btn.textContent = frac.name;
+        btn.onclick = () => switchFraction(frac.id);
+        container.appendChild(btn);
+    });
+}
+
+/**
+ * SUBTRACTIVE COLOR BLENDING (CMY Model)
+ * Chemically accurate for solution mixing
+ */
+function blendColorsSubtractive(hexArray) {
+    if(!hexArray.length) return 'transparent';
+    if(hexArray.length === 1) return hexArray[0];
+    
+    let totalC = 0, totalM = 0, totalY = 0;
+    
+    hexArray.forEach(hex => {
+        let r = parseInt(hex.substring(1, 3), 16) / 255;
+        let g = parseInt(hex.substring(3, 5), 16) / 255;
+        let b = parseInt(hex.substring(5, 7), 16) / 255;
+        
+        // RGB to CMY
+        totalC += (1 - r);
+        totalM += (1 - g);
+        totalY += (1 - b);
+    });
+    
+    // Average CMY values
+    let c = totalC / hexArray.length;
+    let m = totalM / hexArray.length;
+    let y = totalY / hexArray.length;
+    
+    // CMY back to RGB
+    let rOut = Math.round((1 - c) * 255).toString(16).padStart(2, '0');
+    let gOut = Math.round((1 - m) * 255).toString(16).padStart(2, '0');
+    let bOut = Math.round((1 - y) * 255).toString(16).padStart(2, '0');
+    
+    return `#${rOut}${gOut}${bOut}`;
+}
+
+// ==================== REACTION ENGINE ====================
+function processReagent(reagentId) {
+    try {
+        if (!activeFractionId) return log("No active sample.", "err");
+        let f = fractions[activeFractionId];
+        
+        // Heat fallback
+        let effectiveReagent = reagentId;
+        if (isHeated && (reagentId === 'naoh_drop' || reagentId === 'naoh_xs')) effectiveReagent = 'naoh_heat';
+
+        // pH State Tracking
+        if (reagentId === 'hcl_dil') f.ph = 'Acidic';
+        if (['naoh_drop','naoh_xs','nh3_drop','nh3_xs','nh3_nh4cl'].includes(reagentId)) f.ph = 'Basic';
+
+        if (reagentId === 'ph') {
+            log(`> Tested pH with Litmus`, 'act');
+            if (f.ph === 'Acidic') log("Litmus paper turns RED.", 'res');
+            else if (f.ph === 'Basic') log("Litmus paper turns BLUE.", 'res');
+            else log("Litmus paper remains unchanged (Neutral).", 'res');
+            return;
+        }
+
+        log(`> Added ${reagentId.toUpperCase()}`, 'act');
+
+        let observations = [];
+        let pptsFormed = [];
+        let gases = false;
+        let newColor = null;
+
+        let isExamObfuscationActive = (examData.active && !examData.submitted);
+
+        // Aqueous Phase Evaluation
+        let remainingAq = [];
+        f.aqueous.forEach(ionId => {
+            let ionDef = DB.find(i => i.id === ionId);
+            if (!ionDef) {
+                remainingAq.push(ionId);
+                return;
+            }
+            
+            let rxn = ionDef.reactions[effectiveReagent] || ionDef.reactions[reagentId];
+            
+            if (!rxn && reagentId === 'nh3_xs' && ionDef.reactions['nh3_xs_cl']) {
+                rxn = ionDef.reactions['nh3_xs_cl'];
+            }
+
+            if (rxn) {
+                let obsText = (isExamObfuscationActive && rxn.examText) ? rxn.examText : rxn.text;
+                if (obsText && rxn.action !== 'none') observations.push(obsText);
+                
+                if (rxn.action === 'ppt') {
+                    f.solid.push({ sourceId: ionId, formula: rxn.formula, color: rxn.color });
+                    pptsFormed.push(rxn.color);
+                } else if (rxn.action === 'gas') {
+                    gases = true;
+                    lastEvolvedGas = rxn.gasId;
+                    remainingAq.push(ionId);
+                } else if (rxn.action === 'color_change') {
+                    newColor = rxn.color;
+                    remainingAq.push(ionId);
+                } else {
+                    remainingAq.push(ionId);
+                }
+            } else {
+                if (reagentId === 'flame' && ionDef.flame) triggerFlame(ionDef.flame, ionDef.name);
+                remainingAq.push(ionId);
+            }
+        });
+        f.aqueous = remainingAq;
+
+        // Solid Phase Evaluation
+        let remainingSolid = [];
+        f.solid.forEach(solidObj => {
+            let ionDef = DB.find(i => i.id === solidObj.sourceId);
+            if (!ionDef) {
+                remainingSolid.push(solidObj);
+                return;
+            }
+            
+            let rxn = ionDef.reactions[effectiveReagent] || ionDef.reactions[reagentId];
+            
+            if (rxn && (rxn.action === 'dissolve' || rxn.action === 'dissolve_color') && rxn.target === solidObj.formula) {
+                let obsText = (isExamObfuscationActive && rxn.examText) ? rxn.examText : rxn.text;
+                observations.push(obsText);
+                f.aqueous.push(solidObj.sourceId); 
+                if (rxn.action === 'dissolve_color') newColor = rxn.color;
+            } else if (rxn && rxn.action === 'color_change_solid' && rxn.target === solidObj.formula) {
+                let obsText = (isExamObfuscationActive && rxn.examText) ? rxn.examText : rxn.text;
+                observations.push(obsText);
+                solidObj.color = rxn.color;
+                remainingSolid.push(solidObj);
+            } else if (reagentId === 'nh3_xs' && ionDef.reactions['nh3_xs_cl'] && solidObj.formula.includes('Cl')) {
+                let sr = ionDef.reactions['nh3_xs_cl'];
+                observations.push(isExamObfuscationActive && sr.examText ? sr.examText : sr.text);
+                if(solidObj.formula === 'Hg2Cl2') {
+                    solidObj.color = '#111111';
+                    remainingSolid.push(solidObj);
+                } else {
+                    f.aqueous.push(solidObj.sourceId);
+                }
+            } else {
+                remainingSolid.push(solidObj);
+            }
+        });
+        f.solid = remainingSolid;
+
+        // Logging
+        if (observations.length === 0) {
+            if (reagentId === 'flame' || reagentId === 'smell') return;
+            log("No observable change.", "res");
+        } else {
+            let uniqueObs = [...new Set(observations)];
+            if (uniqueObs.length > 1 && pptsFormed.length > 1) {
+                log(`Multiple reactions occurred. Mixed precipitates likely formed.`, "res");
+            }
+            uniqueObs.forEach(o => log(o, "res"));
+        }
+
+        if (newColor) f.overrideColor = newColor;
+        if (gases) triggerGas();
+        updateVisuals();
+        
+    } catch (error) {
+        log(`Error processing reagent: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function testEvolvedGas() {
+    try {
+        log(`> Testing Headspace Gas`, 'act');
+        if(!lastEvolvedGas) {
+            log("No distinct gas detected. Headspace may be empty.", "res");
+            return;
+        }
+        
+        let isExam = (examData.active && !examData.submitted);
+        
+        switch(lastEvolvedGas) {
+            case 'CO2': 
+                log(isExam ? "Tested with limewater: Turns milky." : "Passed through limewater: Limewater turns milky (CaCO3).", "res"); 
+                break;
+            case 'NH3': 
+                log(isExam ? "Tested with damp red litmus: Paper turns BLUE." : "Tested with damp red litmus: Paper turns BLUE (NH3).", "res"); 
+                break;
+            case 'SO2': 
+                log(isExam ? "Tested with acidified K2Cr2O7 paper: Turns GREEN." : "Tested with acidified K2Cr2O7 paper: Turns GREEN (SO2).", "res"); 
+                break;
+            case 'NO2':
+                log(isExam ? "Brown, pungent gas confirmed." : "Gas is distinctly brown and pungent (NO₂). Turns moist starch-iodide paper blue-black.", "res");
+                break;
+            case 'HCN':
+                log(isExam ? "Tested with moist filter paper soaked in Fe²⁺/FeCl₃ solution: Paper turns PRUSSIAN BLUE. TOXIC GAS." :
+                    "CAUTION — TOXIC GAS. Tested with filter paper soaked in FeSO₄/FeCl₃ then acidified: Paper turns Prussian Blue (confirming HCN). Bitter almond odor.", "res");
+                break;
+            case 'H2S':
+                log(isExam ? "Tested with lead acetate paper: Paper turns BLACK." :
+                    "Tested with moist lead acetate paper: Paper turns BLACK (PbS formed). Confirms H₂S (rotten egg odor).", "res");
+                break;
+            default:
+                log(`Unidentified gas behavior detected.`, "res");
+        }
+        
+        lastEvolvedGas = null;
+    } catch (error) {
+        log(`Error testing gas: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function centrifugeAndSeparate() {
+    try {
+        if (!activeFractionId) return;
+        let current = fractions[activeFractionId];
+        if (current.solid.length === 0) return log("No precipitate to separate.", "err");
+
+        let baseName = current.name.split(' (')[0].replace('Original Sample', 'Sample').replace('Tube', 'T');
+        
+        let pptFrac = new Fraction(`Ppt from ${baseName}`, [], current.solid);
+        let filFrac = new Fraction(`Filtrate from ${baseName}`, current.aqueous, []);
+        filFrac.overrideColor = current.overrideColor;
+        filFrac.ph = current.ph;
+
+        fractions[pptFrac.id] = pptFrac;
+        fractions[filFrac.id] = filFrac;
+        
+        delete fractions[activeFractionId];
+        
+        log(`Centrifuged. Original fraction discarded. Separated into Precipitate & Filtrate.`, "sys");
+        switchFraction(filFrac.id); 
+    } catch (error) {
+        log(`Error during centrifugation: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function discardCurrentFraction() {
+    try {
+        if (Object.keys(fractions).length <= 1) return log("Cannot discard the only fraction.", "err");
+        delete fractions[activeFractionId];
+        log("Fraction discarded.", "sys");
+        switchFraction(Object.keys(fractions)[0]);
+    } catch (error) {
+        log(`Error discarding fraction: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+// ==================== VISUAL UPDATES ====================
+function updateVisuals() {
+    try {
+        if (!activeFractionId) return;
+        let f = fractions[activeFractionId];
+        const liq = document.getElementById('tube-liquid');
+        const ppt = document.getElementById('tube-ppt');
+
+        if (f.overrideColor) {
+            liq.style.backgroundColor = f.overrideColor;
+        } else {
+            let colors = f.aqueous.map(id => {
+                let ion = DB.find(i=>i.id===id);
+                return ion && ion.aqColor !== 'transparent' ? ion.aqColor : null;
+            }).filter(Boolean);
+            liq.style.backgroundColor = blendColorsSubtractive(colors);
+        }
+        
+        if (f.solid.length > 0) {
+            ppt.style.height = "25%";
+            if (f.solid.length === 1) {
+                ppt.style.background = f.solid[0].color;
+            } else {
+                let gradient = 'linear-gradient(to bottom, ';
+                let step = 100 / f.solid.length;
+                f.solid.forEach((s, i) => { 
+                    gradient += `${s.color} ${i*step}%, ${s.color} ${(i+1)*step}%${i<f.solid.length-1?',':''}`;
+                });
+                gradient += ')';
+                ppt.style.background = gradient;
+            }
+        } else {
+            ppt.style.height = "0%";
+        }
+    } catch (error) {
+        console.error("Error updating visuals:", error);
+    }
+}
+
+function triggerFlame(cssBg, name) {
+    try {
+        const overlay = document.getElementById('flame-visual');
+        overlay.style.background = cssBg;
+        overlay.style.display = 'block';
+        let isExam = (examData.active && !examData.submitted);
+        log(`Flame test: Characteristic color observed${isExam ? '.' : ' for ' + name}.`, "res");
+        setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    } catch (error) {
+        console.error("Error triggering flame:", error);
+    }
+}
+
+function triggerGas() {
+    try {
+        const container = document.getElementById('tube-gas');
+        container.innerHTML = '';
+        container.classList.add('active');
+        
+        for(let i=0; i<25; i++) {
+            let b = document.createElement('div');
+            b.className = 'bubble';
+            b.style.left = Math.random() * 80 + 10 + '%';
+            b.style.animationDelay = Math.random() * 1.5 + 's';
+            container.appendChild(b);
+        }
+        
+        setTimeout(() => { 
+            container.innerHTML = ''; 
+            container.classList.remove('active');
+        }, 3000);
+    } catch (error) {
+        console.error("Error triggering gas:", error);
+    }
+}
+
+function toggleHeat() {
+    try {
+        isHeated = !isHeated;
+        const btn = document.getElementById('btn-heat');
+        const tube = document.getElementById('visual-tube');
+        
+        btn.setAttribute('aria-pressed', isHeated);
+        btn.style.background = isHeated ? '#ff0000' : '#F26419';
+        btn.textContent = isHeated ? '🔥 BURNER: ON' : '🔥 BURNER: OFF';
+        
+        if(isHeated) tube.classList.add('heated');
+        else tube.classList.remove('heated');
+        
+        log(`Burner turned ${isHeated ? 'ON' : 'OFF'}.`, 'sys');
+    } catch (error) {
+        console.error("Error toggling heat:", error);
+    }
+}
+
+// ==================== LOGGER (WITH MEMORY MANAGEMENT) ====================
+function log(msg, type) {
+    try {
+        const panel = document.getElementById('log-content');
+        const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'log-time';
+        timeSpan.textContent = `[${time}]`;
+        div.appendChild(timeSpan);
+        
+        if (activeFractionId && fractions[activeFractionId]) {
+            const tubeSpan = document.createElement('span');
+            tubeSpan.className = 'log-tube';
+            tubeSpan.textContent = `[${fractions[activeFractionId].name}] `;
+            div.appendChild(tubeSpan);
+        }
+        
+        const msgSpan = document.createElement('span');
+        msgSpan.className = `log-${type}`;
+        msgSpan.textContent = msg;
+        div.appendChild(msgSpan);
+
+        panel.appendChild(div);
+        
+        // Memory Management: FIFO rotation
+        while (panel.children.length > MAX_LOG_ENTRIES) {
+            panel.removeChild(panel.firstChild);
+        }
+        
+        panel.scrollTop = panel.scrollHeight;
+    } catch (error) {
+        console.error("Logger error:", error);
+    }
+}
+
+function clearLog() { 
+    try {
+        document.getElementById('log-content').innerHTML = ''; 
+    } catch (error) {
+        console.error("Error clearing log:", error);
+    }
+}
+
+function copyLog() { 
+    try {
+        const text = document.getElementById('log-content').innerText;
+        navigator.clipboard.writeText(text)
+            .then(() => alert("Log copied to clipboard!"))
+            .catch(() => alert("Copy failed. Please try again."));
+    } catch (error) {
+        console.error("Error copying log:", error);
+    }
+}
+
+// ==================== SESSION & MODE ====================
+function setMode(mode) {
+    try {
+        currentMode = mode;
+        examData.active = false;
+        examData.submitted = false;
+        document.getElementById('btn-exam-sheet').style.display = 'none';
+        document.getElementById('exam-nav').style.display = 'none';
+        
+        if (mode === 'single') {
+            originalMixture = [DB[Math.floor(Math.random() * DB.length)]];
+            document.getElementById('unknown-label').textContent = "Unknown #Single";
+            log("Initialized Random Single Unknown.", "sys");
+            initFractions(originalMixture);
+        }
+    } catch (error) {
+        log(`Error setting mode: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function resetCurrentSession() { 
+    try {
+        log("Tubes washed.", "sys"); 
+        initFractions(originalMixture); 
+    } catch (error) {
+        log(`Error resetting session: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function openModal(id) { 
+    try {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'flex';
+            const focusable = modal.querySelector('button, input, select');
+            if (focusable) focusable.focus();
+        }
+    } catch (error) {
+        console.error("Error opening modal:", error);
+    }
+}
+
+function closeModal(id) { 
+    try {
+        const modal = document.getElementById(id);
+        if (modal) modal.style.display = 'none';
+    } catch (error) {
+        console.error("Error closing modal:", error);
+    }
+}
+
+// ==================== MIXTURE BUILDER ====================
+function populateMixModal() {
+    try {
+        const grid = document.getElementById('mix-checkboxes');
+        DB.forEach(ion => {
+            let lbl = document.createElement('label');
+            lbl.className = 'mix-label';
+            
+            let cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = ion.id;
+            
+            let span = document.createElement('span');
+            span.textContent = ion.name;
+            
+            lbl.appendChild(cb);
+            lbl.appendChild(span);
+            grid.appendChild(lbl);
+        });
+    } catch (error) {
+        console.error("Error populating mixture modal:", error);
+    }
+}
+populateMixModal();
+
+function applyMixture() {
+    try {
+        const checked = Array.from(document.querySelectorAll('#mix-checkboxes input:checked'));
+        if (checked.length === 0 || checked.length > 5) {
+            alert("Please select 1 to 5 ions.");
+            return;
+        }
+        
+        originalMixture = checked.map(cb => DB.find(i => i.id === cb.value));
+        currentMode = 'mix';
+        examData.active = false;
+        examData.submitted = false;
+        document.getElementById('btn-exam-sheet').style.display = 'none';
+        document.getElementById('exam-nav').style.display = 'none';
+        document.getElementById('unknown-label').textContent = `Mixture (${originalMixture.length} ions)`;
+        log(`Synthesized mixture of ${originalMixture.length} ions.`, "sys");
+        initFractions(originalMixture);
+        closeModal('mix-modal');
+    } catch (error) {
+        log(`Error creating mixture: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+// ==================== EXAM MODE ====================
+function generateExam() {
+    try {
+        examData.active = true;
+        examData.submitted = false;
+        document.getElementById('btn-exam-sheet').style.display = 'inline-block';
+        
+        // Select 6 distinct ions based on reaction uniqueness
+        let shuffled = [...DB].sort(() => 0.5 - Math.random());
+        let selected = [];
+        let hashes = new Set();
+        
+        for (let ion of shuffled) {
+            let hash = JSON.stringify(ion.reactions);
+            if (!hashes.has(hash)) { 
+                selected.push(ion); 
+                hashes.add(hash); 
+                if (selected.length === 6) break; 
+            }
+        }
+        examData.unknowns = selected;
+        
+        // Add 4 distractors
+        let distractors = [];
+        for (let ion of shuffled) {
+            if (!selected.includes(ion)) { 
+                distractors.push(ion); 
+                if (distractors.length === 4) break; 
+            }
+        }
+        examData.candidates = [...selected, ...distractors].sort((a,b) => a.name.localeCompare(b.name));
+        
+        buildExamUI();
+        log("Exam Set Generated. 6 distinct tubes prepared.", "sys");
+        loadExamUnknown(0);
+    } catch (error) {
+        log(`Error generating exam: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function loadExamUnknown(index) {
+    try {
+        examData.index = index;
+        originalMixture = [examData.unknowns[index]];
+        document.getElementById('unknown-label').textContent = `Exam Tube ${index + 1}/6`;
+        
+        // Update Quick Nav
+        const nav = document.getElementById('exam-nav');
+        nav.style.display = 'flex';
+        nav.innerHTML = '';
+        for(let i=0; i<6; i++) {
+            let b = document.createElement('button');
+            b.className = `exam-nav-btn ${i === index ? 'active' : ''}`;
+            b.textContent = `Tube ${i+1}`;
+            b.onclick = () => loadExamUnknown(i);
+            nav.appendChild(b);
+        }
+        
+        initFractions(originalMixture);
+    } catch (error) {
+        log(`Error loading exam tube: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+function buildExamUI() {
+    try {
+        const container = document.getElementById('exam-rows-container');
+        container.innerHTML = '';
+        
+        // Populate candidate list
+        const cList = document.getElementById('candidate-list');
+        cList.innerHTML = examData.candidates.map(c => `<span>${c.name}</span>`).join('');
+        
+        for (let i = 0; i < 6; i++) {
+            let row = document.createElement('div');
+            row.className = 'exam-row';
+            row.id = `exam-row-${i}`;
+            
+            let btn = document.createElement('button');
+            btn.textContent = `Analyze Tube ${i+1}`;
+            btn.style.cssText = 'padding:6px 12px; cursor:pointer; background:var(--blue-dim); color:var(--blue); border:1px solid rgba(56,189,248,0.2); border-radius:6px; font-weight:600; font-family:var(--font-body); font-size:12px;';
+            btn.onclick = () => { loadExamUnknown(i); closeModal('exam-modal'); };
+            
+            let selectDiv = document.createElement('div');
+            let select = document.createElement('select');
+            select.id = `exam-ans-${i}`;
+            
+            let defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = '-- Assign Identity --';
+            select.appendChild(defaultOpt);
+            
+            examData.candidates.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                select.appendChild(opt);
+            });
+            
+            let fb = document.createElement('span');
+            fb.id = `exam-fb-${i}`;
+            fb.style.cssText = 'margin-left:10px; font-weight:bold;';
+            
+            selectDiv.appendChild(select);
+            selectDiv.appendChild(fb);
+            
+            row.appendChild(btn);
+            row.appendChild(selectDiv);
+            container.appendChild(row);
+        }
+        
+        document.getElementById('exam-results').textContent = '';
+    } catch (error) {
+        console.error("Error building exam UI:", error);
+    }
+}
+
+function submitExam() {
+    try {
+        if(!confirm("Submit final answers?")) return;
+        
+        let score = 0;
+        examData.submitted = true;
+        
+        for (let i = 0; i < 6; i++) {
+            let sel = document.getElementById(`exam-ans-${i}`);
+            let fb = document.getElementById(`exam-fb-${i}`);
+            let row = document.getElementById(`exam-row-${i}`);
+            sel.disabled = true;
+            
+            if (sel.value === examData.unknowns[i].id) {
+                score++; 
+                row.classList.add('correct-ans'); 
+                fb.textContent = "✓"; 
+                fb.style.color = "#56E39F";
+            } else {
+                row.classList.add('wrong-ans'); 
+                fb.textContent = `✗ Was: ${examData.unknowns[i].name}`; 
+                fb.style.color = "#F26419";
+            }
+        }
+        
+        document.getElementById('exam-results').textContent = `Final Score: ${score} / 6`;
+        log(`Exam submitted. Score: ${score}/6`, "sys");
+    } catch (error) {
+        log(`Error submitting exam: ${error.message}`, "err");
+        console.error(error);
+    }
+}
+
+// ==================== REFERENCE DATA ====================
+function buildCompareData() {
+    try {
+        const table = document.getElementById('data-table');
+        const cols = ['Ion', 'Group', 'Dilute HCl', 'H₂S (acid)', 'NaOH', 'NH₃ (aq)', 'Confirmatory'];
+        let html = `<tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
+        
+        let list = examData.active ? examData.candidates : DB;
+        list.forEach(ion => {
+            let r = ion.reactions;
+            let getAct = (k) => r[k] ? r[k].action.toUpperCase() : '-';
+            html += `<tr>
+                <td><strong>${ion.name}</strong></td>
+                <td>${ion.group}</td>
+                <td>${getAct('hcl_dil')}</td>
+                <td>${getAct('h2s_acid')}</td>
+                <td>${getAct('naoh_drop')} / xs: ${getAct('naoh_xs')}</td>
+                <td>${getAct('nh3_drop')} / xs: ${getAct('nh3_xs')}</td>
+                <td><i>See Manual</i></td>
+            </tr>`;
+        });
+        table.innerHTML = html;
+    } catch (error) {
+        console.error("Error building reference data:", error);
+    }
+}
+
+// ==================== INITIALIZATION ====================
+try {
+    setMode('single');
+} catch (error) {
+    console.error("Initialization error:", error);
+}
+
+</script>
+</body>
+</html>
