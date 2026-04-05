@@ -269,6 +269,13 @@
             --c-dim2:    rgba(167,139,250,0.13);
             --c-border:  rgba(167,139,250,0.18);
         }
+        .card-electro {
+            --c-accent:  #fbbf24;
+            --c-glow:    rgba(251,191,36,0.12);
+            --c-dim:     rgba(251,191,36,0.07);
+            --c-dim2:    rgba(251,191,36,0.13);
+            --c-border:  rgba(251,191,36,0.18);
+        }
 
         /* ── FOOTER ── */
         footer {
@@ -297,6 +304,7 @@
         <a href="labs/titration.html">Titration</a>
         <a href="labs/organic.html">Organic</a>
         <a href="labs/inorganic.html">Inorganic</a>
+        <a href="labs/electrochem.html">Electrochemistry</a>
     </div>
 </nav>
 
@@ -322,8 +330,8 @@
             <div class="stat-label">Titration Types</div>
         </div>
         <div class="stat">
-            <span class="stat-num">3</span>
-            <div class="stat-label">Exam Modes</div>
+            <span class="stat-num">4</span>
+            <div class="stat-label">Virtual Labs</div>
         </div>
     </div>
 </div>
@@ -453,6 +461,57 @@
                 <span class="card-feature">🔬 20+ ions</span>
                 <span class="card-feature">🧫 Centrifuge &amp; separate</span>
                 <span class="card-feature">🎓 10-ion exams</span>
+            </div>
+            <div class="card-cta">
+                Open Lab
+                <span class="card-cta-arrow">→</span>
+            </div>
+        </div>
+    </a>
+
+
+    <!-- ELECTROCHEMISTRY -->
+    <a href="labs/electrochem.html" class="lab-card card-electro" aria-label="Open Electrochemistry Lab">
+        <div class="card-visual">
+            <div class="card-bg-glow"></div>
+            <div class="card-top-line"></div>
+            <svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- left beaker -->
+                <rect x="10" y="60" width="46" height="70" rx="4" fill="rgba(251,191,36,0.07)" stroke="rgba(251,191,36,0.4)" stroke-width="1.5"/>
+                <rect x="12" y="90" width="42" height="38" rx="2" fill="rgba(56,189,248,0.25)"/>
+                <!-- left electrode (zinc - anode) -->
+                <rect x="26" y="52" width="8" height="56" rx="2" fill="rgba(251,191,36,0.5)" stroke="rgba(251,191,36,0.7)" stroke-width="1"/>
+                <text x="22" y="48" font-size="8" fill="rgba(248,113,113,0.9)" font-family="monospace">−</text>
+                <!-- right beaker -->
+                <rect x="94" y="60" width="46" height="70" rx="4" fill="rgba(251,191,36,0.07)" stroke="rgba(251,191,36,0.4)" stroke-width="1.5"/>
+                <rect x="96" y="90" width="42" height="38" rx="2" fill="rgba(52,211,153,0.25)"/>
+                <!-- right electrode (copper - cathode) -->
+                <rect x="116" y="52" width="8" height="56" rx="2" fill="rgba(52,211,153,0.5)" stroke="rgba(52,211,153,0.7)" stroke-width="1"/>
+                <text x="114" y="48" font-size="8" fill="rgba(52,211,153,0.9)" font-family="monospace">+</text>
+                <!-- wire over top -->
+                <path d="M30 52 L30 30 L120 30 L120 52" stroke="rgba(251,191,36,0.6)" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <!-- voltmeter circle -->
+                <circle cx="75" cy="30" r="12" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.5)" stroke-width="1.5"/>
+                <text x="75" y="34" font-size="9" fill="rgba(251,191,36,0.9)" text-anchor="middle" font-family="monospace">V</text>
+                <!-- salt bridge -->
+                <path d="M56 88 Q75 76 94 88" stroke="rgba(148,163,184,0.5)" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M56 88 Q75 76 94 88" stroke="rgba(148,163,184,0.15)" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <!-- electron flow dots -->
+                <circle cx="52" cy="30" r="3" fill="rgba(251,191,36,0.7)"/>
+                <circle cx="75" cy="30" r="0" fill="none"/>
+                <circle cx="98" cy="30" r="3" fill="rgba(251,191,36,0.4)"/>
+            </svg>
+        </div>
+        <div class="card-body">
+            <span class="card-chip">Electrochemistry Lab</span>
+            <div class="card-title">Cells, Electrolysis &amp; Nernst</div>
+            <div class="card-desc">
+                Build galvanic and electrolytic cells, apply the Nernst equation, calculate Faraday electrolysis, and explore concentration cells with 22 half-reactions.
+            </div>
+            <div class="card-features">
+                <span class="card-feature">⚡ 22 half-cells</span>
+                <span class="card-feature">🔋 4 simulation modes</span>
+                <span class="card-feature">🎓 Exam mode</span>
             </div>
             <div class="card-cta">
                 Open Lab
