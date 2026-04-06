@@ -832,7 +832,6 @@ let elecRows     = [];
 let examScore    = { correct:0, total:0 };
 let currentQuestion = null;
 
-// Animation state
 let animFrame   = null;
 let bubbles     = [];
 let electronDots= [];
@@ -873,7 +872,6 @@ function populateSelects(){
         anodeSel.appendChild(makeOpt());
         cathodeSel.appendChild(makeOpt());
     });
-    // Default: Zn anode, Cu cathode
     anodeSel.value   = 'zn';
     cathodeSel.value = 'cu';
 
@@ -893,23 +891,19 @@ function setMode(mode){
     document.querySelectorAll('.mode-toggle button').forEach(b =>
         b.classList.toggle('active', b.dataset.mode === mode));
 
-    // Left panel sections
     document.getElementById('galvanicControls').style.display     = mode==='galvanic'      ? 'block' : 'none';
     document.getElementById('electrolysisControls').style.display = mode==='electrolysis'  ? 'block' : 'none';
     document.getElementById('concentrationControls').style.display= mode==='concentration' ? 'block' : 'none';
     document.getElementById('examControls').style.display         = mode==='exam'          ? 'block' : 'none';
 
-    // Right panel sections
     document.getElementById('galvanicReadings').style.display     = mode==='galvanic'      ? 'block' : 'none';
     document.getElementById('electrolysisReadings').style.display = mode==='electrolysis'  ? 'block' : 'none';
     document.getElementById('concentrationReadings').style.display= mode==='concentration' ? 'block' : 'none';
     document.getElementById('examReadings').style.display         = mode==='exam'          ? 'block' : 'none';
 
-    // Reset live counters
     if(mode !== 'electrolysis') stopElectrolysis();
     if(mode !== 'concentration') { concRunning = false; }
 
-    // Rebuild bubbles/dots
     bubbles      = [];
     electronDots = [];
 
@@ -956,10 +950,10 @@ function updateNernst(){
     document.getElementById('tempVal').textContent        = T+' K';
 
     const e0cell = cat.e0 - an.e0;
-    const n      = Math.min(an.n, cat.n); // simplified
-    const Q      = ac / cc; // simplified Q for anode ion / cathode ion
+    const n      = Math.min(an.n, cat.n);
+    const Q      = ac / cc;
     const E_N    = e0cell - (R*T/(n*F)) * Math.log(Q);
-    const dG     = -n * F * E_N / 1000; // kJ/mol
+    const dG     = -n * F * E_N / 1000;
 
     document.getElementById('rCathode').textContent = `${cat.e0>=0?'+':''}${cat.e0.toFixed(3)}`;
     document.getElementById('rAnode').textContent   = `${an.e0>=0?'+':''}${an.e0.toFixed(3)}`;
@@ -1139,8 +1133,7 @@ function updateConcCell(){
     document.getElementById('rConcE').textContent = `${E>=0?'+':''}${E.toFixed(4)} V`;
     document.getElementById('rConcE').className   = 'reading-val'+(E>0.001?' green':E<-0.001?' red':' amber');
 
-    // Equalization: 0% when concentrations are most different, 100% when equal
-    const maxRatio = 100; // treat C1/C2 >= 100 as 0% equalized
+    const maxRatio = 100;
     const ratio    = c1>0 && c2>0 ? Math.max(c1,c2)/Math.min(c1,c2) : 1;
     const pct      = Math.max(0, Math.min(100, 100*(1-(Math.log10(ratio)/Math.log10(maxRatio)))));
     document.getElementById('equalBar').style.width = pct.toFixed(1)+'%';
@@ -1172,7 +1165,6 @@ function animateConcEqualization(){
         concC1Live = avg; concC2Live = avg;
         document.getElementById('concRunBtn').textContent='▶ Equalize';
     } else {
-        // Move 2% of difference each frame × 0.3 speed
         const step = diff * 0.02;
         if(concC1Live > concC2Live){
             concC1Live -= step;
@@ -1327,7 +1319,6 @@ function startAnimation(){
     animFrame = requestAnimationFrame(loop);
 }
 
-// ─── BUBBLE MANAGEMENT ───
 function spawnBubble(x, baseY, color='rgba(255,255,255,0.7)'){
     bubbles.push({
         x: x + (Math.random()-0.5)*12,
@@ -1352,11 +1343,10 @@ function updateBubbles(liquidTop){
     }
 }
 
-// ─── ELECTRON DOT MANAGEMENT ───
 function spawnElectronDots(){
     electronDots = [];
     for(let i=0;i<6;i++){
-        electronDots.push({ t: i/6 }); // t = 0..1 along wire path
+        electronDots.push({ t: i/6 });
     }
 }
 
@@ -1367,14 +1357,12 @@ function updateElectronDots(){
     });
 }
 
-// ─── WIRE PATH ─── returns {x,y} for parameter t in [0,1] going anode→cathode (galvanic)
 function wirePoint(t, ax, ay, cx, cy, topY){
-    // anode electrode top → over the top → cathode electrode top
     const pts = [
-        {x:ax, y:ay},      // anode top
-        {x:ax, y:topY},    // top-left
-        {x:cx, y:topY},    // top-right
-        {x:cx, y:cy},      // cathode top
+        {x:ax, y:ay},
+        {x:ax, y:topY},
+        {x:cx, y:topY},
+        {x:cx, y:cy},
     ];
     const segs = pts.length-1;
     const seg  = Math.floor(t*segs);
@@ -1393,7 +1381,6 @@ function draw(ts){
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0,0,W,H);
 
-    // Background
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(0,0,W,H);
 
@@ -1413,7 +1400,6 @@ function drawGalvanic(W,H,ts){
 
     const spontaneous = (galvanicData.E_N||0) > 0.001;
 
-    // Layout
     const bW=140, bH=180, bY=160;
     const anX=80,  catX=W-80-bW;
     const bTop = bY;
@@ -1422,16 +1408,13 @@ function drawGalvanic(W,H,ts){
     const liquidBot = bTop + bH - 10;
     const midX = W/2;
 
-    // ─── BEAKERS ───
     function drawBeaker(bx, color, ionName, e0, isAnode){
-        // Liquid fill
         const lc = hexToRgba(color, 0.15);
         ctx.fillStyle = lc;
         ctx.beginPath();
         ctx.roundRect(bx+3, liquidTop, bW-6, liquidH, [0,0,6,6]);
         ctx.fill();
 
-        // Beaker outline
         ctx.strokeStyle = '#243550';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -1440,24 +1423,20 @@ function drawGalvanic(W,H,ts){
         ctx.lineTo(bx+bW, bTop+bH);
         ctx.lineTo(bx+bW, bTop);
         ctx.stroke();
-        // rim
         ctx.beginPath();
         ctx.moveTo(bx-8, bTop);
         ctx.lineTo(bx+bW+8, bTop);
         ctx.stroke();
 
-        // Ion label in liquid
         ctx.fillStyle = hexToRgba(color, 0.8);
         ctx.font = 'bold 13px Inter';
         ctx.textAlign = 'center';
         ctx.fillText(ionName, bx+bW/2, liquidTop+liquidH/2+6);
 
-        // E° label
         ctx.fillStyle = '#64748b';
         ctx.font = '11px Fira Code';
         ctx.fillText(`E°=${e0>=0?'+':''}${e0.toFixed(2)}V`, bx+bW/2, bTop+bH+20);
 
-        // Anode/Cathode label
         ctx.fillStyle = isAnode ? '#f87171' : '#34d399';
         ctx.font = 'bold 12px Inter';
         ctx.fillText(isAnode?'ANODE (−)':'CATHODE (+)', bx+bW/2, bTop-12);
@@ -1466,13 +1445,11 @@ function drawGalvanic(W,H,ts){
     drawBeaker(anX,  an.color,  an.ion,  an.e0,  true);
     drawBeaker(catX, cat.color, cat.ion, cat.e0, false);
 
-    // ─── ELECTRODES ───
     const elecW=18, elecH=100;
     const anElX  = anX  + bW/2 - elecW/2;
     const catElX = catX + bW/2 - elecW/2;
     const elecY  = liquidTop + 10;
 
-    // Anode electrode
     const anGrad = ctx.createLinearGradient(anElX,0,anElX+elecW,0);
     anGrad.addColorStop(0,'#374151'); anGrad.addColorStop(1,'#6b7280');
     ctx.fillStyle = anGrad;
@@ -1480,7 +1457,6 @@ function drawGalvanic(W,H,ts){
     ctx.strokeStyle='#f87171'; ctx.lineWidth=1.5;
     ctx.strokeRect(anElX, elecY, elecW, elecH);
 
-    // Cathode electrode
     const catGrad = ctx.createLinearGradient(catElX,0,catElX+elecW,0);
     catGrad.addColorStop(0,'#374151'); catGrad.addColorStop(1,'#6b7280');
     ctx.fillStyle = catGrad;
@@ -1488,12 +1464,10 @@ function drawGalvanic(W,H,ts){
     ctx.strokeStyle='#34d399'; ctx.lineWidth=1.5;
     ctx.strokeRect(catElX, elecY, elecW, elecH);
 
-    // Electrode name labels
     ctx.fillStyle='#94a3b8'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
     ctx.fillText(an.name.split('/')[1]||an.name, anX+bW/2,  elecY+elecH+12);
     ctx.fillText(cat.name.split('/')[1]||cat.name, catX+bW/2, elecY+elecH+12);
 
-    // ─── SALT BRIDGE ───
     const sbY = bTop + bH/2 - 12;
     const sbL = catX - (anX+bW);
     ctx.save();
@@ -1507,7 +1481,6 @@ function drawGalvanic(W,H,ts){
     ctx.fillStyle='#fbbf24'; ctx.font='bold 10px Inter'; ctx.textAlign='center';
     ctx.fillText('Salt Bridge  KNO₃(aq)', midX, sbY+16);
 
-    // ─── WIRE ───
     const wireTopY = bTop - 50;
     const anTopX   = anX+bW/2;
     const catTopX  = catX+bW/2;
@@ -1520,7 +1493,6 @@ function drawGalvanic(W,H,ts){
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2.5;
     ctx.stroke();
 
-    // Voltmeter circle
     const vmX = midX, vmY = wireTopY;
     ctx.beginPath();
     ctx.arc(vmX, vmY, 22, 0, Math.PI*2);
@@ -1528,7 +1500,6 @@ function drawGalvanic(W,H,ts){
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2; ctx.stroke();
     ctx.fillStyle='#38bdf8'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
     ctx.fillText('V', vmX, vmY+4);
-    // E value under voltmeter
     const ev = galvanicData.E_N;
     if(ev!==undefined){
         ctx.fillStyle = ev>0.001?'#34d399':ev<-0.001?'#f87171':'#fbbf24';
@@ -1536,16 +1507,13 @@ function drawGalvanic(W,H,ts){
         ctx.fillText(`${ev>=0?'+':''}${ev.toFixed(3)}V`, vmX, vmY+38);
     }
 
-    // Current direction arrow on wire
     const arrowDir = spontaneous ? 1 : -1; // galvanic: conventional current cat→anode outside
     const arX = midX + arrowDir*30;
     drawArrow(ctx, arX-arrowDir*12, wireTopY, arX+arrowDir*12, wireTopY, spontaneous?'#34d399':'#f87171');
 
-    // ─── ELECTRON DOTS ───
     updateElectronDots();
     if(spontaneous){
         electronDots.forEach(d=>{
-            // electrons flow anode→cathode (opposite to conventional current)
             const tInv = (1 - d.t);
             const pt = wirePoint(tInv, anTopX, elecY, catTopX, elecY, wireTopY);
             ctx.beginPath();
@@ -1559,7 +1527,6 @@ function drawGalvanic(W,H,ts){
         });
     }
 
-    // ─── BUBBLES ───
     const gasAnodeIds   = ['she','o2_acid','cl2'];
     const gasCathodeIds = ['she','o2_acid','f2'];
     const frameN = Math.floor(ts/60);
@@ -1583,29 +1550,24 @@ function drawElectrolysis(W,H,ts){
 
     const V    = parseFloat(document.getElementById('voltageSlider').value)||6;
 
-    // Single large beaker centred
     const bW=200, bH=200, bX=(W-bW)/2, bY=140;
     const liquidTop = bY+30, liquidBot = bY+bH-10;
     const liquidH   = liquidBot - liquidTop;
 
-    // Liquid
     ctx.fillStyle = hexToRgba(el.color||'#0369a1', 0.2);
     ctx.beginPath();
     ctx.roundRect(bX+3, liquidTop, bW-6, liquidH, [0,0,8,8]);
     ctx.fill();
 
-    // Beaker outline
     ctx.strokeStyle='#243550'; ctx.lineWidth=2;
     ctx.beginPath();
     ctx.moveTo(bX,bY); ctx.lineTo(bX,bY+bH); ctx.lineTo(bX+bW,bY+bH); ctx.lineTo(bX+bW,bY);
     ctx.stroke();
     ctx.beginPath(); ctx.moveTo(bX-8,bY); ctx.lineTo(bX+bW+8,bY); ctx.stroke();
 
-    // Electrolyte label
     ctx.fillStyle='#64748b'; ctx.font='12px Inter'; ctx.textAlign='center';
     ctx.fillText(el.name, bX+bW/2, bY+bH+20);
 
-    // Electrodes
     const elecW=16, elecH=110, elecY=liquidTop+10;
     const catElX = bX+40-elecW/2; // cathode on left
     const anElX  = bX+bW-40-elecW/2; // anode on right (electrolytic: anode connected to +)
@@ -1621,30 +1583,23 @@ function drawElectrolysis(W,H,ts){
     drawEl(catElX, '#34d399', 'Cathode (−)');
     drawEl(anElX,  '#f87171', 'Anode (+)');
 
-    // Products
     ctx.fillStyle='#94a3b8'; ctx.font='12px Inter'; ctx.textAlign='center';
     ctx.fillText(el.cathode.product+' deposited', bX+40, liquidTop-8);
     ctx.fillText(el.anode.product+' evolved',     bX+bW-40, liquidTop-8);
 
-    // Battery / PSU at top
     const batX=W/2, batY=bY-70;
     drawBattery(batX, batY, V);
 
-    // Wires from battery to electrodes
     const catTopX = catElX+elecW/2, anTopX = anElX+elecW/2;
     const wireY = bY-20;
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
-    // cathode wire
     ctx.beginPath(); ctx.moveTo(batX-35, batY+15); ctx.lineTo(batX-35, wireY); ctx.lineTo(catTopX, wireY); ctx.lineTo(catTopX, elecY); ctx.stroke();
-    // anode wire
     ctx.strokeStyle='#f87171';
     ctx.beginPath(); ctx.moveTo(batX+35, batY+15); ctx.lineTo(batX+35, wireY); ctx.lineTo(anTopX, wireY); ctx.lineTo(anTopX, elecY); ctx.stroke();
 
-    // Electron flow arrows
     drawArrow(ctx, batX-35+10, wireY, batX-35-10, wireY, '#38bdf8'); // electrons flow towards cathode from battery −
     drawArrow(ctx, anTopX+10, wireY, anTopX-10, wireY, '#f87171');   // conventional current left at anode
 
-    // Electron dots on wires
     updateElectronDots();
     electronDots.forEach(d=>{
         const side = d.t < 0.5 ? 0 : 1;
@@ -1662,7 +1617,6 @@ function drawElectrolysis(W,H,ts){
         ctx.fillStyle=side===0?'#38bdf8':'#f87171'; ctx.fill();
     });
 
-    // Bubbles
     const frameN = Math.floor(ts/60);
     if(el.cathode.gas && frameN%3===0) spawnBubble(catElX+elecW/2, liquidBot-10, 'rgba(56,189,248,0.7)');
     if(el.anode.gas   && frameN%2===0) spawnBubble(anElX+elecW/2,  liquidBot-10, 'rgba(248,113,113,0.7)');
@@ -1670,7 +1624,6 @@ function drawElectrolysis(W,H,ts){
     updateBubbles(liquidTop);
     drawBubbles(liquidTop, liquidBot);
 
-    // Live counter overlay
     if(elecRunning){
         const q   = parseFloat(document.getElementById('currentInput').value)*elecElapsedSec;
         const m   = q/(el.cathode.n*F)*el.cathode.M;
@@ -1697,7 +1650,6 @@ function drawConcCell(W,H,ts){
     const liquidTop=bY+30, liquidBot=bY+bH-10, liquidH=liquidBot-liquidTop;
     const midX=W/2;
 
-    // Opacity based on concentration (higher = more opaque)
     function concToAlpha(c){ return Math.min(0.5, Math.max(0.08, c*0.3)); }
 
     function drawConcBeaker(bx, conc, label, ionName){
@@ -1707,7 +1659,6 @@ function drawConcCell(W,H,ts){
         ctx.strokeStyle='#243550'; ctx.lineWidth=2;
         ctx.beginPath(); ctx.moveTo(bx,bY); ctx.lineTo(bx,bY+bH); ctx.lineTo(bx+bW,bY+bH); ctx.lineTo(bx+bW,bY); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(bx-8,bY); ctx.lineTo(bx+bW+8,bY); ctx.stroke();
-        // conc label
         ctx.fillStyle=hexToRgba(metal.color,0.9); ctx.font='bold 12px Fira Code'; ctx.textAlign='center';
         ctx.fillText(`${conc.toFixed(4)} M`, bx+bW/2, liquidTop+liquidH/2+6);
         ctx.fillStyle='#64748b'; ctx.font='11px Inter';
@@ -1719,7 +1670,6 @@ function drawConcCell(W,H,ts){
     drawConcBeaker(anX,  c1, c1>=c2?'High Conc.':'Low Conc.',  metal.ion+' (anode)');
     drawConcBeaker(catX, c2, c2>=c1?'High Conc.':'Low Conc.', metal.ion+' (cathode)');
 
-    // Electrodes
     const elecW=16, elecH=100, elecY=liquidTop+10;
     const anElX=anX+bW/2-elecW/2, catElX=catX+bW/2-elecW/2;
     function drawConEl(ex, col){
@@ -1732,7 +1682,6 @@ function drawConcCell(W,H,ts){
     drawConEl(anElX, '#f87171');
     drawConEl(catElX,'#34d399');
 
-    // Salt bridge
     const sbY=bY+bH/2-12, sbL=catX-(anX+bW);
     ctx.beginPath(); ctx.roundRect(anX+bW+10,sbY,sbL-20,24,12);
     ctx.fillStyle='rgba(251,191,36,0.06)'; ctx.fill();
@@ -1740,7 +1689,6 @@ function drawConcCell(W,H,ts){
     ctx.fillStyle='#fbbf24'; ctx.font='bold 10px Inter'; ctx.textAlign='center';
     ctx.fillText('Salt Bridge', midX, sbY+16);
 
-    // Wire + voltmeter
     const wireTopY=bY-50, anTopX=anX+bW/2, catTopX=catX+bW/2;
     ctx.beginPath();
     ctx.moveTo(anTopX,elecY); ctx.lineTo(anTopX,wireTopY);
@@ -1757,10 +1705,8 @@ function drawConcCell(W,H,ts){
     ctx.font='bold 11px Fira Code';
     ctx.fillText(`${E>=0?'+':''}${E.toFixed(3)}V`, midX, wireTopY+38);
 
-    // Arrow
     drawArrow(ctx, midX-20, wireTopY, midX-2, wireTopY, E>0.001?'#34d399':'#f87171');
 
-    // Equalization progress bar on canvas
     if(concRunning){
         const avg=(c1+c2)/2;
         const diff=Math.abs(c1-c2);
@@ -1838,16 +1784,12 @@ function drawBattery(cx, cy, voltage){
     ctx.fillStyle='#f8fafc';
     ctx.beginPath(); ctx.roundRect(cx-bw/2, cy-bh/2, bw, bh, 6); ctx.fill();
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.5; ctx.stroke();
-    // + terminal (right)
     ctx.strokeStyle='#f87171'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.moveTo(cx+bw/2, cy-8); ctx.lineTo(cx+bw/2, cy+8); ctx.stroke();
-    // – terminal (left)
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.moveTo(cx-bw/2, cy-4); ctx.lineTo(cx-bw/2, cy+4); ctx.stroke();
-    // label
     ctx.fillStyle='#fbbf24'; ctx.font='bold 11px Fira Code'; ctx.textAlign='center';
     ctx.fillText(`${voltage.toFixed(1)} V`, cx, cy+5);
-    // terminals label
     ctx.fillStyle='#38bdf8'; ctx.font='bold 10px Inter';
     ctx.fillText('−', cx-bw/2-10, cy+4);
     ctx.fillStyle='#f87171';
@@ -1904,7 +1846,6 @@ function resetLab(){
     setMode('galvanic');
 }
 
-/* ── Canvas roundRect polyfill (Safari < 15.4) ── */
 if(!CanvasRenderingContext2D.prototype.roundRect){
     CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
         if(typeof r==='number') r=[r,r,r,r];

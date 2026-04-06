@@ -18,7 +18,6 @@
         body > header { flex-shrink: 0; }
         #workspace { flex: 1; min-height: 0; }
 
-        /* ── HEADER ── */
         header {
             background: var(--bg-panel);
             padding: 10px 20px;
@@ -40,10 +39,10 @@
             border: 1px solid var(--border);
             padding: 7px 13px; border-radius: var(--r-sm);
             cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        border-color var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease),
-                        transform var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        border-color 0.15s ease,
+                        color 0.15s ease,
+                        transform 0.15s ease;
             font-weight: 600; font-size: 12px; white-space: nowrap;
         }
         button:hover:not(:disabled) { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
@@ -66,11 +65,9 @@
             border-left: 1px solid var(--border); border-right: 1px solid var(--border);
         }
 
-        /* ── WORKSPACE ── */
         #workspace { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         @media (min-width: 1024px) { #workspace { flex-direction: row; } }
 
-        /* ── REAGENTS PANEL — list style like inorganic ── */
         #reagents-panel {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
@@ -90,14 +87,14 @@
         /* full-width list buttons (matches inorganic style) */
         .reagent-btn {
             display: block; width: 100%;
-            font-family: var(--font-body); font-size: var(--font-size-sm); font-weight: 500;
+            font-family: var(--font-body); font-size: 12px; font-weight: 500;
             background: transparent; border: 1px solid transparent;
             color: var(--text-muted);
             padding: 6px 10px; margin-bottom: 2px;
             text-align: left; border-radius: var(--r-sm); cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease),
-                        border-color var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        color 0.15s ease,
+                        border-color 0.15s ease;
         }
         .reagent-btn:hover { background: var(--green-dim); color: #047857; border-color: #a7f3d0; }
         .reagent-btn:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
@@ -106,7 +103,6 @@
         .reagent-btn span.icon { display: none; }
         .grid-2col { display: flex; flex-direction: column; }
 
-        /* ── BENCH ── */
         #bench-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; }
 
         #visual-bench {
@@ -118,11 +114,10 @@
         }
         @media (min-width: 1024px) { #visual-bench { flex: 0 0 200px; } }
 
-        /* ── VIAL ── */
         .vial-container {
             display: flex; flex-direction: column; align-items: center; gap: 10px;
             opacity: 0.3; transform: scale(0.95);
-            transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
         .vial-container.active { opacity: 1; transform: scale(1); }
 
@@ -137,7 +132,7 @@
         .vial-liquid {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
             background: transparent;
-            transition: background-color var(--t-slow) var(--ease), height var(--t-mid) var(--ease);
+            transition: background-color 0.4s ease, height 0.25s ease;
         }
         .vial::after {
             content: '';
@@ -152,7 +147,6 @@
             border: 1px solid #a7f3d0;
         }
 
-        /* ── LOG ── */
         #log-container { flex: 1; display: flex; flex-direction: column; background: var(--bg-inset); overflow: hidden; }
         .log-header {
             padding: 9px 16px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
@@ -176,7 +170,6 @@
         .log-time { color: var(--text-dim); font-size: 10px; margin-right: 6px; }
         .log-obs  { font-weight: 600; display: block; margin-top: 3px; }
 
-        /* ── MODALS ── */
         .modal-overlay {
             display: none; position: fixed; inset: 0;
             background: rgba(15,23,42,0.5);
@@ -203,7 +196,7 @@
             background: var(--bg-inset); border: 1px dashed var(--border-lite);
             padding: 14px; margin-bottom: 18px; text-align: center; border-radius: var(--r-md);
         }
-        .hidden-truth { filter: blur(6px); user-select: none; transition: filter var(--t-slow) var(--ease); }
+        .hidden-truth { filter: blur(6px); user-select: none; transition: filter 0.4s ease; }
         .hidden-truth.revealed { filter: none; }
 
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -213,7 +206,6 @@
         tr:hover td { background: #f0fdf4; }
         td { font-family: var(--font-mono); }
 
-        /* ── EXAM SHEET ── */
         .candidate-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             margin-bottom: 18px; background: var(--bg-inset);
@@ -223,7 +215,7 @@
             display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
             margin-bottom: 10px; background: var(--bg-panel);
             padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-sm);
-            transition: border-color var(--t-fast);
+            transition: border-color 0.15s;
         }
         .exam-row:hover { border-color: var(--border-lite); }
         .exam-row label { font-weight: 700; color: #047857; font-size: 12px; }
@@ -395,7 +387,6 @@
          * ============================================================================
          */
 
-        // --- 100 COMPOUND DATABASE ---
         const dbFactory = [
             { n:"n-Hexane", c:"Aliphatic Hydrocarbon", state:"L", mp:-95, bp:69, arom:false, odor:"Gasoline-like", color:"Clear" },
             { n:"Cyclohexane", c:"Aliphatic Hydrocarbon", state:"L", mp:6.5, bp:80, arom:false, odor:"Petroleum", color:"Clear" },
@@ -498,7 +489,6 @@
             { n:"Urea", c:"Diamide", state:"S", mp:133, bp:200, arom:false, odor:"Ammonia (old)", color:"White solid", amide:true },
             { n:"Acetanilide", c:"Substituted Amide", state:"S", mp:114, bp:304, arom:true, odor:"Odorless", color:"White leaflets", amide:true },
 
-            // --- ALKYNES ---
             { n:"Acetylene (aq)", c:"Terminal Alkyne", state:"L", mp:-82, bp:-84, arom:false, odor:"Garlic-like", color:"Clear", unsat:true, alkyne:true, terminal:true },
             { n:"Propyne", c:"Terminal Alkyne", state:"L", mp:-102, bp:-23, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:true },
             { n:"1-Butyne", c:"Terminal Alkyne", state:"L", mp:-126, bp:8, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:true },
@@ -508,7 +498,6 @@
             { n:"2-Pentyne", c:"Internal Alkyne", state:"L", mp:-101, bp:56, arom:false, odor:"Ethereal", color:"Clear", unsat:true, alkyne:true, terminal:false },
             { n:"Phenylacetylene", c:"Aromatic Terminal Alkyne", state:"L", mp:-45, bp:142, arom:true, odor:"Pungent", color:"Clear", unsat:true, alkyne:true, terminal:true },
 
-            // --- THIOLS & THIOETHERS ---
             { n:"Methanethiol", c:"Aliphatic Thiol", state:"L", mp:-123, bp:6, arom:false, odor:"Rotten egg / Cabbage (very pungent)", color:"Clear", thiol:true },
             { n:"Ethanethiol", c:"Aliphatic Thiol", state:"L", mp:-148, bp:35, arom:false, odor:"Leek / Garlic (intense)", color:"Clear", thiol:true },
             { n:"1-Butanethiol", c:"Aliphatic Thiol", state:"L", mp:-116, bp:98, arom:false, odor:"Skunk-like", color:"Clear", thiol:true },
@@ -517,7 +506,6 @@
             { n:"Diethyl sulfide", c:"Thioether", state:"L", mp:-104, bp:92, arom:false, odor:"Disagreeable", color:"Clear", thioether:true },
             { n:"Diphenyl sulfide", c:"Aromatic Thioether", state:"L", mp:-25, bp:296, arom:true, odor:"Mild", color:"Clear", thioether:true },
 
-            // --- CARBOHYDRATES (simple, aqueous) ---
             { n:"D-Glucose (aq)", c:"Aldohexose (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true },
             { n:"D-Fructose (aq)", c:"Ketohexose (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ket:true, sugar:true, reducing:true, methylK:false },
             { n:"D-Galactose (aq)", c:"Aldohexose (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true },
@@ -526,7 +514,6 @@
             { n:"Lactose (aq)", c:"Disaccharide (Reducing Sugar)", state:"L", mp:0, bp:100, arom:false, odor:"Odorless", color:"Clear", oh:"1", ald:true, sugar:true, reducing:true }
         ];
 
-        // --- THE RULE-BASED TEST ENGINE WITH EXAM OBFUSCATION ---
         const Engine = {
             mp: (c, isDeterministic=false, isExam=false) => {
                 if(c.state === 'L') return "Error: Sample is liquid at room temp. Use BP apparatus.";
@@ -743,7 +730,6 @@
             },
 
             bromine_water: (c, isDeterministic=false, isExam=false) => {
-                // Decolorizes Br2 water: alkenes, alkynes, phenols, thiols, aldehydes
                 if(c.alkyne) {
                     return isExam ? "Positive: Rapid decolorization (addition reaction)." :
                         "Positive: Rapid decolorization. Alkynes add Br₂ across the triple bond (dibromoalkene then tetrabromoalkane).";
@@ -768,7 +754,6 @@
             },
 
             kmno4: (c, isDeterministic=false, isExam=false) => {
-                // Baeyer's test: decolorizes alkaline KMnO4 for alkenes, alkynes, aldehydes, thiols
                 if(c.alkyne) {
                     return isExam ? "Positive: Purple color discharged, brown precipitate." :
                         "Positive (Baeyer's Test): Purple KMnO₄ immediately decolorized. Brown MnO₂ precipitate forms. Alkynes are oxidized.";
@@ -793,7 +778,6 @@
             },
 
             benedict: (c, isDeterministic=false, isExam=false) => {
-                // Benedict's test: reducing sugars, aliphatic aldehydes
                 if(c.reducing) {
                     return isExam ? "Positive: Brick-red/yellow precipitate on heating." :
                         "Positive: Brick-red Cu₂O precipitate forms on heating. Reducing sugar confirmed.";
@@ -814,7 +798,6 @@
             },
 
             lead_acetate: (c, isDeterministic=false, isExam=false) => {
-                // Lead acetate paper test for H2S / sulfur compounds
                 if(c.thiol) {
                     return isExam ? "Positive: Lead acetate paper turns black." :
                         "Positive: Lead acetate paper turns BLACK. Thiol (RSH) releases H₂S-like sulfur compound. PbS precipitate confirms sulfur.";
@@ -827,7 +810,6 @@
             },
 
             hg_acetate: (c, isDeterministic=false, isExam=false) => {
-                // Mercuric acetate / Nessler's-type test for terminal alkynes → mercury acetylide precipitate
                 if(c.alkyne && c.terminal) {
                     return isExam ? "Positive: White/yellow precipitate forms." :
                         "Positive: White mercury(II) acetylide precipitate (RC≡C–Hg–O₂CCH₃) forms. Confirms terminal alkyne (acidic C–H on sp carbon).";
@@ -840,10 +822,8 @@
             }
         };
 
-        // --- CONSTANTS ---
         const MAX_LOG_ENTRIES = 100;
 
-        // --- FINGERPRINTING INITIALIZATION ---
         const chemKeys = ['ignition', 'lassaigne', 'beilstein', 'sol_water', 'sol_ether', 'sol_hcl', 'sol_naoh', 'sol_nahco3', 'lucas', 'ceric', 'iodoform', 'dnp24', 'tollen', 'fehling', 'fecl3', 'hinsberg', 'nitrous', 'carbylamine', 'sodalime', 'phthalimide', 'fluorescein', 'zincdust', 'bromine_water', 'kmno4', 'benedict', 'lead_acetate', 'hg_acetate'];
         
         try {
@@ -856,7 +836,6 @@
             console.error("Fingerprinting initialization error:", error);
         }
 
-        // --- STATE MANAGEMENT ---
         let currentU = null;
         let uCounter = 0;
         let sessionLog = [];
@@ -868,7 +847,6 @@
         let isExamMode = false;
         let examCandidates = [];
 
-        // --- MODE CONTROLS ---
         function requestNewUnknown() {
             try {
                 isExamMode = false;
@@ -897,7 +875,6 @@
                 currentSet = [];
                 examCandidates = [];
                 
-                // Fisher-Yates shuffle
                 let shuffled = [...dbFactory];
                 for (let i = shuffled.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -906,7 +883,6 @@
 
                 let seenFPs = new Set();
                 
-                // Get 6 unique unknowns
                 for (let c of shuffled) {
                     if (!seenFPs.has(c.fingerprint)) {
                         seenFPs.add(c.fingerprint);
@@ -915,7 +891,6 @@
                     }
                 }
                 
-                // Get 4 unique distractors
                 let distractors = [];
                 for (let c of shuffled) {
                     if (!seenFPs.has(c.fingerprint)) {
@@ -925,7 +900,6 @@
                     }
                 }
 
-                // Combine and alphabetize for the Exam Sheet
                 examCandidates = [...currentSet, ...distractors];
                 examCandidates.sort((a, b) => a.n.localeCompare(b.n));
 
@@ -998,7 +972,6 @@
             }
         }
 
-        // --- UTILS ---
         function clearLog() {
             try {
                 if(!currentU) return;
@@ -1034,7 +1007,6 @@
                 
                 logEl.appendChild(entry);
                 
-                // Memory Management: FIFO rotation
                 while (logEl.children.length > MAX_LOG_ENTRIES) {
                     logEl.removeChild(logEl.firstChild);
                 }
@@ -1042,7 +1014,6 @@
                 logEl.scrollTop = logEl.scrollHeight;
                 sessionLog.push(`[${time}] ${text} ${obs ? '-> ' + obs : ''}`);
                 
-                // Session log rotation
                 if (sessionLog.length > MAX_LOG_ENTRIES) {
                     sessionLog.shift();
                 }
@@ -1116,7 +1087,6 @@
             }
         }
 
-        // --- DATA MODAL LOGIC ---
         function openModal() {
             try {
                 if (!currentU) { 
@@ -1183,7 +1153,6 @@
             }
         }
 
-        // --- EXAM SHEET LOGIC ---
         function buildExamSheet() {
             try {
                 let listHTML = '';

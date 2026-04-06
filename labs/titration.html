@@ -89,9 +89,9 @@
             padding: 7px 11px;
             border-radius: var(--r-sm);
             font-family: var(--font-body);
-            font-size: var(--font-size-base);
+            font-size: 13px;
             outline: none;
-            transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
         select:focus, input[type="number"]:focus, input[type="text"]:focus {
@@ -110,11 +110,11 @@
             padding: 7px 14px;
             border: none; border-radius: var(--r-sm);
             font-family: var(--font-body);
-            font-weight: 600; font-size: var(--font-size-base);
+            font-weight: 600; font-size: 13px;
             cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        box-shadow var(--t-fast) var(--ease),
-                        transform var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        box-shadow 0.15s ease,
+                        transform 0.15s ease;
             white-space: nowrap;
         }
         .btn:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
@@ -150,7 +150,7 @@
             padding: 18px;
             display: flex;
             flex-direction: column;
-            transition: border-color var(--t-mid) var(--ease);
+            transition: border-color 0.25s ease;
         }
         .panel:hover { border-color: var(--border-lite); }
 
@@ -167,9 +167,9 @@
             padding: 12px 14px;
             margin-bottom: 10px;
             cursor: pointer;
-            transition: border-color var(--t-fast) var(--ease),
-                        background var(--t-fast) var(--ease),
-                        transform var(--t-fast) var(--ease);
+            transition: border-color 0.15s ease,
+                        background 0.15s ease,
+                        transform 0.15s ease;
         }
         .reagent-card:hover { border-color: var(--border-lite); background: rgba(255,255,255,0.03); transform: translateX(2px); }
         .reagent-card:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
@@ -254,7 +254,7 @@
             background: var(--accent-blue);
             border: 2px solid var(--bg-inset);
             box-shadow: 0 0 0 0 rgba(56,189,248,0.3);
-            transition: box-shadow var(--t-fast) var(--ease);
+            transition: box-shadow 0.15s ease;
             margin-top: -5px;
         }
         input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 5px rgba(56,189,248,0.2); }
@@ -993,7 +993,6 @@ class StateManager {
         this.state.experiment = experiment;
     }
     updateBuretteVolume(value) {
-        // FIX #4: Add float rounding to prevent precision errors
         const clamped = Math.max(0, Math.min(value, CONSTANTS.MAX_BURETTE_VOL));
         this.state.buretteVolume = Math.round(clamped * 100) / 100;
         this.state.volumeAdded = Math.round((this.state.buretteVolume - this.state.initialVolume) * 100) / 100;
@@ -1034,7 +1033,6 @@ class ChemistryEngine {
         return 14 + Math.log10(Math.max((nb - na) / Vtot, 1e-14));
     }
     
-    // FIX #5: Add convergence checking to polyprotic solver
     static exactPolyproticPH(Ca, Va, Ct, Vt, pKa1, pKa2, pKa3) {
         const K1 = Math.pow(10, -pKa1), K2 = Math.pow(10, -pKa2), K3 = Math.pow(10, -pKa3), Kw = 1e-14;
 
@@ -1049,12 +1047,10 @@ class ChemistryEngine {
         };
 
         let low = 0, high = 14, mid;
-        // Improved convergence with tolerance check
         for (let i = 0; i < 100; i++) {
             mid = (low + high) / 2;
             const Vt_calc = calcVt(mid);
             
-            // Check convergence
             if (Math.abs(Vt_calc - Vt) < 1e-6) break;
             
             if (Vt_calc < Vt) low = mid; 
@@ -1071,20 +1067,16 @@ class ChemistryEngine {
         return -Math.log10(Math.max((na - nb) / Vtot, 1e-14));
     }
     
-    // FIX #1: Fixed complexometric calculation (was nEDTA - nEDTA = 0)
     static complexometric(Ca, Va, Ct, Vt) {
         const Vtot = (Va + Vt) / 1000, nCa = Ca * Va / 1000, nEDTA = Ct * Vt / 1000;
         const Kf = CHEM_CONSTANTS.Kf_CaEDTA;
         
         if (nEDTA < nCa - CONSTANTS.EPSILON) {
-            // Before equivalence: excess Ca²⁺
             return -Math.log10(Math.max((nCa - nEDTA) / Vtot, 1e-14));
         }
         if (nEDTA > nCa + CONSTANTS.EPSILON) {
-            // After equivalence: excess EDTA (FIXED: was nEDTA - nEDTA)
             return -Math.log10(Math.max((nCa / Vtot) / (Kf * ((nEDTA - nCa) / Vtot)), 1e-14));
         }
-        // At equivalence
         return -Math.log10(Math.max(Math.sqrt((nCa / Vtot) / Kf), 1e-14));
     }
     
@@ -1101,24 +1093,19 @@ class ChemistryEngine {
         return (770 + 1510) / 2;
     }
     
-    // FIX #2: Corrected argument order for precipitation (was backwards)
     static precipitation(CCl, VCl, CAg, VAg) {
         const Vtot = (VCl + VAg) / 1000, nCl = CCl * VCl / 1000, nAg = CAg * VAg / 1000;
         const Ksp = 1.8e-10;
         
         if (nAg < nCl - CONSTANTS.EPSILON) {
-            // Before equivalence: excess Cl⁻
             return -Math.log10(Math.max(Ksp / ((nCl - nAg) / Vtot), 1e-14));
         }
         if (nAg > nCl + CONSTANTS.EPSILON) {
-            // After equivalence: excess Ag⁺
             return -Math.log10(Math.max((nAg - nCl) / Vtot, 1e-14));
         }
-        // At equivalence
         return -Math.log10(Math.max(Math.sqrt(Ksp), 1e-14));
     }
     
-    // Generic complexometric for metals with arbitrary Kf
     static complexometricGeneric(Ca, Va, Ct, Vt, Kf) {
         const Vtot = (Va + Vt) / 1000, nMetal = Ca * Va / 1000, nEDTA = Ct * Vt / 1000;
         if (nEDTA < nMetal - CONSTANTS.EPSILON) {
@@ -1130,7 +1117,6 @@ class ChemistryEngine {
         return -Math.log10(Math.max(Math.sqrt((nMetal / Vtot) / Kf), 1e-14));
     }
 
-    // Dichromate redox: Cr₂O₇²⁻ + 6Fe²⁺ → 2Cr³⁺ + 6Fe³⁺ (stoich 6:1)
     static redoxDichromate(CFe, VFe, CCr, VCr) {
         const Vtot = (VFe + VCr) / 1000, nFe = CFe * VFe / 1000, nCr = CCr * VCr / 1000;
         const nCr_req = nFe / 6;  // 1 mol Cr₂O₇²⁻ per 6 mol Fe²⁺
@@ -1145,11 +1131,9 @@ class ChemistryEngine {
         return (E0_Fe + E0_Cr) / 2;
     }
 
-    // FIX #8: Return consistent fraction (0-1) instead of percentage
     static iodometry(CI2, VI2, CS2O3, VS2O3) {
         const nI2 = CI2 * VI2 / 1000, nS2O3 = CS2O3 * VS2O3 / 1000;
         const I2_remaining = Math.max(0, nI2 - nS2O3 / 2);
-        // Return as percentage for display (0-100)
         return nI2 > 0 ? (I2_remaining / nI2) * 100 : 0;
     }
 
@@ -1173,7 +1157,6 @@ class ChemistryEngine {
                 const fraction = (value - 4.5) / 1.5;
                 return `rgba(${180 - fraction*160}, ${20 + fraction*30}, ${50 + fraction*130}, 0.6)`;
             } else if (indicator === 'xylenol') {
-                // Xylenol orange: red (complexed) → yellow (free) at equivalence
                 if (value < 5.0) return 'rgba(200, 30, 30, 0.6)';
                 if (value > 7.0) return 'rgba(220, 200, 0, 0.5)';
                 const frac = (value - 5.0) / 2.0;
@@ -1186,7 +1169,6 @@ class ChemistryEngine {
             }
         } else if (['redox', 'redox-dichromate'].includes(cfg.type)) {
             if (indicator === 'diphenylamine') {
-                // Diphenylamine sulfonate: colorless → violet near equivalence
                 if (value < 900) return clear;
                 return `rgba(130, 0, 180, ${Math.min((value - 900) / 400, 1) * 0.6})`;
             }
@@ -1206,7 +1188,6 @@ class ChemistryEngine {
 }
 
 class ValidationModule {
-    // FIX #3: Proper validation without falsy operator fallback
     static validateInput(element, callback) {
         const val = parseFloat(element.value);
         let error = '';
@@ -1269,7 +1250,6 @@ class ExamModule {
         const trial = app.state.state.trials.find(t => t.id === trialId);
         const cfg = EXPERIMENTS[app.state.state.experiment];
         
-        // FIX #12: Handle null indicator selection
         let tStoich = cfg.titrant.stoich;
         if (cfg.type === 'polyprotic-acid') {
             if (!app.state.state.indicatorSelected) {
@@ -1284,7 +1264,6 @@ class ExamModule {
         let score = 0;
         let fb = '<strong>📊 Grading Report</strong><br><br>';
         
-        // Titre accuracy
         const volError = Math.abs(trial.added - trueEqVol);
         const tScore = volError <= CONSTANTS.GRADE_TITRE_EXCELLENT ? CONSTANTS.WEIGHT_TITRE : 
                        (volError <= CONSTANTS.GRADE_TITRE_ACCEPTABLE ? 
@@ -1295,7 +1274,6 @@ class ExamModule {
         fb += `&nbsp;&nbsp;Your titre: ${trial.added.toFixed(2)} mL<br>`;
         fb += `&nbsp;&nbsp;Error: ${volError.toFixed(3)} mL<br><br>`;
         
-        // Calculation accuracy
         const concErrorPct = Math.abs(calcConc - app.state.state.analyteConc) / app.state.state.analyteConc * 100;
         const cScore = concErrorPct <= CONSTANTS.GRADE_CALC_EXCELLENT ? CONSTANTS.WEIGHT_CALC : 
                        (concErrorPct <= CONSTANTS.GRADE_CALC_ACCEPTABLE ? 
@@ -1306,7 +1284,6 @@ class ExamModule {
         fb += `&nbsp;&nbsp;Your answer: ${calcConc.toFixed(4)} M<br>`;
         fb += `&nbsp;&nbsp;Percent error: ${concErrorPct.toFixed(2)}%<br><br>`;
         
-        // Technique
         let techScore = app.state.state.hasRinsed ? 5 : 0;
         if (app.state.state.indicatorSelected) {
             if (cfg.type === 'redox' ? app.state.state.indicatorSelected === 'self' : app.state.state.indicatorSelected !== 'none') {
@@ -1330,7 +1307,6 @@ class ExamModule {
             fb += '<span style="font-size: 12px;">Review your technique and calculations, then try again.</span>';
         }
         
-        // FIX #6: Answer in separate collapsible section
         const answerHTML = `
             True Analyte Concentration: <strong class="mono" style="color:var(--accent-blue);">${app.state.state.analyteConc.toFixed(4)} M</strong><br>
             Theoretical Equivalence Volume: <strong class="mono" style="color:var(--accent-blue);">${trueEqVol.toFixed(2)} mL</strong>
@@ -1349,7 +1325,6 @@ class ExamModule {
         document.getElementById('examCalcConc').disabled = true;
         document.getElementById('submitExamBtn').disabled = true;
         
-        // Show "Show Answer" button instead of auto-revealing
         fb += '<br><br><button class="btn btn-primary" onclick="app.exam.showAnswer()" style="width: 100%; margin-top: 10px;">Show Correct Answer</button>';
         fbBox.innerHTML = fb;
     }
@@ -1467,7 +1442,6 @@ class RenderEngine {
     static renderPlot() {
         const cfg = EXPERIMENTS[app.state.state.experiment];
         
-        // FIX #10: Different messages for exam vs non-sensor experiments
         if (app.state.state.mode === 'exam') {
             document.getElementById('plotCanvas').style.display = 'none';
             document.getElementById('plotBlocker').classList.remove('hidden');
@@ -1502,12 +1476,10 @@ class RenderEngine {
 
         let [yMin, yMax] = cfg.yRange;
 
-        // Draw axes
         ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 1;
         ctx.strokeRect(pad.l, pad.t, pW, pH);
         
-        // X-axis labels
         ctx.fillStyle = '#94a3b8'; 
         ctx.font = '11px Inter'; 
         ctx.textAlign = 'center'; 
@@ -1523,7 +1495,6 @@ class RenderEngine {
         }
         ctx.fillText('Volume Added (mL)', pad.l + pW/2, height - 10);
 
-        // Y-axis labels
         ctx.textAlign = 'right'; 
         ctx.textBaseline = 'middle';
         
@@ -1536,7 +1507,6 @@ class RenderEngine {
             ctx.fillText((yMin + (i/5)*(yMax - yMin)).toFixed(1), pad.l - 10, y);
         }
 
-        // Theoretical curve
         ctx.beginPath(); 
         ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)'; 
         ctx.lineWidth = 2;
@@ -1553,7 +1523,6 @@ class RenderEngine {
         }
         ctx.stroke();
 
-        // Experimental data
         if (app.state.state.plotData.length > 0) {
             ctx.beginPath(); 
             ctx.strokeStyle = '#10b981'; 
@@ -1574,7 +1543,6 @@ class RenderEngine {
             ctx.fill();
         }
 
-        // Y-axis label (rotated)
         ctx.save(); 
         ctx.translate(15, pad.t + pH/2); 
         ctx.rotate(-Math.PI/2);
@@ -1696,7 +1664,6 @@ class DataModule {
         });
     }
     
-    // FIX #11: Add CSV export functionality
     static exportData() {
         if (app.state.state.trials.length === 0) {
             return alert('⚠️ No trial data to export.\n\nPlease record at least one trial before exporting.');
@@ -1872,7 +1839,6 @@ class ExperimentModule {
         
         document.getElementById('sensorLabel').textContent = cfg.yAxis;
         
-        // FIX #9: Always restore exact default configs to prevent state bleeding
         app.state.state.titrantConc = cfg.titrant.defaultConc;
         app.state.state.analyteVolume = cfg.analyte.defaultVol;
 
@@ -1951,14 +1917,12 @@ class SetupModule {
         const analyteInput = document.getElementById('customAnalyte');
         const volumeInput = document.getElementById('customVolume');
         
-        // Validate all inputs
         const validTitrant = ValidationModule.validateInput(titrantInput);
         const validAnalyte = ValidationModule.validateInput(analyteInput);
         const validVolume = ValidationModule.validateInput(volumeInput);
         
         if (!validTitrant || !validAnalyte || !validVolume) return;
         
-        // Use explicit NaN check instead of || fallback
         const newTitrant = parseFloat(titrantInput.value);
         const newAnalyte = parseFloat(analyteInput.value);
         const newVolume = parseFloat(volumeInput.value);
@@ -1994,7 +1958,6 @@ class ModeModule {
         document.getElementById('mode-training').setAttribute('aria-checked', mode === 'training');
         document.getElementById('mode-exam').setAttribute('aria-checked', mode === 'exam');
         
-        // FIX #15: Explicitly disable inputs in exam mode
         const customInputs = document.querySelectorAll('#customSettings input');
         customInputs.forEach(input => input.disabled = (mode === 'exam'));
         
@@ -2058,14 +2021,12 @@ const app = {
         this.state = new StateManager();
         this.experiment.change();
         
-        // Start flask animation loop
         const loop = () => { 
             RenderEngine.renderFlask(); 
             requestAnimationFrame(loop); 
         }; 
         loop();
         
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
             
@@ -2173,7 +2134,6 @@ const app = {
 
 window.addEventListener('load', () => app.init());
 
-// Prevent accidental page unload with unsaved data
 window.addEventListener('beforeunload', (e) => {
     if (app.state.state.trials.length > 0 && !app.state.state.examSubmitted && app.state.state.mode === 'exam') {
         e.preventDefault();

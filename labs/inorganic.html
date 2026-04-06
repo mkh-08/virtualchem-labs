@@ -6,7 +6,6 @@
     <title>Inorganic Qualitative Analysis — VirtualChem by MKh</title>
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* ── LOCAL TOKENS ── */
         :root {
             --accent: var(--purple);
             --accent-dim: var(--purple-dim);
@@ -25,7 +24,6 @@
         body > header { flex-shrink: 0; }
         main { flex: 1; min-height: 0; }
 
-        /* ── APP HEADER ── */
         header {
             background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(129,140,248,0.06) 100%);
             padding: 12px 20px;
@@ -36,7 +34,7 @@
         }
         h1 {
             margin: 0;
-            font-size: var(--font-size-md);
+            font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -45,7 +43,7 @@
         .controls { display: flex; flex-wrap: wrap; gap: 6px; }
         .controls button {
             font-family: var(--font-body);
-            font-size: var(--font-size-sm);
+            font-size: 12px;
             font-weight: 600;
             padding: 7px 13px;
             border-radius: var(--r-sm);
@@ -53,9 +51,9 @@
             background: var(--bg-panel);
             color: var(--text-muted);
             cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease),
-                        border-color var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        color 0.15s ease,
+                        border-color 0.15s ease;
             white-space: nowrap;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
@@ -68,49 +66,47 @@
         }
         .controls .primary-btn:hover { background: #ddd6fe; }
 
-        /* ── LAYOUT ── */
         main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         @media (min-width: 1024px) {
             main { display: grid; grid-template-columns: 300px 1fr 360px; }
         }
 
-        /* ── REAGENT PANEL ── */
         .reagents {
             background: var(--bg-panel);
-            padding: var(--sp-4);
+            padding: 16px;
             overflow-y: auto;
             border-right: 1px solid var(--border);
             max-height: 300px;
         }
         @media (min-width: 1024px) { .reagents { max-height: none; } }
 
-        .reagent-group { margin-bottom: var(--sp-5); }
+        .reagent-group { margin-bottom: 20px; }
         .reagent-group h3 {
-            font-size: var(--font-size-xs);
+            font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border);
-            padding-bottom: var(--sp-2);
-            margin: 0 0 var(--sp-2) 0;
+            padding-bottom: 8px;
+            margin: 0 0 8px 0;
         }
         .reagent-btn {
             display: block; width: 100%;
             font-family: var(--font-body);
-            font-size: var(--font-size-sm);
+            font-size: 12px;
             font-weight: 500;
             background: transparent;
             border: 1px solid transparent;
             color: var(--text-muted);
-            padding: 6px var(--sp-3);
+            padding: 6px 12px;
             margin-bottom: 3px;
             text-align: left;
             border-radius: var(--r-sm);
             cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease),
-                        border-color var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        color 0.15s ease,
+                        border-color 0.15s ease;
         }
         .reagent-btn:hover { background: var(--bg-hover); color: var(--text-main); border-color: var(--border); }
         .reagent-btn:focus-visible { outline: 2px solid var(--purple); outline-offset: -2px; }
@@ -121,9 +117,9 @@
             color: var(--amber) !important;
             font-weight: 700 !important;
             text-align: center;
-            margin-bottom: var(--sp-2);
-            padding: 9px var(--sp-3) !important;
-            transition: background var(--t-fast) var(--ease) !important;
+            margin-bottom: 8px;
+            padding: 9px 12px !important;
+            transition: background 0.15s ease !important;
         }
         .heat-btn:hover { background: rgba(251,191,36,0.18) !important; }
         .heat-btn.active-heat {
@@ -138,11 +134,10 @@
             color: var(--blue) !important;
             font-weight: 700 !important;
             text-align: center;
-            margin-bottom: var(--sp-4);
+            margin-bottom: 16px;
         }
         .gas-btn:hover { background: rgba(56,189,248,0.15) !important; }
 
-        /* ── BENCH ── */
         .bench {
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
@@ -152,13 +147,13 @@
         }
 
         .fraction-tabs {
-            display: flex; gap: var(--sp-1);
-            margin-bottom: var(--sp-4);
+            display: flex; gap: 4px;
+            margin-bottom: 16px;
             flex-wrap: wrap; justify-content: center; max-width: 95%;
         }
         .fraction-tab {
             font-family: var(--font-body);
-            font-size: var(--font-size-xs);
+            font-size: 11px;
             font-weight: 600;
             background: var(--bg-inset);
             border: 1px solid var(--border);
@@ -166,9 +161,9 @@
             padding: 5px 12px;
             border-radius: 99px;
             cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease),
-                        border-color var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        color 0.15s ease,
+                        border-color 0.15s ease;
         }
         .fraction-tab.active {
             background: var(--purple-dim);
@@ -180,23 +175,23 @@
         .fraction-tab:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
 
         #exam-nav {
-            display: none; gap: var(--sp-2);
-            margin-bottom: var(--sp-5);
+            display: none; gap: 8px;
+            margin-bottom: 20px;
             flex-wrap: wrap; justify-content: center;
             background: var(--bg-inset);
-            padding: var(--sp-3) var(--sp-4);
+            padding: 12px 16px;
             border-radius: var(--r-md);
             border: 1px solid var(--border);
         }
         .exam-nav-btn {
             font-family: var(--font-body);
-            font-size: var(--font-size-sm);
+            font-size: 12px;
             font-weight: 500;
             background: var(--bg-panel);
             border: 1px solid var(--border);
             color: var(--text-muted);
             padding: 5px 12px; border-radius: var(--r-sm);
-            cursor: pointer; transition: background var(--t-fast) var(--ease);
+            cursor: pointer; transition: background 0.15s ease;
         }
         .exam-nav-btn:hover { background: var(--bg-hover); color: var(--text-main); }
         .exam-nav-btn.active {
@@ -211,14 +206,13 @@
             padding: 5px 18px;
             border-radius: var(--r-sm);
             font-family: var(--font-mono);
-            font-size: var(--font-size-md);
+            font-size: 14px;
             border: 1px solid var(--border-lite);
-            margin-bottom: var(--sp-4);
+            margin-bottom: 16px;
             color: var(--purple);
             letter-spacing: 0.04em;
         }
 
-        /* ── TEST TUBE ── */
         .test-tube-container { position: relative; width: 90px; height: 300px; margin: 10px 0; }
         .test-tube {
             width: 100%; height: 100%;
@@ -230,8 +224,8 @@
             box-shadow: inset -3px -3px 10px rgba(0,0,0,0.08),
                         0 4px 12px rgba(0,0,0,0.1);
             z-index: 2;
-            transition: box-shadow var(--t-mid) var(--ease),
-                        border-color var(--t-mid) var(--ease);
+            transition: box-shadow 0.25s ease,
+                        border-color 0.25s ease;
         }
         .test-tube::after {
             content: '';
@@ -277,19 +271,18 @@
             100% { transform: translateX(-50%) scale(1.05) skewX(2deg); opacity: 0.95; }
         }
 
-        /* ── BENCH CONTROLS ── */
-        .bench-controls { margin-top: var(--sp-5); display: flex; gap: var(--sp-2); flex-wrap: wrap; justify-content: center; }
+        .bench-controls { margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         .bench-controls button {
             font-family: var(--font-body);
-            font-size: var(--font-size-sm);
+            font-size: 12px;
             font-weight: 600;
             background: var(--bg-panel);
             border: 1px solid var(--border);
             color: var(--text-muted);
             padding: 8px 14px; border-radius: var(--r-sm);
             cursor: pointer;
-            transition: background var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease);
+            transition: background 0.15s ease,
+                        color 0.15s ease;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .bench-controls button:hover { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
@@ -300,7 +293,6 @@
         }
         .sep-btn:hover { background: rgba(56,189,248,0.2) !important; }
 
-        /* ── LOG PANEL ── */
         .log-panel {
             background: var(--bg-inset);
             display: flex; flex-direction: column;
@@ -311,28 +303,28 @@
         @media (max-width: 1023px) { .log-panel { border-left: none; border-top: 1px solid var(--border); } }
 
         .log-header {
-            padding: var(--sp-3) var(--sp-4);
+            padding: 12px 16px;
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
-            font-size: var(--font-size-sm); font-weight: 700;
+            font-size: 12px; font-weight: 700;
             color: var(--text-muted);
             letter-spacing: 0.05em;
             text-transform: uppercase;
         }
-        .log-actions { display: flex; gap: var(--sp-3); font-size: var(--font-size-xs); cursor: pointer; }
-        .log-actions span { color: var(--text-muted); transition: color var(--t-fast); }
+        .log-actions { display: flex; gap: 12px; font-size: 11px; cursor: pointer; }
+        .log-actions span { color: var(--text-muted); transition: color 0.15s; }
         .log-actions span:hover { color: var(--text-main); }
         .log-content {
-            flex: 1; padding: var(--sp-4);
+            flex: 1; padding: 16px;
             overflow-y: auto;
             font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
             scroll-behavior: smooth;
         }
         .log-entry {
-            margin-bottom: var(--sp-3);
+            margin-bottom: 12px;
             border-bottom: 1px solid var(--border);
-            padding-bottom: var(--sp-2);
+            padding-bottom: 8px;
             word-wrap: break-word;
         }
         .log-time { color: var(--text-dim); margin-right: 6px; font-size: 10px; }
@@ -342,7 +334,6 @@
         .log-res { color: #065f46; padding-left: 12px; border-left: 2px solid var(--green); display: block; margin-top: 3px; background: var(--green-dim); border-radius: 0 var(--r-sm) var(--r-sm) 0; padding: 2px 8px 2px 10px; }
         .log-err { color: #991b1b; }
 
-        /* ── MODALS ── */
         .modal {
             display: none; position: fixed; inset: 0;
             background: rgba(15,23,42,0.5);
@@ -350,7 +341,7 @@
             -webkit-backdrop-filter: blur(4px);
             z-index: 500;
             justify-content: center; align-items: center;
-            padding: var(--sp-5);
+            padding: 20px;
         }
         .modal.open, .modal[style*="flex"] { display: flex; }
         .modal-content {
@@ -359,59 +350,56 @@
             border-radius: var(--r-lg);
             width: 95%; max-width: 860px;
             max-height: 88vh; overflow-y: auto;
-            padding: var(--sp-6);
+            padding: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border);
-            padding-bottom: var(--sp-4); margin-bottom: var(--sp-5);
+            padding-bottom: 16px; margin-bottom: 20px;
         }
-        .modal-header h2 { margin: 0; font-size: var(--font-size-lg); font-weight: 700; }
-        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0; transition: color var(--t-fast); }
+        .modal-header h2 { margin: 0; font-size: 16px; font-weight: 700; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0; transition: color 0.15s; }
         .close-modal:hover { color: var(--text-main); }
 
-        /* ── TABLE ── */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: var(--font-size-sm); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
         th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
-        th { background: var(--bg-inset); color: var(--text-muted); font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.06em; position: sticky; top: 0; }
+        th { background: var(--bg-inset); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; position: sticky; top: 0; }
         td { font-family: var(--font-mono); font-size: 12px; }
         tbody tr:hover { background: var(--bg-hover); }
 
-        /* ── EXAM ROWS ── */
         .exam-row {
-            display: flex; flex-direction: column; gap: var(--sp-3);
+            display: flex; flex-direction: column; gap: 12px;
             background: var(--bg-panel);
-            padding: var(--sp-3) var(--sp-4);
-            margin-bottom: var(--sp-2);
+            padding: 12px 16px;
+            margin-bottom: 8px;
             border-radius: var(--r-sm);
             border-left: 3px solid var(--border);
-            transition: background var(--t-fast);
+            transition: background 0.15s;
         }
         @media (min-width: 640px) {
             .exam-row { flex-direction: row; justify-content: space-between; align-items: center; }
         }
         select {
             font-family: var(--font-body);
-            font-size: var(--font-size-sm);
+            font-size: 12px;
             background: var(--bg-inset);
             color: var(--text-main);
             border: 1px solid var(--border);
             padding: 7px 10px; border-radius: var(--r-sm);
             outline: none; width: 100%; max-width: 260px;
-            transition: border-color var(--t-fast);
+            transition: border-color 0.15s;
         }
         select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-dim); }
         .correct-ans { border-left-color: var(--green); background: var(--green-dim); }
         .wrong-ans { border-left-color: var(--red); background: var(--red-dim); }
 
-        /* ── CANDIDATE POOL ── */
         .candidate-pool {
             background: var(--bg-inset);
             border: 1px solid var(--border);
-            padding: var(--sp-4); border-radius: var(--r-sm);
-            margin-bottom: var(--sp-5);
-            font-size: var(--font-size-sm);
+            padding: 16px; border-radius: var(--r-sm);
+            margin-bottom: 20px;
+            font-size: 12px;
         }
         .candidate-pool span {
             display: inline-block;
@@ -425,17 +413,16 @@
             font-size: 12px;
         }
 
-        /* ── MIX GRID ── */
-        .mix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--sp-2); margin-bottom: var(--sp-5); }
+        .mix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 20px; }
         .mix-label {
-            display: flex; align-items: center; gap: var(--sp-2);
+            display: flex; align-items: center; gap: 8px;
             background: var(--bg-panel);
-            padding: var(--sp-2) var(--sp-3);
+            padding: 8px 12px;
             border-radius: var(--r-sm);
-            font-size: var(--font-size-sm);
+            font-size: 12px;
             cursor: pointer;
             border: 1px solid var(--border);
-            transition: border-color var(--t-fast);
+            transition: border-color 0.15s;
         }
         .mix-label:hover { border-color: var(--border-lite); }
     </style>
@@ -653,7 +640,6 @@
  */
 
 const DB = [
-    // ==================== GROUP I ====================
     { id: 'ag', name: 'Silver(I) (Ag⁺)', type: 'cation', group: 'I', aqColor: 'transparent',
       reactions: {
           'hcl_dil': { action: 'ppt', formula: 'AgCl', color: '#ffffff', 
@@ -722,7 +708,6 @@ const DB = [
       }
     },
     
-    // ==================== GROUP II ====================
     { id: 'cu', name: 'Copper(II) (Cu²⁺)', type: 'cation', group: 'II', aqColor: '#87ceeb', 
       flame: 'radial-gradient(ellipse, #00fa9a, #006400)',
       reactions: {
@@ -770,7 +755,6 @@ const DB = [
       }
     },
     
-    // ==================== GROUP III ====================
     { id: 'fe3', name: 'Iron(III) (Fe³⁺)', type: 'cation', group: 'III', aqColor: '#eedd82',
       reactions: {
           'nh42s': { action: 'ppt', formula: 'Fe2S3', color: '#1a1a1a',
@@ -911,7 +895,6 @@ const DB = [
       }
     },
     
-    // ==================== GROUP IV ====================
     { id: 'ba', name: 'Barium (Ba²⁺)', type: 'cation', group: 'IV', aqColor: 'transparent', 
       flame: 'radial-gradient(ellipse, #adff2f, #32cd32)',
       reactions: {
@@ -946,7 +929,6 @@ const DB = [
       }
     },
     
-    // ==================== GROUP V ====================
     { id: 'mg', name: 'Magnesium (Mg²⁺)', type: 'cation', group: 'V', aqColor: 'transparent',
       reactions: {
           'naoh_drop': { action: 'ppt', formula: 'Mg(OH)2', color: '#ffffff', 
@@ -976,7 +958,6 @@ const DB = [
       reactions: {}
     },
     
-    // ==================== ANIONS ====================
     { id: 'cl', name: 'Chloride (Cl⁻)', type: 'anion', group: 'Halide', aqColor: 'transparent',
       reactions: {
           'agno3': { action: 'ppt', formula: 'AgCl', color: '#ffffff', 
@@ -1068,7 +1049,6 @@ const DB = [
       }
     },
 
-    // ==================== ADDITIONAL CATIONS ====================
     { id: 'hg2', name: 'Mercury(II) (Hg²⁺)', type: 'cation', group: 'II', aqColor: 'transparent',
       reactions: {
           'h2s_acid': { action: 'ppt', formula: 'HgS', color: '#000000',
@@ -1111,7 +1091,6 @@ const DB = [
       }
     },
 
-    // ==================== ADDITIONAL ANIONS ====================
     { id: 'cn', name: 'Cyanide (CN⁻)', type: 'anion', group: 'Complex', aqColor: 'transparent',
       reactions: {
           'hcl_dil': { action: 'gas', gasId: 'HCN',
@@ -1159,7 +1138,6 @@ const DB = [
     }
 ];
 
-// ==================== STATE MANAGEMENT ====================
 const MAX_LOG_ENTRIES = 100;
 let isHeated = false;
 let currentMode = 'single';
@@ -1181,7 +1159,6 @@ class Fraction {
     }
 }
 
-// ==================== CORE FUNCTIONS ====================
 function initFractions(ionsArray) {
     fractions = {};
     fractionCounter = 0;
@@ -1232,18 +1209,15 @@ function blendColorsSubtractive(hexArray) {
         let g = parseInt(hex.substring(3, 5), 16) / 255;
         let b = parseInt(hex.substring(5, 7), 16) / 255;
         
-        // RGB to CMY
         totalC += (1 - r);
         totalM += (1 - g);
         totalY += (1 - b);
     });
     
-    // Average CMY values
     let c = totalC / hexArray.length;
     let m = totalM / hexArray.length;
     let y = totalY / hexArray.length;
     
-    // CMY back to RGB
     let rOut = Math.round((1 - c) * 255).toString(16).padStart(2, '0');
     let gOut = Math.round((1 - m) * 255).toString(16).padStart(2, '0');
     let bOut = Math.round((1 - y) * 255).toString(16).padStart(2, '0');
@@ -1251,17 +1225,14 @@ function blendColorsSubtractive(hexArray) {
     return `#${rOut}${gOut}${bOut}`;
 }
 
-// ==================== REACTION ENGINE ====================
 function processReagent(reagentId) {
     try {
         if (!activeFractionId) return log("No active sample.", "err");
         let f = fractions[activeFractionId];
         
-        // Heat fallback
         let effectiveReagent = reagentId;
         if (isHeated && (reagentId === 'naoh_drop' || reagentId === 'naoh_xs')) effectiveReagent = 'naoh_heat';
 
-        // pH State Tracking
         if (reagentId === 'hcl_dil') f.ph = 'Acidic';
         if (['naoh_drop','naoh_xs','nh3_drop','nh3_xs','nh3_nh4cl'].includes(reagentId)) f.ph = 'Basic';
 
@@ -1282,7 +1253,6 @@ function processReagent(reagentId) {
 
         let isExamObfuscationActive = (examData.active && !examData.submitted);
 
-        // Aqueous Phase Evaluation
         let remainingAq = [];
         f.aqueous.forEach(ionId => {
             let ionDef = DB.find(i => i.id === ionId);
@@ -1321,7 +1291,6 @@ function processReagent(reagentId) {
         });
         f.aqueous = remainingAq;
 
-        // Solid Phase Evaluation
         let remainingSolid = [];
         f.solid.forEach(solidObj => {
             let ionDef = DB.find(i => i.id === solidObj.sourceId);
@@ -1357,7 +1326,6 @@ function processReagent(reagentId) {
         });
         f.solid = remainingSolid;
 
-        // Logging
         if (observations.length === 0) {
             if (reagentId === 'flame' || reagentId === 'smell') return;
             log("No observable change.", "res");
@@ -1459,7 +1427,6 @@ function discardCurrentFraction() {
     }
 }
 
-// ==================== VISUAL UPDATES ====================
 function updateVisuals() {
     try {
         if (!activeFractionId) return;
@@ -1553,7 +1520,6 @@ function toggleHeat() {
     }
 }
 
-// ==================== LOGGER (WITH MEMORY MANAGEMENT) ====================
 function log(msg, type) {
     try {
         const panel = document.getElementById('log-content');
@@ -1580,7 +1546,6 @@ function log(msg, type) {
 
         panel.appendChild(div);
         
-        // Memory Management: FIFO rotation
         while (panel.children.length > MAX_LOG_ENTRIES) {
             panel.removeChild(panel.firstChild);
         }
@@ -1610,7 +1575,6 @@ function copyLog() {
     }
 }
 
-// ==================== SESSION & MODE ====================
 function setMode(mode) {
     try {
         currentMode = mode;
@@ -1663,7 +1627,6 @@ function closeModal(id) {
     }
 }
 
-// ==================== MIXTURE BUILDER ====================
 function populateMixModal() {
     try {
         const grid = document.getElementById('mix-checkboxes');
@@ -1712,14 +1675,12 @@ function applyMixture() {
     }
 }
 
-// ==================== EXAM MODE ====================
 function generateExam() {
     try {
         examData.active = true;
         examData.submitted = false;
         document.getElementById('btn-exam-sheet').style.display = 'inline-block';
         
-        // Select 6 distinct ions based on reaction uniqueness
         let shuffled = [...DB].sort(() => 0.5 - Math.random());
         let selected = [];
         let hashes = new Set();
@@ -1734,7 +1695,6 @@ function generateExam() {
         }
         examData.unknowns = selected;
         
-        // Add 4 distractors
         let distractors = [];
         for (let ion of shuffled) {
             if (!selected.includes(ion)) { 
@@ -1759,7 +1719,6 @@ function loadExamUnknown(index) {
         originalMixture = [examData.unknowns[index]];
         document.getElementById('unknown-label').textContent = `Exam Tube ${index + 1}/6`;
         
-        // Update Quick Nav
         const nav = document.getElementById('exam-nav');
         nav.style.display = 'flex';
         nav.innerHTML = '';
@@ -1783,7 +1742,6 @@ function buildExamUI() {
         const container = document.getElementById('exam-rows-container');
         container.innerHTML = '';
         
-        // Populate candidate list
         const cList = document.getElementById('candidate-list');
         cList.innerHTML = examData.candidates.map(c => `<span>${c.name}</span>`).join('');
         
@@ -1864,7 +1822,6 @@ function submitExam() {
     }
 }
 
-// ==================== REFERENCE DATA ====================
 function buildCompareData() {
     try {
         const table = document.getElementById('data-table');
@@ -1891,7 +1848,6 @@ function buildCompareData() {
     }
 }
 
-// ==================== INITIALIZATION ====================
 try {
     setMode('single');
 } catch (error) {

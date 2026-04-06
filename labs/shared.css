@@ -1,77 +1,41 @@
-/*
- * ============================================================
- * VirtualChem Labs — Shared Design System  (light theme)
- * ============================================================
- */
-
-/* ── GOOGLE FONTS ── */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ── DESIGN TOKENS ── */
 :root {
-  /* Backgrounds */
-  --bg-base:     #f8fafc;
-  --bg-panel:    #ffffff;
-  --bg-inset:    #f1f5f9;
-  --bg-hover:    #f8fafc;
+  --bg-base:    #f8fafc;
+  --bg-panel:   #ffffff;
+  --bg-inset:   #f1f5f9;
+  --bg-hover:   #f8fafc;
 
-  /* Text */
-  --text-main:   #0f172a;
-  --text-muted:  #64748b;
-  --text-dim:    #94a3b8;
+  --text-main:  #0f172a;
+  --text-muted: #64748b;
+  --text-dim:   #94a3b8;
 
-  /* Borders */
   --border:      #e2e8f0;
   --border-lite: #cbd5e1;
 
-  /* Accents */
-  --blue:        #0ea5e9;
-  --blue-dim:    #e0f2fe;
-  --blue-hover:  #0284c7;
-  --green:       #10b981;
-  --green-dim:   #d1fae5;
-  --purple:      #8b5cf6;
-  --purple-dim:  #ede9fe;
-  --amber:       #f59e0b;
-  --amber-dim:   #fef3c7;
-  --red:         #ef4444;
-  --red-dim:     #fee2e2;
+  --blue:       #0ea5e9;
+  --blue-dim:   #e0f2fe;
+  --blue-hover: #0284c7;
+  --green:      #10b981;
+  --green-dim:  #d1fae5;
+  --purple:     #8b5cf6;
+  --purple-dim: #ede9fe;
+  --amber:      #f59e0b;
+  --amber-dim:  #fef3c7;
+  --red:        #ef4444;
+  --red-dim:    #fee2e2;
 
-  /* Timing */
-  --t-fast:  0.15s;
-  --t-mid:   0.25s;
-  --t-slow:  0.4s;
-  --ease:    cubic-bezier(0.4, 0, 0.2, 1);
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'Consolas', 'Courier New', monospace;
 
-  /* Spacing scale */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-
-  /* Radius */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 14px;
   --r-xl: 20px;
-
-  /* Font */
-  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Fira Code', 'Consolas', 'Courier New', monospace;
-  --font-size-xs:   11px;
-  --font-size-sm:   12px;
-  --font-size-base: 13px;
-  --font-size-md:   14px;
-  --font-size-lg:   16px;
 }
 
-/* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ── SHARED BODY BASE ── */
 body {
   font-family: var(--font-body);
   background: var(--bg-base);
@@ -80,7 +44,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── SITE NAV ── */
 .site-nav {
   position: sticky; top: 0; z-index: 200;
   height: 52px;
@@ -94,13 +57,13 @@ body {
 }
 
 .site-nav-brand {
-  font-size: var(--font-size-md);
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--text-main);
   text-decoration: none;
-  display: flex; align-items: center; gap: var(--sp-2);
-  transition: opacity var(--t-fast) var(--ease);
+  display: flex; align-items: center; gap: 8px;
+  transition: opacity 0.15s ease;
 }
 .site-nav-brand:hover { opacity: 0.75; }
 
@@ -108,36 +71,32 @@ body {
 .site-nav-links a {
   padding: 5px 12px;
   border-radius: var(--r-sm);
-  font-size: var(--font-size-sm);
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-muted);
   text-decoration: none;
-  transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  transition: color 0.15s ease, background 0.15s ease;
 }
 .site-nav-links a:hover { color: var(--text-main); background: var(--bg-inset); }
 .site-nav-links a.snav-active { color: var(--blue); background: var(--blue-dim); font-weight: 600; }
 
-/* per-lab active overrides */
 .snav-green  { color: var(--green)  !important; background: var(--green-dim)  !important; }
 .snav-purple { color: var(--purple) !important; background: var(--purple-dim) !important; }
 .snav-amber  { color: var(--amber)  !important; background: var(--amber-dim)  !important; }
 
 @media (max-width: 600px) { .site-nav-links { display: none; } }
 
-/* ── SHARED BUTTON SYSTEM ── */
 .sbtn {
-  display: inline-flex; align-items: center; gap: var(--sp-2);
+  display: inline-flex; align-items: center; gap: 8px;
   padding: 7px 14px;
   border: 1px solid transparent; border-radius: var(--r-sm);
   font-family: var(--font-body);
-  font-size: var(--font-size-sm);
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--t-fast) var(--ease),
-              box-shadow var(--t-fast) var(--ease),
-              transform var(--t-fast) var(--ease);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   white-space: nowrap;
-  -webkit-user-select: none; user-select: none;
+  user-select: none;
 }
 .sbtn:active:not(:disabled) { transform: scale(0.97); }
 .sbtn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -146,11 +105,7 @@ body {
 .sbtn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
 .sbtn-primary:hover:not(:disabled) { background: var(--blue-hover); border-color: var(--blue-hover); box-shadow: 0 0 0 3px var(--blue-dim); }
 
-.sbtn-ghost {
-  background: #fff;
-  color: var(--text-muted);
-  border-color: var(--border);
-}
+.sbtn-ghost { background: #fff; color: var(--text-muted); border-color: var(--border); }
 .sbtn-ghost:hover:not(:disabled) { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
 
 .sbtn-danger  { background: var(--red-dim);    color: var(--red);    border-color: #fca5a5; }
@@ -158,7 +113,6 @@ body {
 .sbtn-amber   { background: var(--amber-dim);  color: var(--amber);  border-color: #fcd34d; }
 .sbtn-purple  { background: var(--purple-dim); color: var(--purple); border-color: #c4b5fd; }
 
-/* ── SHARED PANEL ── */
 .spanel {
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -166,7 +120,6 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
-/* ── SHARED INPUT / SELECT ── */
 .sinput, .sselect {
   background: #fff;
   color: var(--text-main);
@@ -174,9 +127,9 @@ body {
   padding: 8px 12px;
   border-radius: var(--r-sm);
   font-family: var(--font-body);
-  font-size: var(--font-size-base);
+  font-size: 13px;
   outline: none;
-  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
 }
 .sinput:focus, .sselect:focus {
@@ -185,7 +138,6 @@ body {
 }
 .sinput:disabled, .sselect:disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg-inset); }
 
-/* ── SHARED MODAL ── */
 .smodal-backdrop {
   display: none;
   position: fixed; inset: 0;
@@ -194,7 +146,7 @@ body {
   -webkit-backdrop-filter: blur(4px);
   z-index: 500;
   justify-content: center; align-items: center;
-  padding: var(--sp-5);
+  padding: 20px;
 }
 .smodal-backdrop.open { display: flex; }
 
@@ -204,44 +156,41 @@ body {
   border-radius: var(--r-lg);
   width: 95%; max-width: 860px;
   max-height: 88vh; overflow-y: auto;
-  padding: var(--sp-6);
+  padding: 24px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
 .smodal-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding-bottom: var(--sp-4);
-  margin-bottom: var(--sp-5);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
   border-bottom: 1px solid var(--border);
 }
-.smodal-header h2 { font-size: var(--font-size-lg); font-weight: 700; color: var(--text-main); }
+.smodal-header h2 { font-size: 16px; font-weight: 700; color: var(--text-main); }
 .smodal-close {
   background: none; border: none;
   color: var(--text-muted); font-size: 22px; line-height: 1;
   cursor: pointer; padding: 0;
-  transition: color var(--t-fast);
+  transition: color 0.15s;
 }
 .smodal-close:hover { color: var(--text-main); }
 
-/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-lite); }
 * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 
-/* ── TABLE ── */
-.stable { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+.stable { width: 100%; border-collapse: collapse; font-size: 12px; }
 .stable th, .stable td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-.stable th { color: var(--text-muted); font-weight: 600; font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.06em; background: var(--bg-inset); }
+.stable th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; background: var(--bg-inset); }
 .stable tbody tr:hover { background: var(--bg-hover); }
 .stable td { font-family: var(--font-mono); font-size: 12px; }
 
-/* ── CHIP / BADGE ── */
 .schip {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 2px 8px; border-radius: 99px;
-  font-size: var(--font-size-xs); font-weight: 700; letter-spacing: 0.06em;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .schip-blue   { background: var(--blue-dim);   color: var(--blue-hover); border: 1px solid #bae6fd; }
@@ -250,7 +199,6 @@ body {
 .schip-red    { background: var(--red-dim);    color: #dc2626;           border: 1px solid #fca5a5; }
 .schip-purple { background: var(--purple-dim); color: var(--purple);     border: 1px solid #c4b5fd; }
 
-/* ── LOG ENTRY ── */
 .slog-entry {
   padding: 6px 10px;
   margin-bottom: 6px;
@@ -265,7 +213,6 @@ body {
 .slog-warn { border-left-color: var(--amber);   color: #92400e;           background: var(--amber-dim); }
 .slog-err  { border-left-color: var(--red);     color: #991b1b;           background: var(--red-dim); }
 
-/* ── REDUCED MOTION ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -273,8 +220,6 @@ body {
   }
 }
 
-/* ── CHEMICAL FORMULA RENDERING ── */
-/* Ensure subscript/superscript Unicode chars render at readable size */
 sub, sup {
   font-size: 0.72em;
   line-height: 0;
@@ -284,7 +229,6 @@ sub, sup {
 sup { top: -0.45em; }
 sub { bottom: -0.25em; }
 
-/* ── ACCESSIBILITY ── */
 .sr-only {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
