@@ -8,10 +8,10 @@
     <style>
         /* ── LOCAL TOKENS ── */
         :root {
-            --accent: #a78bfa;
-            --accent-dim: rgba(167,139,250,0.1);
-            --accent-hover: #8b7cf8;
-            --tube-glass: rgba(255,255,255,0.05);
+            --accent: var(--purple);
+            --accent-dim: var(--purple-dim);
+            --accent-hover: #7c3aed;
+            --tube-glass: rgba(241,245,249,0.9);
         }
 
         body {
@@ -50,22 +50,23 @@
             padding: 7px 13px;
             border-radius: var(--r-sm);
             border: 1px solid var(--border);
-            background: rgba(255,255,255,0.05);
+            background: var(--bg-panel);
             color: var(--text-muted);
             cursor: pointer;
             transition: background var(--t-fast) var(--ease),
                         color var(--t-fast) var(--ease),
                         border-color var(--t-fast) var(--ease);
             white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .controls button:hover { background: rgba(255,255,255,0.09); color: var(--text-main); border-color: var(--border-lite); }
+        .controls button:hover { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
         .controls button:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
         .controls .primary-btn {
             background: var(--purple-dim);
             color: var(--purple);
-            border-color: rgba(167,139,250,0.25);
+            border-color: #c4b5fd;
         }
-        .controls .primary-btn:hover { background: rgba(129,140,248,0.2); }
+        .controls .primary-btn:hover { background: #ddd6fe; }
 
         /* ── LAYOUT ── */
         main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
@@ -146,7 +147,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
             position: relative; padding: 20px 10px;
-            background: radial-gradient(circle at center, var(--bg-panel) 0%, var(--bg-base) 100%);
+            background: radial-gradient(circle at center, #f0fdf4 0%, var(--bg-base) 100%);
             overflow-y: auto; flex: 1;
         }
 
@@ -222,12 +223,12 @@
         .test-tube {
             width: 100%; height: 100%;
             background: var(--tube-glass);
-            border: 3px solid rgba(255,255,255,0.22);
+            border: 2px solid rgba(0,0,0,0.15);
             border-top: none;
             border-radius: 0 0 45px 45px;
             position: relative; overflow: hidden;
-            box-shadow: inset -4px -4px 16px rgba(0,0,0,0.5),
-                        inset 3px 0 8px rgba(255,255,255,0.03);
+            box-shadow: inset -3px -3px 10px rgba(0,0,0,0.08),
+                        0 4px 12px rgba(0,0,0,0.1);
             z-index: 2;
             transition: box-shadow var(--t-mid) var(--ease),
                         border-color var(--t-mid) var(--ease);
@@ -236,13 +237,13 @@
             content: '';
             position: absolute; top: 8px; left: 8px;
             width: 12px; height: 60%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+            background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
             border-radius: 6px;
             pointer-events: none;
         }
         .test-tube.heated {
-            box-shadow: inset -4px -4px 16px rgba(0,0,0,0.5),
-                        inset 0 -30px 40px rgba(251,191,36,0.25);
+            box-shadow: inset -3px -3px 10px rgba(0,0,0,0.08),
+                        inset 0 -20px 30px rgba(251,191,36,0.2);
             border-bottom-color: var(--amber);
         }
 
@@ -259,7 +260,7 @@
         .gas-container { position: absolute; bottom: 0; width: 100%; height: 100%; overflow: hidden; z-index: 4; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .gas-container.active { opacity: 1; }
         @keyframes rise { 0% { bottom: 0; opacity: 1; transform: translateX(0); } 100% { bottom: 100%; opacity: 0; transform: translateX(10px); } }
-        .bubble { position: absolute; background: rgba(255,255,255,0.55); border-radius: 50%; width: 5px; height: 5px; animation: rise 1.2s linear infinite; }
+        .bubble { position: absolute; background: rgba(14,165,233,0.4); border-radius: 50%; width: 5px; height: 5px; animation: rise 1.2s linear infinite; }
 
         .flame-overlay {
             display: none; position: absolute; top: -90px; left: 50%;
@@ -282,15 +283,16 @@
             font-family: var(--font-body);
             font-size: var(--font-size-sm);
             font-weight: 600;
-            background: rgba(255,255,255,0.05);
+            background: var(--bg-panel);
             border: 1px solid var(--border);
             color: var(--text-muted);
             padding: 8px 14px; border-radius: var(--r-sm);
             cursor: pointer;
             transition: background var(--t-fast) var(--ease),
                         color var(--t-fast) var(--ease);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .bench-controls button:hover { background: rgba(255,255,255,0.09); color: var(--text-main); border-color: var(--border-lite); }
+        .bench-controls button:hover { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
         .sep-btn {
             background: var(--blue-dim) !important;
             color: var(--blue) !important;
@@ -329,23 +331,23 @@
         }
         .log-entry {
             margin-bottom: var(--sp-3);
-            border-bottom: 1px dashed rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--border);
             padding-bottom: var(--sp-2);
             word-wrap: break-word;
         }
         .log-time { color: var(--text-dim); margin-right: 6px; font-size: 10px; }
         .log-tube { color: var(--purple); font-weight: 700; margin-right: 4px; }
         .log-sys { color: var(--text-muted); }
-        .log-act { color: var(--blue); font-weight: 700; }
-        .log-res { color: #a7f3d0; padding-left: 12px; border-left: 2px solid var(--green); display: block; margin-top: 3px; }
-        .log-err { color: var(--red); }
+        .log-act { color: #0369a1; font-weight: 700; }
+        .log-res { color: #065f46; padding-left: 12px; border-left: 2px solid var(--green); display: block; margin-top: 3px; background: var(--green-dim); border-radius: 0 var(--r-sm) var(--r-sm) 0; padding: 2px 8px 2px 10px; }
+        .log-err { color: #991b1b; }
 
         /* ── MODALS ── */
         .modal {
             display: none; position: fixed; inset: 0;
-            background: rgba(5,8,18,0.88);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 500;
             justify-content: center; align-items: center;
             padding: var(--sp-5);
@@ -353,12 +355,12 @@
         .modal.open, .modal[style*="flex"] { display: flex; }
         .modal-content {
             background: var(--bg-panel);
-            border: 1px solid var(--border-lite);
+            border: 1px solid var(--border);
             border-radius: var(--r-lg);
             width: 95%; max-width: 860px;
             max-height: 88vh; overflow-y: auto;
             padding: var(--sp-6);
-            box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -479,10 +481,10 @@
         <div class="reagent-group">
             <h3>Group Separation</h3>
             <button class="reagent-btn" onclick="processReagent('hcl_dil')">Dilute HCl (Group I)</button>
-            <button class="reagent-btn" onclick="processReagent('h2s_acid')">H₂S (acidic) (Group II)</button>
-            <button class="reagent-btn" onclick="processReagent('nh3_nh4cl')">NH₃ + NH₄Cl buffer</button>
-            <button class="reagent-btn" onclick="processReagent('nh42s')">(NH₄)₂S (Group III)</button>
-            <button class="reagent-btn" onclick="processReagent('nh42co3')">(NH₄)₂CO₃ (Group IV)</button>
+            <button class="reagent-btn" onclick="processReagent('h2s_acid')">H<sub>2</sub>S (acidic) (Group II)</button>
+            <button class="reagent-btn" onclick="processReagent('nh3_nh4cl')">NH<sub>3</sub> + NH<sub>4</sub>Cl buffer</button>
+            <button class="reagent-btn" onclick="processReagent('nh42s')">(NH<sub>4</sub>)<sub>2</sub>S (Group III)</button>
+            <button class="reagent-btn" onclick="processReagent('nh42co3')">(NH<sub>4</sub>)<sub>2</sub>CO<sub>3</sub> (Group IV)</button>
         </div>
         <div class="reagent-group">
             <h3>Alkalis</h3>
@@ -494,21 +496,21 @@
         <div class="reagent-group">
             <h3>Specific Confirmatory</h3>
             <button class="reagent-btn" onclick="processReagent('ki')">KI (Potassium Iodide)</button>
-            <button class="reagent-btn" onclick="processReagent('k2cro4')">K₂CrO₄</button>
-            <button class="reagent-btn" onclick="processReagent('k4fecn6')">K₄[Fe(CN)₆]</button>
+            <button class="reagent-btn" onclick="processReagent('k2cro4')">K<sub>2</sub>CrO<sub>4</sub></button>
+            <button class="reagent-btn" onclick="processReagent('k4fecn6')">K<sub>4</sub>[Fe(CN)<sub>6</sub>]</button>
             <button class="reagent-btn" onclick="processReagent('kscn')">KSCN</button>
             <button class="reagent-btn" onclick="processReagent('kscn_amyl')">KSCN + Amyl Alcohol</button>
             <button class="reagent-btn" onclick="processReagent('dmg')">Dimethylglyoxime (DMG)</button>
             <button class="reagent-btn" onclick="processReagent('aluminon')">Aluminon Reagent</button>
             <button class="reagent-btn" onclick="processReagent('h2o2_naoh')">H₂O₂ + NaOH</button>
-            <button class="reagent-btn" onclick="processReagent('amm_oxalate')">(NH₄)₂C₂O₄ (Oxalate)</button>
-            <button class="reagent-btn" onclick="processReagent('amm_phosphate')">(NH₄)₂HPO₄ (Phosphate)</button>
+            <button class="reagent-btn" onclick="processReagent('amm_oxalate')">(NH<sub>4</sub>)<sub>2</sub>C<sub>2</sub>O<sub>4</sub> (Oxalate)</button>
+            <button class="reagent-btn" onclick="processReagent('amm_phosphate')">(NH<sub>4</sub>)<sub>2</sub>HPO<sub>4</sub> (Phosphate)</button>
         </div>
         <div class="reagent-group">
             <h3>Anion Tests</h3>
-            <button class="reagent-btn" onclick="processReagent('bacl2')">BaCl₂</button>
-            <button class="reagent-btn" onclick="processReagent('agno3')">AgNO₃ + HNO₃</button>
-            <button class="reagent-btn" onclick="processReagent('ccl4_cl2')">Cl₂ water + CCl₄</button>
+            <button class="reagent-btn" onclick="processReagent('bacl2')">BaCl<sub>2</sub></button>
+            <button class="reagent-btn" onclick="processReagent('agno3')">AgNO<sub>3</sub> + HNO<sub>3</sub></button>
+            <button class="reagent-btn" onclick="processReagent('ccl4_cl2')">Cl<sub>2</sub> water + CCl<sub>4</sub></button>
             <button class="reagent-btn" onclick="processReagent('amm_molybdate')">Ammonium Molybdate</button>
             <button class="reagent-btn" onclick="processReagent('brown_ring')">Brown Ring Test</button>
         </div>

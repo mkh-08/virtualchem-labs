@@ -6,19 +6,6 @@
     <title>Organic Qualitative Analysis — VirtualChem by MKh</title>
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* ── ORGANIC LAB LOCAL TOKENS (mapped to shared) ── */
-        :root {
-            --bg-dark:      var(--bg-base);
-            --panel-bg:     var(--bg-panel);
-            --panel-border: var(--border);
-            --accent-blue:  var(--blue);
-            --accent-green: var(--green);
-            --accent-red:   var(--red);
-            --accent-orange: var(--amber);
-            --accent-purple: var(--purple);
-            --vial-glass:   rgba(255,255,255,0.08);
-        }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -33,11 +20,12 @@
 
         /* ── HEADER ── */
         header {
-            background: var(--bg-inset);
+            background: var(--bg-panel);
             padding: 10px 20px;
             display: flex; flex-wrap: wrap; gap: 8px;
             justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         header h1 {
             font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
@@ -47,29 +35,30 @@
 
         button {
             font-family: var(--font-body);
-            background: rgba(255,255,255,0.06);
-            color: var(--text-main);
+            background: var(--bg-panel);
+            color: var(--text-muted);
             border: 1px solid var(--border);
             padding: 7px 13px; border-radius: var(--r-sm);
             cursor: pointer;
             transition: background var(--t-fast) var(--ease),
                         border-color var(--t-fast) var(--ease),
+                        color var(--t-fast) var(--ease),
                         transform var(--t-fast) var(--ease);
             font-weight: 600; font-size: 12px; white-space: nowrap;
         }
-        button:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--border-lite); }
+        button:hover:not(:disabled) { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
         button:active:not(:disabled) { transform: scale(0.97); }
-        button:disabled { opacity: 0.45; cursor: not-allowed; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
         button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 
-        .btn-primary { background: var(--green); color: #000; border: none; }
-        .btn-primary:hover:not(:disabled) { background: #2ec990; box-shadow: 0 0 0 4px var(--green-dim); }
+        .btn-primary { background: var(--green); color: #fff; border-color: var(--green); }
+        .btn-primary:hover:not(:disabled) { background: #059669; border-color: #059669; }
 
-        .btn-exam { background: var(--purple); color: #fff; border: none; }
-        .btn-exam:hover:not(:disabled) { background: #6d77e8; box-shadow: 0 0 0 4px var(--purple-dim); }
+        .btn-exam { background: var(--purple); color: #fff; border-color: var(--purple); }
+        .btn-exam:hover:not(:disabled) { background: #7c3aed; border-color: #7c3aed; }
 
-        .btn-sheet { background: var(--amber); color: #000; border: none; display: none; }
-        .btn-sheet:hover:not(:disabled) { background: #f0a800; }
+        .btn-sheet { background: var(--amber); color: #fff; border-color: var(--amber); display: none; }
+        .btn-sheet:hover:not(:disabled) { background: #d97706; }
 
         #set-nav {
             display: none; gap: 4px; align-items: center;
@@ -77,11 +66,11 @@
             border-left: 1px solid var(--border); border-right: 1px solid var(--border);
         }
 
-        /* ── WORKSPACE LAYOUT ── */
+        /* ── WORKSPACE ── */
         #workspace { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         @media (min-width: 1024px) { #workspace { flex-direction: row; } }
 
-        /* ── REAGENTS PANEL ── */
+        /* ── REAGENTS PANEL — list style like inorganic ── */
         #reagents-panel {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
@@ -89,53 +78,42 @@
             overflow-y: auto; max-height: 40vh;
         }
         @media (min-width: 1024px) {
-            #reagents-panel {
-                flex: 0 0 340px; max-height: none;
-                border-right: 1px solid var(--border); border-bottom: none;
-            }
+            #reagents-panel { flex: 0 0 300px; max-height: none; border-right: 1px solid var(--border); border-bottom: none; }
         }
 
-        .reagent-group { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        .reagent-group { padding: 10px 12px; border-bottom: 1px solid var(--border); }
         .reagent-group h3 {
-            margin: 0 0 10px;
-            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
-            color: var(--amber);
-        }
-        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-
-        .reagent-btn {
-            background: var(--bg-inset);
-            border: 1px solid var(--border);
-            padding: 9px 6px; border-radius: var(--r-sm);
+            margin: 0 0 8px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em;
             color: var(--text-muted);
-            font-family: var(--font-body); font-size: 11px; font-weight: 500;
-            text-align: center; cursor: pointer;
+        }
+        /* full-width list buttons (matches inorganic style) */
+        .reagent-btn {
+            display: block; width: 100%;
+            font-family: var(--font-body); font-size: var(--font-size-sm); font-weight: 500;
+            background: transparent; border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 6px 10px; margin-bottom: 2px;
+            text-align: left; border-radius: var(--r-sm); cursor: pointer;
             transition: background var(--t-fast) var(--ease),
-                        border-color var(--t-fast) var(--ease),
-                        color var(--t-fast) var(--ease);
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
+                        color var(--t-fast) var(--ease),
+                        border-color var(--t-fast) var(--ease);
         }
-        .reagent-btn span.icon { font-size: 1.1rem; }
-        .reagent-btn:hover {
-            background: rgba(52,211,153,0.08);
-            border-color: var(--green);
-            color: var(--text-main);
-        }
-        .reagent-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-        .reagent-btn.clicked {
-            background: var(--green-dim);
-            border-color: var(--green);
-            color: var(--green);
-        }
+        .reagent-btn:hover { background: var(--green-dim); color: #047857; border-color: #a7f3d0; }
+        .reagent-btn:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+        .reagent-btn.clicked { background: var(--green-dim); color: #047857; border-color: #6ee7b7; font-weight: 600; }
+        /* hide the icon spans — we no longer use the 2-col grid layout */
+        .reagent-btn span.icon { display: none; }
+        .grid-2col { display: flex; flex-direction: column; }
 
-        /* ── BENCH PANEL ── */
+        /* ── BENCH ── */
         #bench-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; }
 
         #visual-bench {
             flex: 0 0 160px;
             display: flex; justify-content: center; align-items: center;
             border-bottom: 1px solid var(--border);
-            background: radial-gradient(circle at 50% 70%, rgba(52,211,153,0.06) 0%, var(--bg-inset) 70%);
+            background: radial-gradient(circle at 50% 70%, rgba(16,185,129,0.06) 0%, var(--bg-inset) 70%);
             position: relative;
         }
         @media (min-width: 1024px) { #visual-bench { flex: 0 0 200px; } }
@@ -143,105 +121,96 @@
         /* ── VIAL ── */
         .vial-container {
             display: flex; flex-direction: column; align-items: center; gap: 10px;
-            opacity: 0.25;
-            transform: scale(0.95);
+            opacity: 0.3; transform: scale(0.95);
             transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
         }
         .vial-container.active { opacity: 1; transform: scale(1); }
 
         .vial {
             width: 54px; height: 88px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(0,0,0,0.15);
             border-top: none; border-radius: 0 0 27px 27px;
             position: relative; overflow: hidden;
-            background: var(--vial-glass);
-            box-shadow: inset 2px 0 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.3);
+            background: rgba(241,245,249,0.8);
+            box-shadow: inset 2px 0 6px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.1);
         }
         .vial-liquid {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
             background: transparent;
             transition: background-color var(--t-slow) var(--ease), height var(--t-mid) var(--ease);
         }
-        /* subtle glass shine */
         .vial::after {
             content: '';
             position: absolute; top: 0; left: 6px; width: 6px; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0.08), transparent);
+            background: linear-gradient(to right, rgba(255,255,255,0.5), transparent);
             pointer-events: none;
         }
         #vial-label {
             font-family: var(--font-mono); font-size: 13px; font-weight: 600;
-            color: var(--green);
-            background: var(--bg-inset); padding: 3px 10px; border-radius: var(--r-sm);
-            border: 1px solid var(--border);
+            color: #047857;
+            background: var(--green-dim); padding: 3px 10px; border-radius: var(--r-sm);
+            border: 1px solid #a7f3d0;
         }
 
         /* ── LOG ── */
         #log-container { flex: 1; display: flex; flex-direction: column; background: var(--bg-inset); overflow: hidden; }
         .log-header {
             padding: 9px 16px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
         }
-        .log-header h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .log-header h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); }
         .log-controls button { font-size: 11px; padding: 4px 9px; background: transparent; border-color: var(--border); color: var(--text-muted); }
-        .log-controls button:hover { color: var(--text-main); }
+        .log-controls button:hover { color: var(--text-main); background: var(--bg-inset); }
 
         #action-log {
             flex: 1; padding: 12px 14px; overflow-y: auto;
             font-family: var(--font-mono); font-size: 12px; line-height: 1.65;
         }
 
-        .log-entry { margin-bottom: 10px; border-left: 2px solid transparent; padding: 4px 10px; word-wrap: break-word; border-radius: 0 var(--r-sm) var(--r-sm) 0; }
-        .log-entry.system { border-left-color: var(--border); color: var(--text-muted); }
-        .log-entry.action { border-left-color: var(--blue); color: var(--text-main); }
-        .log-entry.result { border-left-color: var(--green); background: rgba(52,211,153,0.06); color: #a7f3d0; }
-        .log-entry.warning { border-left-color: var(--amber); background: rgba(251,191,36,0.06); color: #fde68a; }
-        .log-entry.error { border-left-color: var(--red); background: rgba(248,113,113,0.06); color: #fca5a5; }
-        .log-time { color: var(--text-muted); font-size: 10px; margin-right: 6px; opacity: 0.7; }
-        .log-obs { font-weight: 600; display: block; margin-top: 3px; }
+        .log-entry { margin-bottom: 8px; border-left: 2px solid transparent; padding: 5px 10px; word-wrap: break-word; border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+        .log-entry.system  { border-left-color: var(--border-lite); color: var(--text-muted); background: var(--bg-panel); }
+        .log-entry.action  { border-left-color: var(--blue);        color: #0369a1; background: #e0f2fe; }
+        .log-entry.result  { border-left-color: var(--green);       color: #065f46; background: var(--green-dim); }
+        .log-entry.warning { border-left-color: var(--amber);       color: #92400e; background: var(--amber-dim); }
+        .log-entry.error   { border-left-color: var(--red);         color: #991b1b; background: #fee2e2; }
+        .log-time { color: var(--text-dim); font-size: 10px; margin-right: 6px; }
+        .log-obs  { font-weight: 600; display: block; margin-top: 3px; }
 
         /* ── MODALS ── */
         .modal-overlay {
             display: none; position: fixed; inset: 0;
-            background: rgba(5,8,18,0.88);
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-            justify-content: center; align-items: center; z-index: 1000;
-            padding: 20px;
+            background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 1000; padding: 20px;
         }
         .modal-overlay[style*="flex"] { display: flex; }
         .modal-content {
             background: var(--bg-panel);
             padding: 24px; border-radius: var(--r-lg);
             width: 95%; max-width: 820px; max-height: 90vh; overflow-y: auto;
-            border: 1px solid var(--border-lite);
-            box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;
         }
         .modal-header h2 { margin: 0; font-size: 16px; font-weight: 700; }
-        .modal-close {
-            background: none; border: none; color: var(--text-muted);
-            font-size: 22px; line-height: 1; cursor: pointer; padding: 0;
-            transition: color var(--t-fast);
-        }
+        .modal-close { background: none; border: none; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0; }
         .modal-close:hover { color: var(--red); }
 
         .truth-box {
             background: var(--bg-inset); border: 1px dashed var(--border-lite);
-            padding: 14px; margin-bottom: 18px; text-align: center;
-            border-radius: var(--r-md);
+            padding: 14px; margin-bottom: 18px; text-align: center; border-radius: var(--r-md);
         }
         .hidden-truth { filter: blur(6px); user-select: none; transition: filter var(--t-slow) var(--ease); }
         .hidden-truth.revealed { filter: none; }
 
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
-        th { background: var(--bg-inset); color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; position: sticky; top: 0; }
-        tr:nth-child(even) { background: rgba(255,255,255,0.015); }
-        tr:hover td { background: rgba(255,255,255,0.025); }
+        th { background: var(--bg-inset); color: var(--text-muted); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; position: sticky; top: 0; }
+        tr:nth-child(even) { background: var(--bg-inset); }
+        tr:hover td { background: #f0fdf4; }
         td { font-family: var(--font-mono); }
 
         /* ── EXAM SHEET ── */
@@ -252,20 +221,19 @@
         }
         .exam-row {
             display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
-            margin-bottom: 10px; background: rgba(255,255,255,0.025);
+            margin-bottom: 10px; background: var(--bg-panel);
             padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-sm);
             transition: border-color var(--t-fast);
         }
         .exam-row:hover { border-color: var(--border-lite); }
-        .exam-row label { font-weight: 700; color: var(--blue); font-size: 12px; }
+        .exam-row label { font-weight: 700; color: #047857; font-size: 12px; }
         .exam-row select {
             width: 100%; padding: 7px 10px;
             background: var(--bg-inset); color: var(--text-main);
             border: 1px solid var(--border); font-size: 13px; border-radius: var(--r-sm);
             font-family: var(--font-body);
-            transition: border-color var(--t-fast), box-shadow var(--t-fast);
         }
-        .exam-row select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); outline: none; }
+        .exam-row select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-dim); outline: none; }
         .exam-res { margin-top: 4px; font-weight: 700; font-size: 12px; }
 
         @media (min-width: 640px) {
@@ -291,7 +259,7 @@
 </nav>
 
     <header>
-        <h1>Virtual Lab_1 by MKh </h1>
+        <h1>Organic Qualitative Analysis</h1>
         <div class="controls">
             <button class="btn-primary" onclick="requestNewUnknown()">Single Random</button>
             <button class="btn-exam" onclick="generateSet(6)">New Exam Set</button>
@@ -325,7 +293,7 @@
                     <button class="reagent-btn" onclick="runTest('sol_ether')" role="button" aria-label="Ether Solubility"><span class="icon">🛢️</span> Ether</button>
                     <button class="reagent-btn" onclick="runTest('sol_hcl')" role="button" aria-label="5% HCl Solubility"><span class="icon">🔴</span> 5% HCl</button>
                     <button class="reagent-btn" onclick="runTest('sol_naoh')" role="button" aria-label="5% NaOH Solubility"><span class="icon">🔵</span> 5% NaOH</button>
-                    <button class="reagent-btn" onclick="runTest('sol_nahco3')" role="button" aria-label="5% Sodium Bicarbonate Solubility"><span class="icon">🫧</span> 5% NaHCO₃</button>
+                    <button class="reagent-btn" onclick="runTest('sol_nahco3')" role="button" aria-label="5% Sodium Bicarbonate Solubility"><span class="icon">🫧</span> 5% NaHCO<sub>3</sub></button>
                 </div>
             </div>
             <div class="reagent-group">
@@ -333,11 +301,11 @@
                 <div class="grid-2col">
                     <button class="reagent-btn" onclick="runTest('lucas')">Lucas Reagent</button>
                     <button class="reagent-btn" onclick="runTest('ceric')">Ceric Amm. Nit.</button>
-                    <button class="reagent-btn" onclick="runTest('iodoform')">Iodoform (I₂/NaOH)</button>
+                    <button class="reagent-btn" onclick="runTest('iodoform')">Iodoform (I<sub>2</sub>/NaOH)</button>
                     <button class="reagent-btn" onclick="runTest('dnp24')">2,4-DNP</button>
                     <button class="reagent-btn" onclick="runTest('tollen')">Tollen's Reagent</button>
                     <button class="reagent-btn" onclick="runTest('fehling')">Fehling's A+B</button>
-                    <button class="reagent-btn" onclick="runTest('fecl3')">Neutral FeCl₃</button>
+                    <button class="reagent-btn" onclick="runTest('fecl3')">Neutral FeCl<sub>3</sub></button>
                     <button class="reagent-btn" onclick="runTest('hinsberg')">Hinsberg Reagent</button>
                     <button class="reagent-btn" onclick="runTest('nitrous')">NaNO₂/HCl (0°C)</button>
                     <button class="reagent-btn" onclick="runTest('carbylamine')">Carbylamine</button>
@@ -346,10 +314,10 @@
                     <button class="reagent-btn" onclick="runTest('fluorescein')">Fluorescein Test</button>
                     <button class="reagent-btn" onclick="runTest('zincdust')">Zinc Dust Distill.</button>
                     <button class="reagent-btn" onclick="runTest('bromine_water')">Bromine Water</button>
-                    <button class="reagent-btn" onclick="runTest('kmno4')">KMnO₄ (alk.)</button>
+                    <button class="reagent-btn" onclick="runTest('kmno4')">KMnO<sub>4</sub> (alk.)</button>
                     <button class="reagent-btn" onclick="runTest('benedict')">Benedict's Test</button>
-                    <button class="reagent-btn" onclick="runTest('lead_acetate')">Lead Acetate (Pb(OAc)₂)</button>
-                    <button class="reagent-btn" onclick="runTest('hg_acetate')">Hg(OAc)₂ (Alkynes)</button>
+                    <button class="reagent-btn" onclick="runTest('lead_acetate')">Lead Acetate (Pb(OAc)<sub>2</sub>)</button>
+                    <button class="reagent-btn" onclick="runTest('hg_acetate')">Hg(OAc)<sub>2</sub> (Alkynes)</button>
                 </div>
             </div>
         </div>

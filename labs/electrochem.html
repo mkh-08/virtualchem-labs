@@ -227,7 +227,7 @@
             font-family: var(--font-mono); font-size: 11px;
             color: var(--text-main);
         }
-        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        tbody tr:hover { background: var(--bg-hover); }
         tbody tr:last-child td { border-bottom: none; }
 
         /* ─── EXAM PANEL ─── */
@@ -288,7 +288,7 @@
         /* ─── MODAL ─── */
         .modal-backdrop {
             display: none; position: fixed; inset: 0;
-            background: rgba(5,8,18,0.88); backdrop-filter: blur(6px);
+            background: rgba(15,23,42,0.5); backdrop-filter: blur(4px);
             z-index: 500; justify-content: center; align-items: center; padding: 20px;
         }
         .modal-backdrop.open { display: flex; }
@@ -406,15 +406,15 @@
                     <div class="field">
                         <label>Anode [ion] <span id="anodeIonLabel"></span></label>
                         <div class="slider-row">
-                            <input type="range" id="anodeConc" min="-3" max="0.3" step="0.01" value="-0.301" oninput="updateNernst()">
-                            <span class="slider-val" id="anodeConcVal">0.500 M</span>
+                            <input type="range" id="anodeConc" min="-3" max="0.3" step="0.01" value="-1" oninput="updateNernst()">
+                            <span class="slider-val" id="anodeConcVal">0.100 M</span>
                         </div>
                     </div>
                     <div class="field">
                         <label>Cathode [ion] <span id="cathodeIonLabel"></span></label>
                         <div class="slider-row">
-                            <input type="range" id="cathodeConc" min="-3" max="0.3" step="0.01" value="-0.301" oninput="updateNernst()">
-                            <span class="slider-val" id="cathodeConcVal">0.500 M</span>
+                            <input type="range" id="cathodeConc" min="-3" max="0.3" step="0.01" value="0" oninput="updateNernst()">
+                            <span class="slider-val" id="cathodeConcVal">1.000 M</span>
                         </div>
                     </div>
                     <div class="field">
@@ -1394,7 +1394,7 @@ function draw(ts){
     ctx.clearRect(0,0,W,H);
 
     // Background
-    ctx.fillStyle = '#080c14';
+    ctx.fillStyle = '#f8fafc';
     ctx.fillRect(0,0,W,H);
 
     if(currentMode==='galvanic')      drawGalvanic(W,H,ts);
@@ -1524,7 +1524,7 @@ function drawGalvanic(W,H,ts){
     const vmX = midX, vmY = wireTopY;
     ctx.beginPath();
     ctx.arc(vmX, vmY, 22, 0, Math.PI*2);
-    ctx.fillStyle='#0f1623'; ctx.fill();
+    ctx.fillStyle='#f8fafc'; ctx.fill();
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2; ctx.stroke();
     ctx.fillStyle='#38bdf8'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
     ctx.fillText('V', vmX, vmY+4);
@@ -1749,7 +1749,7 @@ function drawConcCell(W,H,ts){
 
     const E = (c1>0&&c2>0&&c1!==c2) ? (R*298/(metal.n*F))*Math.log(c1/c2) : 0;
     ctx.beginPath(); ctx.arc(midX,wireTopY,22,0,Math.PI*2);
-    ctx.fillStyle='#0f1623'; ctx.fill();
+    ctx.fillStyle='#f8fafc'; ctx.fill();
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2; ctx.stroke();
     ctx.fillStyle='#38bdf8'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
     ctx.fillText('V', midX, wireTopY+4);
@@ -1768,13 +1768,13 @@ function drawConcCell(W,H,ts){
         ctx.beginPath(); ctx.roundRect(20, H-50, W-40, 30, 6); ctx.fill();
         ctx.strokeStyle='#1a2840'; ctx.lineWidth=1; ctx.stroke();
         const pct = diff<0.0001 ? 100 : Math.max(0,Math.min(100,100*(1-(diff/Math.max(c1,c2)))));
-        ctx.fillStyle='#1a2840';
+        ctx.fillStyle='#f8fafc';
         ctx.beginPath(); ctx.roundRect(24, H-46, W-48, 22, 4); ctx.fill();
         const grd = ctx.createLinearGradient(24,0,24+(W-48)*pct/100,0);
         grd.addColorStop(0,'#34d399'); grd.addColorStop(1,'#38bdf8');
         ctx.fillStyle=grd;
         ctx.beginPath(); ctx.roundRect(24, H-46, (W-48)*pct/100, 22, 4); ctx.fill();
-        ctx.fillStyle='#f1f5f9'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
+        ctx.fillStyle='#0f172a'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
         ctx.fillText(`Equalization: ${pct.toFixed(1)}%`, W/2, H-30);
     }
 
@@ -1793,7 +1793,7 @@ function drawConcCell(W,H,ts){
    DRAW EXAM DIAGRAM
 ══════════════════════════════════════════════════════════ */
 function drawExamDiagram(W,H){
-    ctx.fillStyle='#1a2840';
+    ctx.fillStyle='#f8fafc';
     ctx.beginPath(); ctx.roundRect(W/2-120, H/2-60, 240, 120, 12); ctx.fill();
     ctx.fillStyle='#38bdf8'; ctx.font='bold 16px Inter'; ctx.textAlign='center';
     ctx.fillText('⚡ Exam Mode', W/2, H/2-18);
@@ -1835,7 +1835,7 @@ function drawArrow(ctx, x1, y1, x2, y2, color){
 
 function drawBattery(cx, cy, voltage){
     const bw=70, bh=30;
-    ctx.fillStyle='#1a2840';
+    ctx.fillStyle='#f8fafc';
     ctx.beginPath(); ctx.roundRect(cx-bw/2, cy-bh/2, bw, bh, 6); ctx.fill();
     ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.5; ctx.stroke();
     // + terminal (right)

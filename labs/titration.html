@@ -9,17 +9,12 @@
         /* Map titration local vars onto shared tokens */
         :root {
             --bg-page:      var(--bg-base);
-            --bg-panel:     #1a2236;
-            --bg-inset:     var(--bg-inset);
-            --text-main:    var(--text-main);
-            --text-muted:   var(--text-muted);
             --accent-blue:  var(--blue);
             --accent-hover: var(--blue-hover);
             --success:      var(--green);
             --warning:      var(--amber);
             --danger:       var(--red);
-            --border:       var(--border);
-            --glass:        rgba(255,255,255,0.04);
+            --glass:        var(--bg-inset);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -128,8 +123,8 @@
 
         .btn-primary { background: var(--accent-blue); color: #000; }
         .btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 0 4px rgba(56,189,248,0.15); }
-        .btn-secondary { background: rgba(255,255,255,0.07); color: var(--text-main); border: 1px solid var(--border); }
-        .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.11); border-color: var(--border-lite); }
+        .btn-secondary { background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-secondary:hover:not(:disabled) { background: var(--bg-inset); color: var(--text-main); border-color: var(--border-lite); }
         .btn-success { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
         .btn-success:hover:not(:disabled) { background: rgba(52,211,153,0.25); }
         .btn-warning { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.25); }
@@ -307,7 +302,8 @@
 
         .magnifier-overlay, .manual-overlay, .export-dialog {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
             display: none; justify-content: center; align-items: center; z-index: 1000;
             padding: 20px;
         }
@@ -1398,18 +1394,17 @@ class RenderEngine {
             ctx.stroke();
         }
 
-        ctx.fillStyle = 'rgba(100,130,160,0.9)';
         ctx.font = '10px Fira Code';
         ctx.textAlign = 'left';
 
         for (let i = 0; i <= 50; i += 1) {
             const y = 10 + (i / 50) * 340;
             if (i % 5 === 0) {
-                ctx.fillStyle = 'rgba(148,163,184,0.8)';
+                ctx.fillStyle = '#64748b';
                 ctx.fillRect(50, y - 1, 7, 1.5);
                 ctx.fillText(i.toString(), 59, y + 4);
             } else {
-                ctx.fillStyle = 'rgba(100,116,139,0.5)';
+                ctx.fillStyle = '#94a3b8';
                 ctx.fillRect(50, y, 4, 1);
             }
         }
@@ -1497,17 +1492,19 @@ class RenderEngine {
         const width = canvas.width = canvas.offsetWidth;
         const height = canvas.height = canvas.offsetHeight;
         
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
         ctx.clearRect(0, 0, width, height);
-        
+
         const pad = { t: 20, r: 30, b: 40, l: 50 };
         const pW = width - pad.l - pad.r;
         const pH = height - pad.t - pad.b;
-        
+
         let [yMin, yMax] = cfg.yRange;
-        
+
         // Draw axes
-        ctx.strokeStyle = '#334155'; 
-        ctx.lineWidth = 2; 
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
         ctx.strokeRect(pad.l, pad.t, pW, pH);
         
         // X-axis labels
