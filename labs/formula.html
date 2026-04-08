@@ -1,0 +1,3262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Formula Finder — VirtualChem by MKh</title>
+    <style>
+        /* White and Blue Theme */
+        :root {
+            --primary-blue: #1a73e8;
+            --light-blue: #e8f0fe;
+            --dark-blue: #0d47a1;
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --medium-gray: #dadce0;
+            --dark-gray: #5f6368;
+            --success-green: #34a853;
+            --warning-orange: #f9ab00;
+            --error-red: #dc3545;
+            --pubchem-green: #2e8b57;
+            --transition-speed: 0.3s;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--white);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: var(--white);
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 500px 1fr;
+            gap: 0;
+            min-height: 800px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Left Panel - Inputs */
+        .input-panel {
+            background: var(--light-gray);
+            padding: 25px;
+            border-right: 1px solid var(--medium-gray);
+            overflow-y: auto;
+            max-height: 800px;
+        }
+        
+        .panel-title {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light-blue);
+            font-weight: 600;
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: var(--dark-gray);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all var(--transition-speed);
+            background: var(--white);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+        
+        /* Element Input Rows */
+        .element-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        
+        .element-input {
+            position: relative;
+        }
+        
+        .element-input input {
+            padding-right: 35px;
+        }
+        
+        .element-symbol {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+        
+        /* Advanced Options */
+        .advanced-options {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--medium-gray);
+        }
+        
+        .advanced-options summary {
+            color: var(--primary-blue);
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        /* PubChem Search Options */
+        .pubchem-search-options {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--medium-gray);
+        }
+        
+        .pubchem-search-options summary {
+            color: var(--pubchem-green);
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .pubchem-options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .charge-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .charge-btn {
+            padding: 8px 12px;
+            background: var(--light-gray);
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .charge-btn:hover {
+            background: var(--medium-gray);
+        }
+        
+        .charge-btn.active {
+            background: var(--pubchem-green);
+            color: var(--white);
+            border-color: var(--pubchem-green);
+        }
+        
+        /* Periodic Table Styles */
+        .periodic-table-container {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--medium-gray);
+            margin-bottom: 15px;
+        }
+        
+        .periodic-table-grid {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 3px;
+            margin-top: 10px;
+        }
+        
+        .periodic-table-cell {
+            aspect-ratio: 1;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            position: relative;
+            overflow: hidden;
+            padding: 2px;
+        }
+        
+        .periodic-table-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .periodic-table-cell.selected {
+            border-color: var(--primary-blue);
+            background-color: var(--light-blue);
+            box-shadow: 0 0 0 2px var(--primary-blue);
+        }
+        
+        .periodic-table-cell .symbol {
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+        
+        .periodic-table-cell .number {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 0.6rem;
+            color: var(--dark-gray);
+        }
+        
+        .periodic-table-cell .mass {
+            font-size: 0.55rem;
+            color: var(--dark-gray);
+            line-height: 1;
+            margin-top: 1px;
+        }
+        
+        .periodic-table-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .periodic-table-btn {
+            padding: 6px 12px;
+            background: var(--light-gray);
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .periodic-table-btn:hover {
+            background: var(--medium-gray);
+        }
+        
+        .periodic-table-btn.active {
+            background: var(--primary-blue);
+            color: var(--white);
+            border-color: var(--primary-blue);
+        }
+        
+        .periodic-table-btn.period-btn {
+            min-width: 40px;
+        }
+        
+        .periodic-table-btn.group-btn {
+            min-width: 50px;
+        }
+        
+        /* Right Panel - Results */
+        .results-panel {
+            padding: 25px;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light-blue);
+            flex-shrink: 0;
+        }
+        
+        .results-title {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .results-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .stat-box {
+            background: var(--light-blue);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--dark-blue);
+            font-weight: 600;
+        }
+        
+        /* PubChem Verification */
+        .pubchem-verification {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .pubchem-btn {
+            background: var(--pubchem-green);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .pubchem-btn:hover {
+            background: #26734d;
+        }
+        
+        .pubchem-btn:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+        }
+        
+        .pubchem-status {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+        
+        .pubchem-verified {
+            color: var(--success-green);
+            font-weight: bold;
+        }
+        
+        .pubchem-error {
+            color: var(--error-red);
+        }
+        
+        .pubchem-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pubchem-loading::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--primary-blue);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .pubchem-badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .pubchem-badge.verified {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .pubchem-badge.unverified {
+            background: var(--error-red);
+            color: white;
+        }
+        
+        .pubchem-badge.pending {
+            background: var(--warning-orange);
+            color: #212529;
+        }
+        
+        .pubchem-badge.not-found {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .pubchem-link {
+            color: var(--pubchem-green);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .pubchem-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Results Table */
+        .results-container {
+            overflow: auto;
+            flex: 1;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            background: var(--white);
+            margin-bottom: 15px;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        .results-table th {
+            background: var(--light-blue);
+            color: var(--dark-blue);
+            font-weight: 600;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid var(--primary-blue);
+            font-size: 0.9rem;
+        }
+        
+        .results-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--medium-gray);
+            font-size: 0.9rem;
+        }
+        
+        .results-table tr:hover {
+            background: var(--light-blue);
+        }
+        
+        .formula-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        
+        .composition-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+        
+        .percentage-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .percentage-diff {
+            font-size: 0.75rem;
+            color: var(--dark-gray);
+            margin-top: 2px;
+        }
+        
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--medium-gray);
+            flex-shrink: 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--medium-gray);
+        }
+        
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+        
+        .btn-success:hover {
+            background: #2d8c47;
+        }
+        
+        .btn-warning {
+            background: var(--warning-orange);
+            color: var(--white);
+        }
+        
+        .btn-warning:hover {
+            background: #e09a00;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark-blue);
+            color: var(--white);
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .progress-bar {
+            width: 150px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success-green);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        /* Element Categories */
+        .category-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--light-gray);
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+        
+        /* Selection Mode Indicator */
+        .selection-mode-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            z-index: 1001;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+        
+        .selection-mode-indicator.visible {
+            opacity: 1;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-panel,
+            .results-panel {
+                padding: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .periodic-table-grid {
+                grid-template-columns: repeat(10, 1fr);
+                font-size: 0.7rem;
+            }
+            
+            .periodic-table-cell .symbol {
+                font-size: 0.8rem;
+            }
+            
+            .periodic-table-controls {
+                justify-content: center;
+            }
+            
+            .pubchem-verification {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<nav class="site-nav" role="navigation" aria-label="Site navigation">
+    <a href="../index.html" class="site-nav-brand">⚗️ VirtualChem Labs</a>
+    <div class="site-nav-links">
+        <a href="../index.html">Home</a>
+        <a href="titration.html">Titration</a>
+        <a href="organic.html">Organic</a>
+        <a href="inorganic.html">Inorganic</a>
+        <a href="electrochem.html">Electrochemistry</a>
+        <a href="formula.html" class="snav-active">Formula Finder</a>
+    </div>
+</nav>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧪 Chemical Formula Finder</h1>
+            <p class="subtitle">Find ALL possible chemical formulas from mass percentages - Generates every combination of unknown elements</p>
+            <div class="badge">Now with Periodic Table & Enhanced PubChem Verification</div>
+        </div>
+        
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Panel - Inputs -->
+            <div class="input-panel">
+                <h2 class="panel-title">Input Parameters</h2>
+                
+                <!-- Total Elements -->
+                <div class="form-group">
+                    <label for="totalElements">Total Elements in Compound (1-7)</label>
+                    <select id="totalElements">
+                        <option value="1">1 Element</option>
+                        <option value="2" selected>2 Elements</option>
+                        <option value="3">3 Elements</option>
+                        <option value="4">4 Elements</option>
+                        <option value="5">5 Elements</option>
+                        <option value="6">6 Elements</option>
+                        <option value="7">7 Elements</option>
+                    </select>
+                </div>
+                
+                <!-- Known Elements -->
+                <div class="form-group">
+                    <label>Known Elements & Percentages</label>
+                    <div id="elementInputs">
+                        <!-- Generated by JavaScript -->
+                    </div>
+                    <div class="category-legend">
+                        <div class="category-item">
+                            <div class="category-color" style="background-color: #e8f0fe;"></div>
+                            <span>Unknown percentage</span>
+                        </div>
+                        <div class="category-item">
+                            <div class="category-color" style="background-color: #1a73e8;"></div>
+                            <span>With percentage</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Advanced Options -->
+                <details class="advanced-options">
+                    <summary>Advanced Options</summary>
+                    <div class="options-grid">
+                        <div class="form-group">
+                            <label for="tolerance">Tolerance (%)</label>
+                            <input type="number" id="tolerance" value="0.5" step="0.1" min="0" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxCoefficient">Max Coefficient per Element</label>
+                            <input type="number" id="maxCoefficient" value="12" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxResults">Max Results to Display</label>
+                            <input type="number" id="maxResults" value="1000" min="100" max="10000">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchMethod">Search Method</label>
+                            <select id="searchMethod">
+                                <option value="bruteforce" selected>Brute Force (All Combinations)</option>
+                                <option value="smart">Smart Search (Optimized)</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+                
+                <!-- PubChem Search Options -->
+                <details class="pubchem-search-options">
+                    <summary>PubChem Search Options</summary>
+                    <div class="pubchem-options-grid">
+                        <div class="form-group">
+                            <label for="pubchemSearchType">Search Type</label>
+                            <select id="pubchemSearchType">
+                                <option value="strict" selected>Strict Formula Match</option>
+                                <option value="synonyms">Include Synonyms</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pubchemChargeType">Charge Type</label>
+                            <select id="pubchemChargeType">
+                                <option value="any" selected>Any Charge</option>
+                                <option value="neutral">Neutral Only</option>
+                                <option value="cation">Cations Only</option>
+                                <option value="anion">Anions Only</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pubchemCompoundType">Compound Type</label>
+                            <select id="pubchemCompoundType">
+                                <option value="all" selected>All Compounds</option>
+                                <option value="inorganic">Inorganic Only</option>
+                                <option value="organic">Organic Only</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pubchemBatchSize">Batch Size</label>
+                            <input type="number" id="pubchemBatchSize" value="3" min="1" max="10">
+                        </div>
+                    </div>
+                </details>
+                
+                <!-- Control Buttons -->
+                <div class="controls">
+                    <button class="btn btn-primary" id="calculateBtn">
+                        <span>🔍 Find ALL Formulas</span>
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn">
+                        <span>🗑️ Clear All</span>
+                    </button>
+                    <button class="btn btn-warning" id="loadExampleBtn">
+                        <span>📋 Load Water Example</span>
+                    </button>
+                    <button class="btn btn-success" id="exportAllBtn">
+                        <span>📊 Export All Combinations</span>
+                    </button>
+                </div>
+                
+                <!-- Periodic Table -->
+                <div class="form-group">
+                    <label>Periodic Table - Element Pool for Unknown Elements</label>
+                    <div class="periodic-table-container">
+                        <div class="periodic-table-controls">
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                <button class="periodic-table-btn period-btn" data-period="all">All Periods</button>
+                                <button class="periodic-table-btn period-btn" data-period="1">Period 1</button>
+                                <button class="periodic-table-btn period-btn" data-period="2">Period 2</button>
+                                <button class="periodic-table-btn period-btn" data-period="3">Period 3</button>
+                                <button class="periodic-table-btn period-btn" data-period="4">Period 4</button>
+                                <button class="periodic-table-btn period-btn" data-period="5">Period 5</button>
+                                <button class="periodic-table-btn period-btn" data-period="6">Period 6</button>
+                                <button class="periodic-table-btn period-btn" data-period="7">Period 7</button>
+                            </div>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+                                <button class="periodic-table-btn group-btn" data-group="all">All Groups</button>
+                                <button class="periodic-table-btn group-btn" data-group="1">Group 1</button>
+                                <button class="periodic-table-btn group-btn" data-group="2">Group 2</button>
+                                <button class="periodic-table-btn group-btn" data-group="13">Group 13</button>
+                                <button class="periodic-table-btn group-btn" data-group="14">Group 14</button>
+                                <button class="periodic-table-btn group-btn" data-group="15">Group 15</button>
+                                <button class="periodic-table-btn group-btn" data-group="16">Group 16</button>
+                                <button class="periodic-table-btn group-btn" data-group="17">Group 17</button>
+                                <button class="periodic-table-btn group-btn" data-group="18">Group 18</button>
+                            </div>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+                                <button class="periodic-table-btn" data-type="transition">Transition Metals</button>
+                                <button class="periodic-table-btn" data-type="lanthanides">Lanthanides</button>
+                                <button class="periodic-table-btn" data-type="actinides">Actinides</button>
+                            </div>
+                        </div>
+                        <div class="periodic-table-grid" id="periodicTableGrid">
+                            <!-- Periodic table will be generated here -->
+                        </div>
+                        <div class="controls" style="margin-top: 15px; padding-top: 0; border-top: none;">
+                            <button class="btn btn-secondary" id="selectAllBtn" style="padding: 8px 15px;">
+                                <span>✓ Select All</span>
+                            </button>
+                            <button class="btn btn-secondary" id="selectNoneBtn" style="padding: 8px 15px;">
+                                <span>✗ Select None</span>
+                            </button>
+                            <button class="btn btn-secondary" id="invertSelectionBtn" style="padding: 8px 15px;">
+                                <span>↔ Invert Selection</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Results -->
+            <div class="results-panel">
+                <div class="results-header">
+                    <h2 class="results-title">All Possible Combinations</h2>
+                    <div class="results-stats">
+                        <div class="stat-box" id="formulaCount">0 formulas</div>
+                        <div class="stat-box" id="combinationCount">0 combinations</div>
+                        <div class="stat-box" id="timeElapsed">0.0s</div>
+                    </div>
+                </div>
+                
+                <!-- PubChem Verification Controls -->
+                <div class="pubchem-verification">
+                    <button class="pubchem-btn" id="verifyAllBtn">
+                        <span>🔍</span> Verify All with PubChem
+                    </button>
+                    <button class="pubchem-btn" id="verifySelectedBtn">
+                        <span>✓</span> Verify Selected Page
+                    </button>
+                    <button class="pubchem-btn" id="testPubChemBtn" style="background: #6f42c1;">
+                        <span>⚡</span> Test PubChem
+                    </button>
+                    <div class="pubchem-status" id="pubchemStatus">
+                        Ready to verify compounds
+                    </div>
+                </div>
+                
+                <!-- Results Table -->
+                <div class="results-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th width="120">Formula</th>
+                                <th width="150">Composition</th>
+                                <th width="100">Molar Mass</th>
+                                <th width="120">Theoretical %</th>
+                                <th width="120">Actual %</th>
+                                <th width="80">Difference</th>
+                                <th width="100">Unknown Elements</th>
+                                <th width="100">Elements without %</th>
+                                <th width="120">PubChem Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Results Controls -->
+                <div class="controls">
+                    <button class="btn btn-secondary" id="prevPageBtn" disabled>
+                        <span>← Previous</span>
+                    </button>
+                    <div style="flex: 1; text-align: center;">
+                        <span id="pageInfo">Page 1 of 1</span>
+                    </div>
+                    <button class="btn btn-secondary" id="nextPageBtn" disabled>
+                        <span>Next →</span>
+                    </button>
+                    <button class="btn btn-success" id="exportPageBtn" disabled>
+                        <span>📥 Export Page</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">
+        <div class="status-left">
+            <span id="statusText">Ready to calculate all possible combinations</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        <div class="status-right">
+            <span id="selectedElements">Selected: 118/118 elements</span>
+            <span id="selectionMode">Ctrl+Click for multiple</span>
+        </div>
+    </div>
+
+    <!-- Selection Mode Indicator -->
+    <div class="selection-mode-indicator" id="selectionModeIndicator">
+        <span id="indicatorText">Single Selection</span>
+    </div>
+
+    <script>
+        // ============================================
+        // CHEMICAL DATABASE & PERIODIC TABLE DATA
+        // ============================================
+        
+        // Complete atomic mass database (IUPAC 2022)
+        const ATOMIC_MASSES = {
+            // Period 1
+            'H': 1.008, 'He': 4.0026,
+            // Period 2
+            'Li': 6.94, 'Be': 9.0122, 'B': 10.81, 'C': 12.011, 'N': 14.007, 'O': 15.999, 'F': 18.998, 'Ne': 20.180,
+            // Period 3
+            'Na': 22.990, 'Mg': 24.305, 'Al': 26.982, 'Si': 28.085, 'P': 30.974, 'S': 32.06, 'Cl': 35.45, 'Ar': 39.95,
+            // Period 4
+            'K': 39.098, 'Ca': 40.078, 'Sc': 44.956, 'Ti': 47.867, 'V': 50.942, 'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845,
+            'Co': 58.933, 'Ni': 58.693, 'Cu': 63.546, 'Zn': 65.38, 'Ga': 69.723, 'Ge': 72.630, 'As': 74.922, 'Se': 78.971,
+            'Br': 79.904, 'Kr': 83.798,
+            // Period 5
+            'Rb': 85.468, 'Sr': 87.62, 'Y': 88.906, 'Zr': 91.224, 'Nb': 92.906, 'Mo': 95.95, 'Tc': 98, 'Ru': 101.07,
+            'Rh': 102.91, 'Pd': 106.42, 'Ag': 107.87, 'Cd': 112.41, 'In': 114.82, 'Sn': 118.71, 'Sb': 121.76, 'Te': 127.60,
+            'I': 126.90, 'Xe': 131.29,
+            // Period 6
+            'Cs': 132.91, 'Ba': 137.33, 'La': 138.91, 'Ce': 140.12, 'Pr': 140.91, 'Nd': 144.24, 'Pm': 145, 'Sm': 150.36,
+            'Eu': 151.96, 'Gd': 157.25, 'Tb': 158.93, 'Dy': 162.50, 'Ho': 164.93, 'Er': 167.26, 'Tm': 168.93, 'Yb': 173.05,
+            'Lu': 174.97, 'Hf': 178.49, 'Ta': 180.95, 'W': 183.84, 'Re': 186.21, 'Os': 190.23, 'Ir': 192.22, 'Pt': 195.08,
+            'Au': 196.97, 'Hg': 200.59, 'Tl': 204.38, 'Pb': 207.2, 'Bi': 208.98, 'Po': 209, 'At': 210, 'Rn': 222,
+            // Period 7
+            'Fr': 223, 'Ra': 226, 'Ac': 227, 'Th': 232.04, 'Pa': 231.04, 'U': 238.03, 'Np': 237, 'Pu': 244, 'Am': 243,
+            'Cm': 247, 'Bk': 247, 'Cf': 251, 'Es': 252, 'Fm': 257, 'Md': 258, 'No': 259, 'Lr': 262
+        };
+
+        // Periodic table layout data - positions for each element
+        const PERIODIC_TABLE_LAYOUT = {
+            // Row 1
+            1: {row: 1, col: 1, category: 'nonmetal'}, // H
+            2: {row: 1, col: 18, category: 'noble'}, // He
+            
+            // Row 2
+            3: {row: 2, col: 1, category: 'alkali'}, // Li
+            4: {row: 2, col: 2, category: 'alkaline'}, // Be
+            5: {row: 2, col: 13, category: 'metalloid'}, // B
+            6: {row: 2, col: 14, category: 'nonmetal'}, // C
+            7: {row: 2, col: 15, category: 'nonmetal'}, // N
+            8: {row: 2, col: 16, category: 'nonmetal'}, // O
+            9: {row: 2, col: 17, category: 'halogen'}, // F
+            10: {row: 2, col: 18, category: 'noble'}, // Ne
+            
+            // Row 3
+            11: {row: 3, col: 1, category: 'alkali'}, // Na
+            12: {row: 3, col: 2, category: 'alkaline'}, // Mg
+            13: {row: 3, col: 13, category: 'post-transition'}, // Al
+            14: {row: 3, col: 14, category: 'metalloid'}, // Si
+            15: {row: 3, col: 15, category: 'nonmetal'}, // P
+            16: {row: 3, col: 16, category: 'nonmetal'}, // S
+            17: {row: 3, col: 17, category: 'halogen'}, // Cl
+            18: {row: 3, col: 18, category: 'noble'}, // Ar
+            
+            // Row 4
+            19: {row: 4, col: 1, category: 'alkali'}, // K
+            20: {row: 4, col: 2, category: 'alkaline'}, // Ca
+            21: {row: 4, col: 3, category: 'transition'}, // Sc
+            22: {row: 4, col: 4, category: 'transition'}, // Ti
+            23: {row: 4, col: 5, category: 'transition'}, // V
+            24: {row: 4, col: 6, category: 'transition'}, // Cr
+            25: {row: 4, col: 7, category: 'transition'}, // Mn
+            26: {row: 4, col: 8, category: 'transition'}, // Fe
+            27: {row: 4, col: 9, category: 'transition'}, // Co
+            28: {row: 4, col: 10, category: 'transition'}, // Ni
+            29: {row: 4, col: 11, category: 'transition'}, // Cu
+            30: {row: 4, col: 12, category: 'transition'}, // Zn
+            31: {row: 4, col: 13, category: 'post-transition'}, // Ga
+            32: {row: 4, col: 14, category: 'metalloid'}, // Ge
+            33: {row: 4, col: 15, category: 'metalloid'}, // As
+            34: {row: 4, col: 16, category: 'nonmetal'}, // Se
+            35: {row: 4, col: 17, category: 'halogen'}, // Br
+            36: {row: 4, col: 18, category: 'noble'}, // Kr
+            
+            // Row 5
+            37: {row: 5, col: 1, category: 'alkali'}, // Rb
+            38: {row: 5, col: 2, category: 'alkaline'}, // Sr
+            39: {row: 5, col: 3, category: 'transition'}, // Y
+            40: {row: 5, col: 4, category: 'transition'}, // Zr
+            41: {row: 5, col: 5, category: 'transition'}, // Nb
+            42: {row: 5, col: 6, category: 'transition'}, // Mo
+            43: {row: 5, col: 7, category: 'transition'}, // Tc
+            44: {row: 5, col: 8, category: 'transition'}, // Ru
+            45: {row: 5, col: 9, category: 'transition'}, // Rh
+            46: {row: 5, col: 10, category: 'transition'}, // Pd
+            47: {row: 5, col: 11, category: 'transition'}, // Ag
+            48: {row: 5, col: 12, category: 'transition'}, // Cd
+            49: {row: 5, col: 13, category: 'post-transition'}, // In
+            50: {row: 5, col: 14, category: 'post-transition'}, // Sn
+            51: {row: 5, col: 15, category: 'metalloid'}, // Sb
+            52: {row: 5, col: 16, category: 'metalloid'}, // Te
+            53: {row: 5, col: 17, category: 'halogen'}, // I
+            54: {row: 5, col: 18, category: 'noble'}, // Xe
+            
+            // Row 6
+            55: {row: 6, col: 1, category: 'alkali'}, // Cs
+            56: {row: 6, col: 2, category: 'alkaline'}, // Ba
+            57: {row: 6, col: 3, category: 'lanthanide'}, // La
+            72: {row: 6, col: 4, category: 'transition'}, // Hf
+            73: {row: 6, col: 5, category: 'transition'}, // Ta
+            74: {row: 6, col: 6, category: 'transition'}, // W
+            75: {row: 6, col: 7, category: 'transition'}, // Re
+            76: {row: 6, col: 8, category: 'transition'}, // Os
+            77: {row: 6, col: 9, category: 'transition'}, // Ir
+            78: {row: 6, col: 10, category: 'transition'}, // Pt
+            79: {row: 6, col: 11, category: 'transition'}, // Au
+            80: {row: 6, col: 12, category: 'transition'}, // Hg
+            81: {row: 6, col: 13, category: 'post-transition'}, // Tl
+            82: {row: 6, col: 14, category: 'post-transition'}, // Pb
+            83: {row: 6, col: 15, category: 'post-transition'}, // Bi
+            84: {row: 6, col: 16, category: 'post-transition'}, // Po
+            85: {row: 6, col: 17, category: 'halogen'}, // At
+            86: {row: 6, col: 18, category: 'noble'}, // Rn
+            
+            // Row 7
+            87: {row: 7, col: 1, category: 'alkali'}, // Fr
+            88: {row: 7, col: 2, category: 'alkaline'}, // Ra
+            89: {row: 7, col: 3, category: 'actinide'}, // Ac
+            104: {row: 7, col: 4, category: 'transition'}, // Rf
+            105: {row: 7, col: 5, category: 'transition'}, // Db
+            106: {row: 7, col: 6, category: 'transition'}, // Sg
+            107: {row: 7, col: 7, category: 'transition'}, // Bh
+            108: {row: 7, col: 8, category: 'transition'}, // Hs
+            109: {row: 7, col: 9, category: 'transition'}, // Mt
+            110: {row: 7, col: 10, category: 'transition'}, // Ds
+            111: {row: 7, col: 11, category: 'transition'}, // Rg
+            112: {row: 7, col: 12, category: 'transition'}, // Cn
+            113: {row: 7, col: 13, category: 'post-transition'}, // Nh
+            114: {row: 7, col: 14, category: 'post-transition'}, // Fl
+            115: {row: 7, col: 15, category: 'post-transition'}, // Mc
+            116: {row: 7, col: 16, category: 'post-transition'}, // Lv
+            117: {row: 7, col: 17, category: 'halogen'}, // Ts
+            118: {row: 7, col: 18, category: 'noble'}, // Og
+            
+            // Lanthanides (row 8)
+            58: {row: 8, col: 4, category: 'lanthanide'}, // Ce
+            59: {row: 8, col: 5, category: 'lanthanide'}, // Pr
+            60: {row: 8, col: 6, category: 'lanthanide'}, // Nd
+            61: {row: 8, col: 7, category: 'lanthanide'}, // Pm
+            62: {row: 8, col: 8, category: 'lanthanide'}, // Sm
+            63: {row: 8, col: 9, category: 'lanthanide'}, // Eu
+            64: {row: 8, col: 10, category: 'lanthanide'}, // Gd
+            65: {row: 8, col: 11, category: 'lanthanide'}, // Tb
+            66: {row: 8, col: 12, category: 'lanthanide'}, // Dy
+            67: {row: 8, col: 13, category: 'lanthanide'}, // Ho
+            68: {row: 8, col: 14, category: 'lanthanide'}, // Er
+            69: {row: 8, col: 15, category: 'lanthanide'}, // Tm
+            70: {row: 8, col: 16, category: 'lanthanide'}, // Yb
+            71: {row: 8, col: 17, category: 'lanthanide'}, // Lu
+            
+            // Actinides (row 9)
+            90: {row: 9, col: 4, category: 'actinide'}, // Th
+            91: {row: 9, col: 5, category: 'actinide'}, // Pa
+            92: {row: 9, col: 6, category: 'actinide'}, // U
+            93: {row: 9, col: 7, category: 'actinide'}, // Np
+            94: {row: 9, col: 8, category: 'actinide'}, // Pu
+            95: {row: 9, col: 9, category: 'actinide'}, // Am
+            96: {row: 9, col: 10, category: 'actinide'}, // Cm
+            97: {row: 9, col: 11, category: 'actinide'}, // Bk
+            98: {row: 9, col: 12, category: 'actinide'}, // Cf
+            99: {row: 9, col: 13, category: 'actinide'}, // Es
+            100: {row: 9, col: 14, category: 'actinide'}, // Fm
+            101: {row: 9, col: 15, category: 'actinide'}, // Md
+            102: {row: 9, col: 16, category: 'actinide'}, // No
+            103: {row: 9, col: 17, category: 'actinide'}, // Lr
+        };
+
+        // Element symbols in order of atomic number
+        const ELEMENTS_BY_ATOMIC_NUMBER = [
+            'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',
+            'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca',
+            'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn',
+            'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr',
+            'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn',
+            'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd',
+            'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb',
+            'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg',
+            'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
+            'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm',
+            'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds',
+            'Rg', 'Cn', 'Nh', 'Fl', 'Mc', 'Lv', 'Ts', 'Og'
+        ];
+
+        // Element groups for quick selection
+        const ELEMENT_GROUPS = {
+            'alkali': ['Li', 'Na', 'K', 'Rb', 'Cs', 'Fr'],
+            'alkaline': ['Be', 'Mg', 'Ca', 'Sr', 'Ba', 'Ra'],
+            'transition': ['Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 
+                          'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
+                          'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Rf',
+                          'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn'],
+            'lanthanides': ['La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 
+                           'Ho', 'Er', 'Tm', 'Yb', 'Lu'],
+            'actinides': ['Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 
+                         'Es', 'Fm', 'Md', 'No', 'Lr'],
+            'post-transition': ['Al', 'Ga', 'In', 'Sn', 'Tl', 'Pb', 'Bi', 'Po', 'Nh', 'Fl', 'Mc', 'Lv'],
+            'metalloid': ['B', 'Si', 'Ge', 'As', 'Sb', 'Te'],
+            'nonmetal': ['H', 'C', 'N', 'O', 'P', 'S', 'Se'],
+            'halogen': ['F', 'Cl', 'Br', 'I', 'At', 'Ts'],
+            'noble': ['He', 'Ne', 'Ar', 'Kr', 'Xe', 'Rn', 'Og']
+        };
+
+        // State variables
+        let state = {
+            selectedElements: new Set(Object.keys(ATOMIC_MASSES)), // Start with all elements selected
+            allResults: [],
+            filteredResults: [],
+            currentPage: 1,
+            pageSize: 50,
+            isCalculating: false,
+            calculationStartTime: 0,
+            elementInputs: [],
+            periodicTableCells: {},
+            shiftPressed: false,
+            ctrlPressed: false,
+            lastSelectedElement: null
+        };
+
+        // PubChem verification state
+        let pubchemVerificationState = {
+            verifiedFormulas: new Map(),
+            isVerifying: false,
+            verificationQueue: [],
+            searchOptions: {
+                type: 'strict', // 'strict' or 'synonyms'
+                chargeType: 'any', // 'any', 'neutral', 'cation', 'anion'
+                compoundType: 'all', // 'all', 'inorganic', 'organic'
+                batchSize: 3
+            }
+        };
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        
+        const elements = {
+            // Input elements
+            totalElements: document.getElementById('totalElements'),
+            elementInputs: document.getElementById('elementInputs'),
+            periodicTableGrid: document.getElementById('periodicTableGrid'),
+            
+            // PubChem options
+            pubchemSearchType: document.getElementById('pubchemSearchType'),
+            pubchemChargeType: document.getElementById('pubchemChargeType'),
+            pubchemCompoundType: document.getElementById('pubchemCompoundType'),
+            pubchemBatchSize: document.getElementById('pubchemBatchSize'),
+            
+            // Button elements
+            calculateBtn: document.getElementById('calculateBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            loadExampleBtn: document.getElementById('loadExampleBtn'),
+            exportAllBtn: document.getElementById('exportAllBtn'),
+            prevPageBtn: document.getElementById('prevPageBtn'),
+            nextPageBtn: document.getElementById('nextPageBtn'),
+            exportPageBtn: document.getElementById('exportPageBtn'),
+            selectAllBtn: document.getElementById('selectAllBtn'),
+            selectNoneBtn: document.getElementById('selectNoneBtn'),
+            invertSelectionBtn: document.getElementById('invertSelectionBtn'),
+            
+            // PubChem elements
+            verifyAllBtn: document.getElementById('verifyAllBtn'),
+            verifySelectedBtn: document.getElementById('verifySelectedBtn'),
+            testPubChemBtn: document.getElementById('testPubChemBtn'),
+            pubchemStatus: document.getElementById('pubchemStatus'),
+            
+            // Status elements
+            statusBar: document.getElementById('statusBar'),
+            statusText: document.getElementById('statusText'),
+            progressFill: document.getElementById('progressFill'),
+            selectedElements: document.getElementById('selectedElements'),
+            selectionMode: document.getElementById('selectionMode'),
+            
+            // Results elements
+            formulaCount: document.getElementById('formulaCount'),
+            combinationCount: document.getElementById('combinationCount'),
+            timeElapsed: document.getElementById('timeElapsed'),
+            resultsBody: document.getElementById('resultsBody'),
+            pageInfo: document.getElementById('pageInfo'),
+            
+            // Selection mode indicator
+            selectionModeIndicator: document.getElementById('selectionModeIndicator'),
+            indicatorText: document.getElementById('indicatorText')
+        };
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeElementInputs();
+            initializePeriodicTable();
+            initializeEventListeners();
+            updateSelectedElementsCount();
+            initializePubChemVerification();
+        });
+
+        function initializeElementInputs() {
+            updateElementInputs();
+            elements.totalElements.addEventListener('change', updateElementInputs);
+        }
+
+        function updateElementInputs() {
+            elements.elementInputs.innerHTML = '';
+            const total = parseInt(elements.totalElements.value);
+            state.elementInputs = [];
+            
+            for (let i = 0; i < total; i++) {
+                const div = document.createElement('div');
+                div.className = 'element-row';
+                div.innerHTML = `
+                    <div class="element-input">
+                        <input type="text" 
+                               id="element${i}" 
+                               placeholder="Element ${i + 1}"
+                               maxlength="2"
+                               class="element-symbol-input"
+                               list="elementSuggestions">
+                        <div class="element-symbol">?</div>
+                    </div>
+                    <div class="element-input">
+                        <input type="number" 
+                               id="percent${i}" 
+                               placeholder="Mass % (leave blank for unknown)"
+                               step="0.01"
+                               min="0"
+                               max="100">
+                    </div>
+                `;
+                elements.elementInputs.appendChild(div);
+                
+                // Store reference
+                const symbolInput = div.querySelector(`#element${i}`);
+                const percentInput = div.querySelector(`#percent${i}`);
+                const symbolDisplay = div.querySelector('.element-symbol');
+                
+                state.elementInputs.push({
+                    symbol: symbolInput,
+                    percent: percentInput,
+                    display: symbolDisplay
+                });
+                
+                // Element symbol formatting
+                symbolInput.addEventListener('input', (e) => {
+                    let value = e.target.value;
+                    
+                    // Convert to proper chemical symbol format
+                    if (value.length === 2) {
+                        value = value.charAt(0).toUpperCase() + value.charAt(1).toLowerCase();
+                    } else if (value.length === 1) {
+                        value = value.toUpperCase();
+                    }
+                    
+                    e.target.value = value;
+                    
+                    // Check if element exists in database
+                    const elementExists = ATOMIC_MASSES[value] !== undefined;
+                    symbolDisplay.textContent = elementExists ? value : '?';
+                    
+                    if (value && elementExists) {
+                        symbolDisplay.style.color = '#1a73e8';
+                    } else {
+                        symbolDisplay.style.color = '#dc3545';
+                    }
+                    
+                    // Update input field background if percentage is empty
+                    if (percentInput.value.trim() === '') {
+                        symbolInput.style.backgroundColor = '#e8f0fe';
+                    } else {
+                        symbolInput.style.backgroundColor = '';
+                    }
+                });
+                
+                percentInput.addEventListener('input', (e) => {
+                    updateTotalPercentage();
+                    // Update background color of symbol input based on whether percentage is filled
+                    if (symbolInput.value.trim() !== '') {
+                        if (e.target.value.trim() === '') {
+                            symbolInput.style.backgroundColor = '#e8f0fe';
+                        } else {
+                            symbolInput.style.backgroundColor = '';
+                        }
+                    }
+                });
+                
+                // Add autocomplete functionality
+                symbolInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === 'Tab') {
+                        const value = symbolInput.value.trim();
+                        if (value.length === 1) {
+                            // Try to find matching element
+                            const matches = Object.keys(ATOMIC_MASSES).filter(el => 
+                                el.startsWith(value.toUpperCase())
+                            );
+                            if (matches.length === 1) {
+                                symbolInput.value = matches[0];
+                                symbolInput.dispatchEvent(new Event('input'));
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Add datalist for element suggestions
+            if (!document.getElementById('elementSuggestions')) {
+                const datalist = document.createElement('datalist');
+                datalist.id = 'elementSuggestions';
+                Object.keys(ATOMIC_MASSES).forEach(symbol => {
+                    const option = document.createElement('option');
+                    option.value = symbol;
+                    option.textContent = symbol;
+                    datalist.appendChild(option);
+                });
+                document.body.appendChild(datalist);
+            }
+            
+            updateTotalPercentage();
+        }
+
+        function initializePeriodicTable() {
+            // Create a 9x18 grid
+            for (let row = 1; row <= 9; row++) {
+                for (let col = 1; col <= 18; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'periodic-table-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.dataset.category = 'empty';
+                    
+                    // Find element at this position
+                    let elementAtPos = null;
+                    for (const [symbol, data] of Object.entries(PERIODIC_TABLE_LAYOUT)) {
+                        const atomicNum = parseInt(symbol);
+                        const elementSymbol = ELEMENTS_BY_ATOMIC_NUMBER[atomicNum - 1];
+                        if (data.row === row && data.col === col && ATOMIC_MASSES[elementSymbol]) {
+                            elementAtPos = elementSymbol;
+                            cell.dataset.category = data.category;
+                            cell.dataset.element = elementSymbol;
+                            cell.dataset.atomicNumber = atomicNum;
+                            break;
+                        }
+                    }
+                    
+                    if (elementAtPos) {
+                        const atomicNum = cell.dataset.atomicNumber;
+                        cell.innerHTML = `
+                            <div class="number">${atomicNum}</div>
+                            <div class="symbol">${elementAtPos}</div>
+                            <div class="mass">${ATOMIC_MASSES[elementAtPos].toFixed(2)}</div>
+                        `;
+                        
+                        // Set color based on category
+                        const categoryColors = {
+                            'alkali': '#ff6666',
+                            'alkaline': '#ff9966',
+                            'transition': '#ffcc66',
+                            'lanthanide': '#99cc66',
+                            'actinide': '#66cc99',
+                            'post-transition': '#66ccff',
+                            'metalloid': '#cc66ff',
+                            'nonmetal': '#ff66cc',
+                            'halogen': '#6699ff',
+                            'noble': '#66ffcc'
+                        };
+                        
+                        if (categoryColors[cell.dataset.category]) {
+                            cell.style.backgroundColor = categoryColors[cell.dataset.category] + '20';
+                            cell.style.borderColor = categoryColors[cell.dataset.category] + '80';
+                        }
+                        
+                        // Add click event
+                        cell.addEventListener('click', (e) => handleElementCellClick(e, elementAtPos, cell));
+                        cell.addEventListener('mousedown', (e) => handleElementCellMouseDown(e, elementAtPos));
+                        
+                        // Store reference
+                        state.periodicTableCells[elementAtPos] = cell;
+                        
+                        // Set initial selection
+                        if (state.selectedElements.has(elementAtPos)) {
+                            cell.classList.add('selected');
+                        }
+                    } else {
+                        cell.style.visibility = 'hidden';
+                    }
+                    
+                    elements.periodicTableGrid.appendChild(cell);
+                }
+            }
+        }
+
+        // ============================================
+        // PERIODIC TABLE SELECTION FUNCTIONS (FIXED)
+        // ============================================
+        
+        function getGroupFromAtomicNumber(atomicNumber) {
+            // Fixed function to properly determine group for all elements
+            if (PERIODIC_TABLE_LAYOUT[atomicNumber]) {
+                return PERIODIC_TABLE_LAYOUT[atomicNumber].col;
+            }
+            
+            // For lanthanides and actinides, they're in group 3 but placed in f-block
+            const symbol = ELEMENTS_BY_ATOMIC_NUMBER[atomicNumber - 1];
+            if (ELEMENT_GROUPS.lanthanides.includes(symbol) || ELEMENT_GROUPS.actinides.includes(symbol)) {
+                return 3;
+            }
+            
+            // Default fallback
+            return 0;
+        }
+
+        function getPeriodFromAtomicNumber(atomicNumber) {
+            if (atomicNumber <= 2) return 1;
+            if (atomicNumber <= 10) return 2;
+            if (atomicNumber <= 18) return 3;
+            if (atomicNumber <= 36) return 4;
+            if (atomicNumber <= 54) return 5;
+            if (atomicNumber <= 86) return 6;
+            return 7;
+        }
+
+        function handleElementCellClick(e, symbol, cell) {
+            e.preventDefault();
+            
+            if (state.shiftPressed && state.lastSelectedElement) {
+                // Range selection
+                selectElementRange(state.lastSelectedElement, symbol);
+            } else if (state.ctrlPressed) {
+                // Toggle single element without clearing others
+                toggleElementSelection(symbol, cell);
+            } else {
+                // Single selection (clear others if not holding ctrl)
+                if (!state.ctrlPressed) {
+                    clearAllElementSelections();
+                }
+                toggleElementSelection(symbol, cell);
+            }
+            
+            state.lastSelectedElement = symbol;
+            updateSelectedElementsCount();
+        }
+
+        function handleElementCellMouseDown(e, symbol) {
+            // Check for modifier keys
+            state.shiftPressed = e.shiftKey;
+            state.ctrlPressed = e.ctrlKey || e.metaKey;
+            
+            // Update status
+            updateSelectionModeIndicator();
+        }
+
+        function updateSelectionModeIndicator() {
+            let modeText = 'Click: Single selection';
+            
+            if (state.shiftPressed && state.ctrlPressed) {
+                modeText = 'Shift+Ctrl: Range toggle';
+            } else if (state.shiftPressed) {
+                modeText = 'Shift: Range selection';
+            } else if (state.ctrlPressed) {
+                modeText = 'Ctrl: Multiple selection';
+            }
+            
+            elements.indicatorText.textContent = modeText;
+            elements.selectionMode.textContent = modeText;
+            
+            // Show/hide indicator
+            if (state.shiftPressed || state.ctrlPressed) {
+                elements.selectionModeIndicator.classList.add('visible');
+            } else {
+                elements.selectionModeIndicator.classList.remove('visible');
+            }
+        }
+
+        function selectPeriod(period) {
+            if (period === 'all') {
+                Object.values(state.periodicTableCells).forEach(cell => {
+                    if (cell.dataset.element) {
+                        const symbol = cell.dataset.element;
+                        state.selectedElements.add(symbol);
+                        cell.classList.add('selected');
+                    }
+                });
+                return;
+            }
+            
+            const periodNum = parseInt(period);
+            Object.values(state.periodicTableCells).forEach(cell => {
+                if (cell.dataset.element) {
+                    const symbol = cell.dataset.element;
+                    const atomicNum = parseInt(cell.dataset.atomicNumber);
+                    const elementPeriod = getPeriodFromAtomicNumber(atomicNum);
+                    
+                    if (elementPeriod === periodNum) {
+                        if (state.ctrlPressed) {
+                            // Toggle selection
+                            if (state.selectedElements.has(symbol)) {
+                                state.selectedElements.delete(symbol);
+                                cell.classList.remove('selected');
+                            } else {
+                                state.selectedElements.add(symbol);
+                                cell.classList.add('selected');
+                            }
+                        } else {
+                            state.selectedElements.add(symbol);
+                            cell.classList.add('selected');
+                        }
+                    }
+                }
+            });
+        }
+
+        function selectGroup(group) {
+            if (group === 'all') {
+                Object.values(state.periodicTableCells).forEach(cell => {
+                    if (cell.dataset.element) {
+                        const symbol = cell.dataset.element;
+                        state.selectedElements.add(symbol);
+                        cell.classList.add('selected');
+                    }
+                });
+                return;
+            }
+            
+            const groupNum = parseInt(group);
+            Object.values(state.periodicTableCells).forEach(cell => {
+                if (cell.dataset.element) {
+                    const symbol = cell.dataset.element;
+                    const atomicNum = parseInt(cell.dataset.atomicNumber);
+                    const elementGroup = getGroupFromAtomicNumber(atomicNum);
+                    
+                    if (elementGroup === groupNum) {
+                        if (state.ctrlPressed) {
+                            // Toggle selection
+                            if (state.selectedElements.has(symbol)) {
+                                state.selectedElements.delete(symbol);
+                                cell.classList.remove('selected');
+                            } else {
+                                state.selectedElements.add(symbol);
+                                cell.classList.add('selected');
+                            }
+                        } else {
+                            state.selectedElements.add(symbol);
+                            cell.classList.add('selected');
+                        }
+                    }
+                }
+            });
+        }
+
+        function selectElementType(type) {
+            if (ELEMENT_GROUPS[type]) {
+                ELEMENT_GROUPS[type].forEach(symbol => {
+                    const cell = state.periodicTableCells[symbol];
+                    if (cell) {
+                        if (state.ctrlPressed) {
+                            // Toggle selection
+                            if (state.selectedElements.has(symbol)) {
+                                state.selectedElements.delete(symbol);
+                                cell.classList.remove('selected');
+                            } else {
+                                state.selectedElements.add(symbol);
+                                cell.classList.add('selected');
+                            }
+                        } else {
+                            state.selectedElements.add(symbol);
+                            cell.classList.add('selected');
+                        }
+                    }
+                });
+            }
+        }
+
+        function selectElementRange(startSymbol, endSymbol) {
+            const startCell = state.periodicTableCells[startSymbol];
+            const endCell = state.periodicTableCells[endSymbol];
+            
+            if (!startCell || !endCell) return;
+            
+            const startRow = parseInt(startCell.dataset.row);
+            const startCol = parseInt(startCell.dataset.col);
+            const endRow = parseInt(endCell.dataset.row);
+            const endCol = parseInt(endCell.dataset.col);
+            
+            const minRow = Math.min(startRow, endRow);
+            const maxRow = Math.max(startRow, endRow);
+            const minCol = Math.min(startCol, endCol);
+            const maxCol = Math.max(startCol, endCol);
+            
+            Object.values(state.periodicTableCells).forEach(cell => {
+                if (cell.dataset.element) {
+                    const symbol = cell.dataset.element;
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    
+                    if (row >= minRow && row <= maxRow && col >= minCol && col <= maxCol) {
+                        if (state.ctrlPressed) {
+                            // Toggle selection
+                            if (state.selectedElements.has(symbol)) {
+                                state.selectedElements.delete(symbol);
+                                cell.classList.remove('selected');
+                            } else {
+                                state.selectedElements.add(symbol);
+                                cell.classList.add('selected');
+                            }
+                        } else {
+                            state.selectedElements.add(symbol);
+                            cell.classList.add('selected');
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleElementSelection(symbol, elementCell) {
+            if (state.selectedElements.has(symbol)) {
+                state.selectedElements.delete(symbol);
+                elementCell.classList.remove('selected');
+            } else {
+                state.selectedElements.add(symbol);
+                elementCell.classList.add('selected');
+            }
+        }
+
+        function clearAllElementSelections() {
+            state.selectedElements.clear();
+            Object.values(state.periodicTableCells).forEach(cell => {
+                if (cell.dataset.element) {
+                    cell.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateSelectedElementsCount() {
+            const count = state.selectedElements.size;
+            const total = Object.keys(ATOMIC_MASSES).length;
+            elements.selectedElements.textContent = `Selected: ${count}/${total} elements`;
+        }
+
+        // ============================================
+        // EVENT LISTENERS INITIALIZATION
+        // ============================================
+        
+        function initializeEventListeners() {
+            // Keyboard events for modifier keys
+            document.addEventListener('keydown', (e) => {
+                state.shiftPressed = e.shiftKey;
+                state.ctrlPressed = e.ctrlKey || e.metaKey;
+                
+                updateSelectionModeIndicator();
+                
+                // Keyboard shortcuts
+                // Ctrl+Enter to calculate
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!state.isCalculating) {
+                        calculateAllFormulas();
+                    }
+                }
+                
+                // Ctrl+Shift+V to verify with PubChem
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'V') {
+                    e.preventDefault();
+                    if (!pubchemVerificationState.isVerifying && state.allResults.length > 0) {
+                        elements.verifyAllBtn.click();
+                    }
+                }
+                
+                // Escape to clear
+                if (e.key === 'Escape') {
+                    const activeElement = document.activeElement;
+                    if (!activeElement.tagName.match(/INPUT|TEXTAREA|SELECT/)) {
+                        if (confirm('Clear all inputs and results?')) {
+                            clearAll();
+                        }
+                    }
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                if (!e.shiftKey) state.shiftPressed = false;
+                if (!e.ctrlKey && !e.metaKey) state.ctrlPressed = false;
+                
+                updateSelectionModeIndicator();
+            });
+            
+            // Calculation button
+            elements.calculateBtn.addEventListener('click', calculateAllFormulas);
+            
+            // Clear button
+            elements.clearBtn.addEventListener('click', clearAll);
+            
+            // Example button (now loads water example)
+            elements.loadExampleBtn.addEventListener('click', loadWaterExample);
+            
+            // Export buttons
+            elements.exportAllBtn.addEventListener('click', exportAllResults);
+            elements.exportPageBtn.addEventListener('click', exportCurrentPage);
+            
+            // Page navigation
+            elements.prevPageBtn.addEventListener('click', () => changePage(-1));
+            elements.nextPageBtn.addEventListener('click', () => changePage(1));
+            
+            // Selection buttons
+            elements.selectAllBtn.addEventListener('click', selectAllElements);
+            elements.selectNoneBtn.addEventListener('click', selectNoElements);
+            elements.invertSelectionBtn.addEventListener('click', invertSelection);
+            
+            // Periodic table control buttons
+            document.querySelectorAll('.periodic-table-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const group = this.dataset.group;
+                    const period = this.dataset.period;
+                    const type = this.dataset.type;
+                    
+                    // Update active state
+                    if (!state.ctrlPressed) {
+                        document.querySelectorAll('.periodic-table-btn').forEach(b => {
+                            b.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    }
+                    
+                    if (group) {
+                        if (group === 'all') {
+                            selectAllElements();
+                        } else {
+                            selectGroup(parseInt(group));
+                        }
+                    } else if (period) {
+                        if (period === 'all') {
+                            selectAllElements();
+                        } else {
+                            selectPeriod(parseInt(period));
+                        }
+                    } else if (type) {
+                        selectElementType(type);
+                    }
+                    
+                    updateSelectedElementsCount();
+                });
+            });
+        }
+
+        function selectAllElements() {
+            state.selectedElements = new Set(Object.keys(ATOMIC_MASSES));
+            Object.values(state.periodicTableCells).forEach(cell => {
+                if (cell.dataset.element) {
+                    cell.classList.add('selected');
+                }
+            });
+            updateSelectedElementsCount();
+        }
+
+        function selectNoElements() {
+            state.selectedElements.clear();
+            Object.values(state.periodicTableCells).forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            updateSelectedElementsCount();
+        }
+
+        function invertSelection() {
+            const allElements = Object.keys(ATOMIC_MASSES);
+            allElements.forEach(symbol => {
+                const cell = state.periodicTableCells[symbol];
+                if (cell) {
+                    if (state.selectedElements.has(symbol)) {
+                        state.selectedElements.delete(symbol);
+                        cell.classList.remove('selected');
+                    } else {
+                        state.selectedElements.add(symbol);
+                        cell.classList.add('selected');
+                    }
+                }
+            });
+            updateSelectedElementsCount();
+        }
+
+        // ============================================
+        // PUB CHEM VERIFICATION SYSTEM (FIXED)
+        // ============================================
+        
+        function initializePubChemVerification() {
+            elements.verifyAllBtn.addEventListener('click', verifyAllWithPubChem);
+            elements.verifySelectedBtn.addEventListener('click', verifySelectedPageWithPubChem);
+            elements.testPubChemBtn.addEventListener('click', testPubChemConnection);
+            
+            // Update search options
+            elements.pubchemSearchType.addEventListener('change', (e) => {
+                pubchemVerificationState.searchOptions.type = e.target.value;
+            });
+            
+            elements.pubchemChargeType.addEventListener('change', (e) => {
+                pubchemVerificationState.searchOptions.chargeType = e.target.value;
+            });
+            
+            elements.pubchemCompoundType.addEventListener('change', (e) => {
+                pubchemVerificationState.searchOptions.compoundType = e.target.value;
+            });
+            
+            elements.pubchemBatchSize.addEventListener('change', (e) => {
+                pubchemVerificationState.searchOptions.batchSize = parseInt(e.target.value) || 3;
+            });
+        }
+
+        // SIMPLIFIED PubChem API - Direct approach
+        const PubChemAPI = {
+            async checkCompound(formula, options = {}) {
+                try {
+                    // Clean the formula: remove HTML tags and format properly
+                    const cleanFormula = formula
+                        .replace(/<sub>/g, '')
+                        .replace(/<\/sub>/g, '')
+                        .trim();
+                    
+                    console.log(`Checking PubChem for: ${cleanFormula}`, options);
+                    
+                    // Use PubChem's simpler API endpoint
+                    const url = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastformula/${encodeURIComponent(cleanFormula)}/cids/JSON`;
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                        mode: 'cors',
+                        cache: 'no-cache'
+                    });
+                    
+                    if (response.status === 404) {
+                        // Compound not found - this is normal for many formulas
+                        return { 
+                            exists: false, 
+                            count: 0, 
+                            cid: null, 
+                            link: null,
+                            error: null,
+                            formula: cleanFormula
+                        };
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Parse response - PubChem returns different structures
+                    let cid = null;
+                    let count = 0;
+                    
+                    if (data.IdentifierList && data.IdentifierList.CID) {
+                        cid = data.IdentifierList.CID[0];
+                        count = data.IdentifierList.CID.length;
+                    } else if (data.CID) {
+                        cid = data.CID;
+                        count = 1;
+                    } else if (data.IdentifierList && Array.isArray(data.IdentifierList.CID)) {
+                        cid = data.IdentifierList.CID[0];
+                        count = data.IdentifierList.CID.length;
+                    }
+                    
+                    if (cid && count > 0) {
+                        // Check if compound matches search options
+                        const matchesOptions = await this.checkCompoundProperties(cid, cleanFormula, options);
+                        if (matchesOptions) {
+                            return {
+                                exists: true,
+                                count: count,
+                                cid: cid,
+                                link: `https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`,
+                                error: null,
+                                formula: cleanFormula
+                            };
+                        } else {
+                            // Compound exists but doesn't match search options
+                            return { 
+                                exists: false, 
+                                count: 0, 
+                                cid: null, 
+                                link: null,
+                                error: 'Compound found but does not match search criteria',
+                                formula: cleanFormula
+                            };
+                        }
+                    }
+                    
+                    // Try alternative search method if first one fails
+                    return await this.tryAlternativeSearch(cleanFormula, options);
+                    
+                } catch (error) {
+                    console.warn('PubChem check failed for', formula, ':', error.message);
+                    
+                    // For network errors, return a pending status
+                    if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
+                        return { 
+                            exists: false, 
+                            count: 0, 
+                            cid: null, 
+                            link: null,
+                            error: 'Network error - try again later',
+                            formula: formula
+                        };
+                    }
+                    
+                    return { 
+                        exists: false, 
+                        count: 0, 
+                        cid: null, 
+                        link: null,
+                        error: error.message,
+                        formula: formula
+                    };
+                }
+            },
+            
+            async checkCompoundProperties(cid, formula, options) {
+                // Check if compound matches charge type and compound type options
+                if (options.chargeType === 'any' && options.compoundType === 'all') {
+                    return true; // No filtering needed
+                }
+                
+                try {
+                    // Get compound details to check properties
+                    const detailsUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/JSON`;
+                    const response = await fetch(detailsUrl, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                        mode: 'cors'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Check charge type
+                        if (options.chargeType !== 'any') {
+                            const compound = data.PC_Compounds?.[0];
+                            const charge = compound?.charge || 0;
+                            
+                            if (options.chargeType === 'neutral' && charge !== 0) return false;
+                            if (options.chargeType === 'cation' && charge <= 0) return false;
+                            if (options.chargeType === 'anion' && charge >= 0) return false;
+                        }
+                        
+                        // Check compound type (organic/inorganic)
+                        if (options.compoundType !== 'all') {
+                            const cleanFormula = formula.replace(/[^A-Za-z]/g, '');
+                            const hasCarbon = cleanFormula.includes('C');
+                            const simpleInorganic = ['CO2', 'CO', 'CS2', 'CN', 'CN2', 'C2N2', 'H2CO3'];
+                            
+                            if (options.compoundType === 'organic') {
+                                if (!hasCarbon) return false;
+                                if (simpleInorganic.includes(cleanFormula)) return false;
+                            } else if (options.compoundType === 'inorganic') {
+                                if (hasCarbon && !simpleInorganic.includes(cleanFormula)) return false;
+                            }
+                        }
+                        
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn('Could not check compound properties:', error);
+                    // If we can't check properties, assume it matches
+                    return true;
+                }
+                
+                return true; // Default to true if we can't check
+            },
+            
+            async tryAlternativeSearch(formula, options) {
+                try {
+                    // Alternative endpoint: try name search for common compounds
+                    const url = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(formula)}/cids/JSON`;
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                        mode: 'cors'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.IdentifierList && data.IdentifierList.CID && data.IdentifierList.CID.length > 0) {
+                            const cid = data.IdentifierList.CID[0];
+                            // Check if matches options
+                            const matchesOptions = await this.checkCompoundProperties(cid, formula, options);
+                            if (matchesOptions) {
+                                return {
+                                    exists: true,
+                                    count: data.IdentifierList.CID.length,
+                                    cid: cid,
+                                    link: `https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`,
+                                    error: null,
+                                    formula: formula
+                                };
+                            }
+                        }
+                    }
+                } catch (altError) {
+                    console.log('Alternative search also failed:', altError.message);
+                }
+                
+                return { 
+                    exists: false, 
+                    count: 0, 
+                    cid: null, 
+                    link: null,
+                    error: null,
+                    formula: formula
+                };
+            },
+            
+            async batchCheck(formulas, options, progressCallback = null) {
+                const results = [];
+                const batchSize = options.batchSize || 3; // Reduced batch size for better reliability
+                const delay = 2000; // Increased delay to respect rate limits
+                
+                for (let i = 0; i < formulas.length; i += batchSize) {
+                    const batch = formulas.slice(i, i + batchSize);
+                    
+                    // Process batch sequentially, not in parallel
+                    for (let j = 0; j < batch.length; j++) {
+                        const formula = batch[j];
+                        try {
+                            const result = await this.checkCompound(formula, options);
+                            results.push(result);
+                            
+                            if (progressCallback) {
+                                progressCallback(i + j + 1, formulas.length);
+                            }
+                            
+                            // Small delay between individual requests
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                        } catch (error) {
+                            console.error('Error checking formula:', formula, error);
+                            results.push({ 
+                                exists: false, 
+                                count: 0, 
+                                cid: null, 
+                                error: error.message,
+                                formula: formula
+                            });
+                        }
+                    }
+                    
+                    // Delay between batches
+                    if (i + batchSize < formulas.length) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+                
+                return results;
+            }
+        };
+
+        async function testPubChemConnection() {
+            elements.testPubChemBtn.disabled = true;
+            elements.pubchemStatus.innerHTML = '<span class="pubchem-loading">Testing PubChem connection...</span>';
+            
+            try {
+                // Test with water (H2O)
+                const testResult = await PubChemAPI.checkCompound('H2O', {
+                    type: 'strict',
+                    chargeType: 'any',
+                    compoundType: 'all'
+                });
+                
+                if (testResult.exists) {
+                    elements.pubchemStatus.innerHTML = 
+                        `<span class="pubchem-verified">✅ PubChem connection successful</span>`;
+                } else if (testResult.error) {
+                    elements.pubchemStatus.innerHTML = 
+                        `<span class="pubchem-error">⚠️ Connection issue: ${testResult.error}</span>`;
+                } else {
+                    elements.pubchemStatus.innerHTML = 
+                        `<span>ℹ️ H2O not found in PubChem (unexpected)</span>`;
+                }
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                elements.pubchemStatus.innerHTML = 
+                    `<span class="pubchem-error">❌ Test failed: ${error.message}</span>`;
+            } finally {
+                elements.testPubChemBtn.disabled = false;
+            }
+        }
+
+        async function verifyAllWithPubChem() {
+            if (state.allResults.length === 0) {
+                alert('No formulas to verify! Please run the calculation first.');
+                return;
+            }
+            
+            if (pubchemVerificationState.isVerifying) {
+                alert('Verification already in progress!');
+                return;
+            }
+            
+            // Get search options from UI
+            pubchemVerificationState.searchOptions.type = elements.pubchemSearchType.value;
+            pubchemVerificationState.searchOptions.chargeType = elements.pubchemChargeType.value;
+            pubchemVerificationState.searchOptions.compoundType = elements.pubchemCompoundType.value;
+            pubchemVerificationState.searchOptions.batchSize = parseInt(elements.pubchemBatchSize.value) || 3;
+            
+            // Ask for confirmation if there are many results
+            if (state.allResults.length > 50) {
+                const confirm = window.confirm(
+                    `You are about to verify ${state.allResults.length} compounds with PubChem.\n\n` +
+                    `Search Options:\n` +
+                    `• Type: ${pubchemVerificationState.searchOptions.type === 'strict' ? 'Strict' : 'Include Synonyms'}\n` +
+                    `• Charge: ${pubchemVerificationState.searchOptions.chargeType}\n` +
+                    `• Compound: ${pubchemVerificationState.searchOptions.compoundType}\n` +
+                    `Note: This may take a few minutes due to rate limiting.\nContinue?`
+                );
+                if (!confirm) return;
+            }
+            
+            pubchemVerificationState.isVerifying = true;
+            elements.verifyAllBtn.disabled = true;
+            elements.verifySelectedBtn.disabled = true;
+            elements.testPubChemBtn.disabled = true;
+            
+            // Get unique formulas
+            const formulaMap = new Map();
+            state.allResults.forEach((result, index) => {
+                const formula = formatFormula(result.formula);
+                const cleanFormula = formula.replace(/<sub>/g, '').replace(/<\/sub>/g, '');
+                if (!formulaMap.has(cleanFormula)) {
+                    formulaMap.set(cleanFormula, { indices: [index], formula: formula });
+                } else {
+                    formulaMap.get(cleanFormula).indices.push(index);
+                }
+            });
+            
+            const uniqueFormulas = Array.from(formulaMap.keys());
+            
+            elements.pubchemStatus.innerHTML = `<span class="pubchem-loading">Starting verification of ${uniqueFormulas.length} unique compounds with current filters...</span>`;
+            
+            try {
+                const results = await PubChemAPI.batchCheck(
+                    uniqueFormulas, 
+                    pubchemVerificationState.searchOptions,
+                    (current, total) => {
+                        const percent = Math.round((current / total) * 100);
+                        const remaining = total - current;
+                        const timeRemaining = Math.round((remaining * 3) / 60);
+                        elements.pubchemStatus.innerHTML = 
+                            `<span class="pubchem-loading">Verifying ${current}/${total} (${percent}%)` +
+                            `${timeRemaining > 0 ? ` - ~${timeRemaining} min remaining` : ''}</span>`;
+                    }
+                );
+                
+                // Apply results
+                results.forEach((result, resultIndex) => {
+                    const cleanFormula = uniqueFormulas[resultIndex];
+                    const formulaData = formulaMap.get(cleanFormula);
+                    
+                    if (formulaData) {
+                        formulaData.indices.forEach(index => {
+                            if (index < state.allResults.length) {
+                                state.allResults[index].pubchem = result;
+                            }
+                        });
+                        
+                        pubchemVerificationState.verifiedFormulas.set(cleanFormula, result);
+                    }
+                });
+                
+                // Count statistics
+                const verifiedCount = results.filter(r => r.exists).length;
+                const errorCount = results.filter(r => r.error && r.error.includes('error')).length;
+                const notFoundCount = results.filter(r => !r.exists && !r.error).length;
+                const filteredOutCount = results.filter(r => r.error && r.error.includes('does not match')).length;
+                
+                elements.pubchemStatus.innerHTML = `
+                    <span>Verification complete: 
+                    <span class="pubchem-verified">${verifiedCount} matching compounds</span>
+                    ${filteredOutCount > 0 ? `, <span>${filteredOutCount} filtered out</span>` : ''}
+                    ${notFoundCount > 0 ? `, <span>${notFoundCount} not found</span>` : ''}
+                    ${errorCount > 0 ? `, <span class="pubchem-error">${errorCount} errors</span>` : ''}</span>
+                `;
+                
+                // Update results table
+                updatePageDisplay();
+                
+                // Show summary
+                setTimeout(() => {
+                    let message = `PubChem verification complete!\n\n`;
+                    if (verifiedCount > 0) {
+                        message += `✅ Found ${verifiedCount} compounds matching your criteria\n`;
+                    }
+                    if (filteredOutCount > 0) {
+                        message += `⚡ ${filteredOutCount} compounds filtered out (didn't match charge/type criteria)\n`;
+                    }
+                    if (notFoundCount > 0) {
+                        message += `❌ ${notFoundCount} formulas not found in PubChem\n`;
+                    }
+                    if (errorCount > 0) {
+                        message += `⚠️ ${errorCount} network/connection errors`;
+                    }
+                    
+                    alert(message);
+                }, 500);
+                
+            } catch (error) {
+                console.error('Verification error:', error);
+                elements.pubchemStatus.innerHTML = 
+                    `<span class="pubchem-error">Error: ${error.message}. Please check your connection and try again.</span>`;
+            } finally {
+                pubchemVerificationState.isVerifying = false;
+                elements.verifyAllBtn.disabled = false;
+                elements.verifySelectedBtn.disabled = false;
+                elements.testPubChemBtn.disabled = false;
+            }
+        }
+
+        async function verifySelectedPageWithPubChem() {
+            if (state.filteredResults.length === 0) {
+                alert('No results to verify!');
+                return;
+            }
+            
+            if (pubchemVerificationState.isVerifying) {
+                alert('Verification already in progress!');
+                return;
+            }
+            
+            // Get search options from UI
+            pubchemVerificationState.searchOptions.type = elements.pubchemSearchType.value;
+            pubchemVerificationState.searchOptions.chargeType = elements.pubchemChargeType.value;
+            pubchemVerificationState.searchOptions.compoundType = elements.pubchemCompoundType.value;
+            pubchemVerificationState.searchOptions.batchSize = parseInt(elements.pubchemBatchSize.value) || 3;
+            
+            const start = (state.currentPage - 1) * state.pageSize;
+            const end = start + state.pageSize;
+            const pageResults = state.filteredResults.slice(start, end);
+            
+            const formulas = pageResults.map(result => 
+                formatFormula(result.formula)
+            );
+            
+            pubchemVerificationState.isVerifying = true;
+            elements.verifyAllBtn.disabled = true;
+            elements.verifySelectedBtn.disabled = true;
+            elements.testPubChemBtn.disabled = true;
+            
+            elements.pubchemStatus.innerHTML = '<span class="pubchem-loading">Verifying page with PubChem...</span>';
+            
+            try {
+                const results = await PubChemAPI.batchCheck(formulas, pubchemVerificationState.searchOptions);
+                
+                formulas.forEach((formula, index) => {
+                    const cleanFormula = formula.replace(/<sub>/g, '').replace(/<\/sub>/g, '');
+                    pubchemVerificationState.verifiedFormulas.set(cleanFormula, results[index]);
+                    
+                    if (start + index < state.allResults.length) {
+                        state.allResults[start + index].pubchem = results[index];
+                    }
+                });
+                
+                const verifiedCount = results.filter(r => r.exists).length;
+                const errorCount = results.filter(r => r.error && !r.exists).length;
+                const notFoundCount = results.filter(r => !r.exists && !r.error).length;
+                const filteredOutCount = results.filter(r => r.error && r.error.includes('does not match')).length;
+                
+                elements.pubchemStatus.innerHTML = `
+                    <span>Page verified: 
+                    <span class="pubchem-verified">${verifiedCount}/${formulas.length} matching compounds</span>
+                    ${filteredOutCount > 0 ? `, <span>${filteredOutCount} filtered out</span>` : ''}
+                    ${notFoundCount > 0 ? `, <span>${notFoundCount} not found</span>` : ''}
+                    ${errorCount > 0 ? `, <span class="pubchem-error">${errorCount} errors</span>` : ''}</span>
+                `;
+                
+                updatePageDisplay();
+                
+            } catch (error) {
+                console.error('Page verification error:', error);
+                elements.pubchemStatus.innerHTML = 
+                    `<span class="pubchem-error">Error: ${error.message}</span>`;
+            } finally {
+                pubchemVerificationState.isVerifying = false;
+                elements.verifyAllBtn.disabled = false;
+                elements.verifySelectedBtn.disabled = false;
+                elements.testPubChemBtn.disabled = false;
+            }
+        }
+
+        // ============================================
+        // CORE CALCULATION FUNCTIONS
+        // ============================================
+        
+        async function calculateAllFormulas() {
+            if (state.isCalculating) {
+                alert('Calculation already in progress!');
+                return;
+            }
+            
+            // Get input parameters
+            const inputs = getInputParameters();
+            if (!validateInputs(inputs)) return;
+            
+            // Update UI
+            state.isCalculating = true;
+            state.calculationStartTime = Date.now();
+            elements.calculateBtn.disabled = true;
+            elements.calculateBtn.innerHTML = '<span class="spinner"></span> Calculating...';
+            updateStatus('Generating all possible combinations...', 0);
+            
+            // Clear previous results
+            state.allResults = [];
+            state.filteredResults = [];
+            state.currentPage = 1;
+            
+            // Clear PubChem verification
+            pubchemVerificationState.verifiedFormulas.clear();
+            
+            // Start calculation
+            setTimeout(() => {
+                try {
+                    const results = generateAllCombinations(inputs);
+                    displayResults(results);
+                    updateStatus(`Found ${results.length} possible formulas`, 100);
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 0, 'error');
+                    console.error(error);
+                } finally {
+                    state.isCalculating = false;
+                    elements.calculateBtn.disabled = false;
+                    elements.calculateBtn.innerHTML = '<span>🔍 Find ALL Formulas</span>';
+                }
+            }, 10);
+        }
+
+        function getInputParameters() {
+            const totalElements = parseInt(elements.totalElements.value);
+            const tolerance = parseFloat(document.getElementById('tolerance').value);
+            const maxCoefficient = parseInt(document.getElementById('maxCoefficient').value);
+            const maxResults = parseInt(document.getElementById('maxResults').value);
+            const searchMethod = document.getElementById('searchMethod').value;
+            
+            const knownElementsWithPercent = [];
+            const percentages = [];
+            const knownElementsWithoutPercent = [];
+            
+            state.elementInputs.forEach(input => {
+                const symbol = input.symbol.value.trim();
+                const percent = input.percent.value.trim();
+                
+                if (symbol) {
+                    // Format symbol properly
+                    const formattedSymbol = symbol.length === 2 
+                        ? symbol.charAt(0).toUpperCase() + symbol.charAt(1).toLowerCase()
+                        : symbol.toUpperCase();
+                    
+                    if (percent && !isNaN(parseFloat(percent))) {
+                        knownElementsWithPercent.push(formattedSymbol);
+                        percentages.push(parseFloat(percent));
+                    } else {
+                        knownElementsWithoutPercent.push(formattedSymbol);
+                    }
+                }
+            });
+            
+            return {
+                totalElements,
+                knownElementsWithPercent,
+                percentages,
+                knownElementsWithoutPercent,
+                tolerance,
+                maxCoefficient,
+                maxResults,
+                searchMethod,
+                unknownElements: Array.from(state.selectedElements)
+            };
+        }
+
+        function validateInputs(params) {
+            const { knownElementsWithPercent, percentages, totalElements, knownElementsWithoutPercent } = params;
+            
+            // Check if we have at least one known element (with or without percentage)
+            if (knownElementsWithPercent.length === 0 && knownElementsWithoutPercent.length === 0) {
+                alert('Please enter at least one known element (with or without percentage)');
+                return false;
+            }
+            
+            // Validate known elements
+            const allKnownElements = [...knownElementsWithPercent, ...knownElementsWithoutPercent];
+            for (const element of allKnownElements) {
+                if (!ATOMIC_MASSES[element]) {
+                    alert(`Unknown element: ${element}. Please check the element symbol.`);
+                    return false;
+                }
+            }
+            
+            // Validate percentages (if any)
+            const totalPercent = percentages.reduce((sum, p) => sum + p, 0);
+            if (totalPercent > 100) {
+                alert(`Total percentage (${totalPercent.toFixed(2)}%) cannot exceed 100%`);
+                return false;
+            }
+            
+            // Check for duplicate elements
+            const uniqueElements = new Set(allKnownElements);
+            if (uniqueElements.size !== allKnownElements.length) {
+                alert('Duplicate elements found in known elements list. Please remove duplicates.');
+                return false;
+            }
+            
+            // Check if we have enough slots for unknowns
+            const numKnown = allKnownElements.length;
+            const numUnknown = totalElements - numKnown;
+            if (numUnknown < 0) {
+                alert(`Too many known elements. Total elements is ${totalElements} but you specified ${numKnown} known elements.`);
+                return false;
+            }
+            
+            if (numUnknown > 0 && state.selectedElements.size < numUnknown) {
+                alert(`Need at least ${numUnknown} elements in the pool for unknown elements`);
+                return false;
+            }
+            
+            return true;
+        }
+
+        function generateAllCombinations(params) {
+            const {
+                totalElements,
+                knownElementsWithPercent,
+                percentages,
+                knownElementsWithoutPercent,
+                tolerance,
+                maxCoefficient,
+                maxResults,
+                searchMethod,
+                unknownElements
+            } = params;
+            
+            const allKnownElements = [...knownElementsWithPercent, ...knownElementsWithoutPercent];
+            const numKnown = allKnownElements.length;
+            const numUnknown = totalElements - numKnown;
+            const allResults = [];
+            
+            updateStatus('Preparing calculation...', 5);
+            
+            // Filter out known elements from unknown pool
+            const availableUnknownElements = unknownElements.filter(elem => 
+                !allKnownElements.includes(elem)
+            );
+            
+            if (numUnknown === 0) {
+                // No unknown elements, just solve for known elements
+                updateStatus('Solving for exact composition...', 10);
+                const formulas = solveForExactComposition(allKnownElements, percentages, knownElementsWithoutPercent, maxCoefficient, tolerance);
+                
+                return formulas.map(formula => ({
+                    formula,
+                    unknownCount: 0,
+                    theoreticalPercentages: calculateTheoreticalPercentages(formula),
+                    actualPercentages: percentages,
+                    unknownElements: [],
+                    elementsWithoutPercent: knownElementsWithoutPercent
+                }));
+            }
+            
+            updateStatus('Generating element combinations...', 20);
+            
+            // Generate all combinations of unknown elements
+            const elementCombinations = generateCombinations(availableUnknownElements, numUnknown);
+            
+            if (elementCombinations.length === 0) {
+                updateStatus('No valid element combinations found', 100, 'error');
+                return [];
+            }
+            
+            updateStatus(`Generated ${elementCombinations.length} element combinations`, 30);
+            
+            let totalCombinations = 0;
+            let formulasFound = 0;
+            const startTime = Date.now();
+            
+            elementCombinations.forEach((unknownElementSet, comboIndex) => {
+                // Update progress
+                const progress = 30 + (comboIndex / elementCombinations.length * 60);
+                const elapsed = (Date.now() - startTime) / 1000;
+                const rate = comboIndex > 0 ? (comboIndex / elapsed).toFixed(1) : 0;
+                updateStatus(`Processing combination ${comboIndex + 1} of ${elementCombinations.length} (${rate}/sec)...`, progress);
+                
+                // Generate all possible coefficient sets
+                const coefficientSets = generateAllCoefficientSets(
+                    knownElementsWithPercent,
+                    knownElementsWithoutPercent,
+                    unknownElementSet,
+                    percentages,
+                    maxCoefficient,
+                    tolerance
+                );
+                
+                totalCombinations += coefficientSets.length;
+                
+                coefficientSets.forEach((coefficients, coeffIndex) => {
+                    if (allResults.length >= maxResults) return;
+                    
+                    // Create formula object
+                    const formula = {};
+                    
+                    // Add elements with percentages
+                    knownElementsWithPercent.forEach((elem, i) => {
+                        formula[elem] = coefficients.knownWithPercent[i];
+                    });
+                    
+                    // Add elements without percentages
+                    knownElementsWithoutPercent.forEach((elem, i) => {
+                        formula[elem] = coefficients.knownWithoutPercent[i];
+                    });
+                    
+                    // Add unknown elements
+                    unknownElementSet.forEach((elem, i) => {
+                        formula[elem] = coefficients.unknown[i];
+                    });
+                    
+                    // Calculate theoretical percentages
+                    const theoretical = calculateTheoreticalPercentages(formula);
+                    
+                    // Check if within tolerance for known elements with percentages
+                    const withinTolerance = knownElementsWithPercent.every((elem, i) => {
+                        return Math.abs(theoretical[elem] - percentages[i]) <= tolerance;
+                    });
+                    
+                    if (withinTolerance) {
+                        formulasFound++;
+                        allResults.push({
+                            formula,
+                            unknownCount: numUnknown,
+                            theoreticalPercentages: theoretical,
+                            actualPercentages: percentages,
+                            unknownElements: unknownElementSet,
+                            elementsWithoutPercent: knownElementsWithoutPercent
+                        });
+                    }
+                });
+            });
+            
+            // Update statistics
+            const elapsed = (Date.now() - state.calculationStartTime) / 1000;
+            elements.combinationCount.textContent = `${totalCombinations.toLocaleString()} combinations`;
+            elements.timeElapsed.textContent = `${elapsed.toFixed(1)}s`;
+            
+            return allResults;
+        }
+
+        function generateAllCoefficientSets(knownWithPercent, knownWithoutPercent, unknownElements, percentages, maxCoeff, tolerance) {
+            const coefficientSets = [];
+            const numKnownWithPercent = knownWithPercent.length;
+            const numKnownWithoutPercent = knownWithoutPercent.length;
+            const numUnknown = unknownElements.length;
+            
+            // Generate coefficients for unknown elements
+            const unknownCoefficientRanges = unknownElements.map(() => 
+                Array.from({length: maxCoeff}, (_, i) => i + 1)
+            );
+            
+            // Generate coefficients for known elements without percentages
+            const knownWithoutPercentCoefficientRanges = knownWithoutPercent.map(() => 
+                Array.from({length: maxCoeff}, (_, i) => i + 1)
+            );
+            
+            // Generate all combinations of coefficients for unknown and known-without-percent elements
+            const allCoefficientCombinations = cartesianProduct(
+                ...knownWithoutPercentCoefficientRanges,
+                ...unknownCoefficientRanges
+            );
+            
+            allCoefficientCombinations.forEach(coefficients => {
+                // Split coefficients into known without percent and unknown
+                const knownWithoutPercentCoefficients = coefficients.slice(0, numKnownWithoutPercent);
+                const unknownCoefficients = coefficients.slice(numKnownWithoutPercent);
+                
+                // Calculate total mass from elements without percentage constraints
+                let massWithoutConstraints = 0;
+                knownWithoutPercent.forEach((elem, i) => {
+                    massWithoutConstraints += knownWithoutPercentCoefficients[i] * ATOMIC_MASSES[elem];
+                });
+                unknownElements.forEach((elem, i) => {
+                    massWithoutConstraints += unknownCoefficients[i] * ATOMIC_MASSES[elem];
+                });
+                
+                // Now find coefficients for elements with percentages
+                if (numKnownWithPercent > 0) {
+                    const knownCoefficientRanges = knownWithPercent.map(() => 
+                        Array.from({length: maxCoeff}, (_, i) => i + 1)
+                    );
+                    
+                    const knownCoefficientCombinations = cartesianProduct(...knownCoefficientRanges);
+                    
+                    knownCoefficientCombinations.forEach(knownWithPercentCoefficients => {
+                        // Calculate total mass
+                        let totalMass = massWithoutConstraints;
+                        knownWithPercent.forEach((elem, i) => {
+                            totalMass += knownWithPercentCoefficients[i] * ATOMIC_MASSES[elem];
+                        });
+                        
+                        // Check if percentages match
+                        const matches = knownWithPercent.every((elem, i) => {
+                            const theoreticalPercent = (knownWithPercentCoefficients[i] * ATOMIC_MASSES[elem] / totalMass) * 100;
+                            return Math.abs(theoreticalPercent - percentages[i]) <= tolerance;
+                        });
+                        
+                        if (matches) {
+                            coefficientSets.push({
+                                knownWithPercent: knownWithPercentCoefficients,
+                                knownWithoutPercent: knownWithoutPercentCoefficients,
+                                unknown: unknownCoefficients
+                            });
+                        }
+                    });
+                } else {
+                    // No elements with percentages, just add the combination
+                    coefficientSets.push({
+                        knownWithPercent: [],
+                        knownWithoutPercent: knownWithoutPercentCoefficients,
+                        unknown: unknownCoefficients
+                    });
+                }
+            });
+            
+            return coefficientSets;
+        }
+
+        function solveForExactComposition(elements, percentages, elementsWithoutPercent, maxCoeff, tolerance) {
+            const formulas = [];
+            const elementsWithPercent = elements.filter(e => !elementsWithoutPercent.includes(e));
+            const percentIndices = elementsWithPercent.map(e => elements.indexOf(e));
+            const actualPercentages = percentIndices.map(i => percentages[i]);
+            
+            // Generate coefficients for all elements
+            const coefficientRanges = elements.map(() => 
+                Array.from({length: maxCoeff}, (_, i) => i + 1)
+            );
+            
+            const coefficientCombinations = cartesianProduct(...coefficientRanges);
+            
+            coefficientCombinations.forEach(coefficients => {
+                // Calculate total mass
+                let totalMass = 0;
+                elements.forEach((elem, i) => {
+                    totalMass += coefficients[i] * ATOMIC_MASSES[elem];
+                });
+                
+                // Check if percentages match for elements with percentages
+                const matches = elementsWithPercent.every((elem, i) => {
+                    const elementIndex = elements.indexOf(elem);
+                    const theoreticalPercent = (coefficients[elementIndex] * ATOMIC_MASSES[elem] / totalMass) * 100;
+                    const targetPercent = actualPercentages[i];
+                    return Math.abs(theoreticalPercent - targetPercent) <= tolerance;
+                });
+                
+                if (matches) {
+                    const formula = {};
+                    elements.forEach((elem, i) => {
+                        formula[elem] = coefficients[i];
+                    });
+                    formulas.push(formula);
+                }
+            });
+            
+            return formulas;
+        }
+
+        function generateCombinations(elements, k) {
+            const result = [];
+            
+            function backtrack(start, current) {
+                if (current.length === k) {
+                    result.push([...current]);
+                    return;
+                }
+                
+                for (let i = start; i < elements.length; i++) {
+                    current.push(elements[i]);
+                    backtrack(i + 1, current);
+                    current.pop();
+                }
+            }
+            
+            backtrack(0, []);
+            return result;
+        }
+
+        function cartesianProduct(...arrays) {
+            return arrays.reduce((acc, curr) => {
+                const result = [];
+                acc.forEach(a => {
+                    curr.forEach(b => {
+                        result.push([...a, b]);
+                    });
+                });
+                return result;
+            }, [[]]);
+        }
+
+        function calculateTheoreticalPercentages(formula) {
+            const result = {};
+            let totalMass = 0;
+            
+            // Calculate total mass
+            Object.entries(formula).forEach(([element, coefficient]) => {
+                totalMass += coefficient * ATOMIC_MASSES[element];
+            });
+            
+            // Calculate percentages
+            Object.entries(formula).forEach(([element, coefficient]) => {
+                result[element] = (coefficient * ATOMIC_MASSES[element] / totalMass) * 100;
+            });
+            
+            return result;
+        }
+
+        // ============================================
+        // RESULTS DISPLAY
+        // ============================================
+        
+        function displayResults(results) {
+            state.allResults = results;
+            state.filteredResults = [...results];
+            
+            // Update statistics
+            elements.formulaCount.textContent = `${results.length.toLocaleString()} formulas`;
+            
+            // Display first page
+            state.currentPage = 1;
+            updatePageDisplay();
+        }
+
+        function updatePageDisplay() {
+            const start = (state.currentPage - 1) * state.pageSize;
+            const end = start + state.pageSize;
+            const pageResults = state.filteredResults.slice(start, end);
+            
+            // Clear table
+            elements.resultsBody.innerHTML = '';
+            
+            if (pageResults.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--dark-gray);">
+                        No results found. Try adjusting your search parameters.
+                    </td>
+                `;
+                elements.resultsBody.appendChild(row);
+            } else {
+                // Populate table
+                pageResults.forEach((result, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Format formula
+                    const formulaText = formatFormula(result.formula);
+                    const cleanFormula = formulaText.replace(/<sub>/g, '').replace(/<\/sub>/g, '');
+                    
+                    // Format composition
+                    const compositionText = Object.entries(result.formula)
+                        .map(([elem, coeff]) => `${elem}${coeff}`)
+                        .join('');
+                    
+                    // Calculate molar mass
+                    const molarMass = Object.entries(result.formula)
+                        .reduce((sum, [elem, coeff]) => sum + coeff * ATOMIC_MASSES[elem], 0);
+                    
+                    // Get actual percentages (for known elements with percentages)
+                    const actualPercentages = state.elementInputs
+                        .filter(input => input.symbol.value.trim() && input.percent.value.trim())
+                        .map(input => {
+                            const symbol = input.symbol.value;
+                            const formattedSymbol = symbol.length === 2 
+                                ? symbol.charAt(0).toUpperCase() + symbol.charAt(1).toLowerCase()
+                                : symbol.toUpperCase();
+                            return {
+                                element: formattedSymbol,
+                                percent: parseFloat(input.percent.value)
+                            };
+                        });
+                    
+                    // Elements without percentages
+                    const elementsWithoutPercent = result.elementsWithoutPercent || [];
+                    
+                    // Get PubChem verification status - FIXED TO SHOW REAL/ERROR PROPERLY
+                    let pubchemCell = '';
+                    
+                    if (result.pubchem) {
+                        if (result.pubchem.exists) {
+                            // Compound found - show "Real" with link
+                            if (result.pubchem.link) {
+                                pubchemCell = `
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <span class="pubchem-badge verified">✓ Real</span>
+                                        <a href="${result.pubchem.link}" target="_blank" class="pubchem-link" title="View on PubChem">
+                                            View
+                                        </a>
+                                    </div>
+                                `;
+                            } else {
+                                pubchemCell = `<span class="pubchem-badge verified">✓ Real</span>`;
+                            }
+                            row.style.backgroundColor = '#f0fff4';
+                        } else if (result.pubchem.error) {
+                            // Error during search
+                            const shortError = result.pubchem.error.length > 20 
+                                ? result.pubchem.error.substring(0, 20) + '...' 
+                                : result.pubchem.error;
+                            pubchemCell = `<span class="pubchem-badge unverified" title="${result.pubchem.error}">⚠️ ${shortError}</span>`;
+                            row.style.backgroundColor = '#fff8e6';
+                        } else {
+                            // No error, just not found
+                            pubchemCell = '<span class="pubchem-badge not-found">Not Found</span>';
+                            row.style.backgroundColor = '';
+                        }
+                    } else {
+                        // Not verified yet
+                        pubchemCell = '<span class="pubchem-badge pending">Not Checked</span>';
+                        row.style.backgroundColor = '';
+                    }
+                    
+                    // Create table row
+                    row.innerHTML = `
+                        <td class="formula-cell">${formulaText}</td>
+                        <td class="composition-cell">${compositionText}</td>
+                        <td>${molarMass.toFixed(2)} g/mol</td>
+                        <td class="percentage-cell">
+                            ${Object.entries(result.theoreticalPercentages)
+                                .filter(([elem]) => actualPercentages.some(p => p.element === elem) || elementsWithoutPercent.includes(elem))
+                                .map(([elem, pct]) => `<div>${elem}: ${pct.toFixed(2)}%</div>`)
+                                .join('')}
+                        </td>
+                        <td class="percentage-cell">
+                            ${actualPercentages
+                                .map(p => `<div>${p.element}: ${p.percent.toFixed(2)}%</div>`)
+                                .join('')}
+                            ${elementsWithoutPercent.map(e => `<div>${e}: ?</div>`).join('')}
+                        </td>
+                        <td class="percentage-cell">
+                            ${actualPercentages
+                                .map(p => {
+                                    const diff = Math.abs((result.theoreticalPercentages[p.element] || 0) - p.percent);
+                                    const color = diff <= parseFloat(document.getElementById('tolerance').value) ? 'green' : 'red';
+                                    return `<div style="color: ${color}">${diff.toFixed(2)}%</div>`;
+                                })
+                                .join('')}
+                        </td>
+                        <td>${result.unknownElements ? result.unknownElements.join(', ') : 'None'}</td>
+                        <td>${elementsWithoutPercent.length > 0 ? elementsWithoutPercent.join(', ') : 'None'}</td>
+                        <td>${pubchemCell}</td>
+                    `;
+                    
+                    elements.resultsBody.appendChild(row);
+                });
+            }
+            
+            // Update page info
+            const totalPages = Math.ceil(state.filteredResults.length / state.pageSize);
+            elements.pageInfo.textContent = `Page ${state.currentPage} of ${totalPages}`;
+            
+            // Update button states
+            elements.prevPageBtn.disabled = state.currentPage <= 1;
+            elements.nextPageBtn.disabled = state.currentPage >= totalPages;
+            elements.exportPageBtn.disabled = pageResults.length === 0;
+        }
+
+        function changePage(delta) {
+            const totalPages = Math.ceil(state.filteredResults.length / state.pageSize);
+            const newPage = state.currentPage + delta;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                state.currentPage = newPage;
+                updatePageDisplay();
+            }
+        }
+
+        function formatFormula(formula) {
+            const elements = Object.keys(formula);
+            
+            // Hill system: C first, then H, then alphabetical
+            elements.sort((a, b) => {
+                if (a === 'C') return -1;
+                if (b === 'C') return 1;
+                if (a === 'H') return -1;
+                if (b === 'H') return 1;
+                return a.localeCompare(b);
+            });
+            
+            return elements.map(e => formula[e] === 1 ? e : `${e}<sub>${formula[e]}</sub>`).join('');
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        
+        function updateStatus(message, progress, type = 'info') {
+            elements.statusText.textContent = message;
+            elements.progressFill.style.width = `${progress}%`;
+            
+            if (type === 'error') {
+                elements.progressFill.style.background = '#dc3545';
+            } else if (type === 'success') {
+                elements.progressFill.style.background = '#34a853';
+            } else {
+                elements.progressFill.style.background = '#1a73e8';
+            }
+        }
+
+        function updateTotalPercentage() {
+            let total = 0;
+            let count = 0;
+            state.elementInputs.forEach(input => {
+                const percent = parseFloat(input.percent.value);
+                if (!isNaN(percent)) {
+                    total += percent;
+                    count++;
+                }
+            });
+            
+            // Update status bar with total
+            const remaining = 100 - total;
+            if (remaining >= 0) {
+                elements.statusText.textContent = `Total: ${total.toFixed(2)}% from ${count} elements (${remaining.toFixed(2)}% for unknown elements)`;
+            } else {
+                elements.statusText.textContent = `Warning: Total ${total.toFixed(2)}% exceeds 100%`;
+            }
+        }
+
+        function clearAll() {
+            // Clear inputs
+            state.elementInputs.forEach(input => {
+                input.symbol.value = '';
+                input.percent.value = '';
+                input.display.textContent = '?';
+                input.display.style.color = '';
+                input.symbol.style.backgroundColor = '';
+            });
+            
+            // Reset element pool selection
+            selectAllElements();
+            
+            // Clear results
+            state.allResults = [];
+            state.filteredResults = [];
+            state.currentPage = 1;
+            elements.resultsBody.innerHTML = '';
+            elements.formulaCount.textContent = '0 formulas';
+            elements.combinationCount.textContent = '0 combinations';
+            elements.timeElapsed.textContent = '0.0s';
+            elements.pageInfo.textContent = 'Page 1 of 1';
+            
+            // Clear PubChem verification
+            pubchemVerificationState.verifiedFormulas.clear();
+            elements.pubchemStatus.textContent = 'Ready to verify compounds';
+            
+            // Reset controls
+            elements.prevPageBtn.disabled = true;
+            elements.nextPageBtn.disabled = true;
+            elements.exportPageBtn.disabled = true;
+            
+            // Reset periodic table controls
+            document.querySelectorAll('.periodic-table-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            updateStatus('All inputs cleared. Ready to calculate.', 0);
+        }
+
+        function loadWaterExample() {
+            // Clear first
+            clearAll();
+            
+            // Simple example: Water (H2O)
+            elements.totalElements.value = '2';
+            updateElementInputs();
+            
+            // Set known elements
+            state.elementInputs[0].symbol.value = 'H';
+            state.elementInputs[0].percent.value = '11.19';
+            state.elementInputs[0].symbol.dispatchEvent(new Event('input'));
+            state.elementInputs[0].percent.dispatchEvent(new Event('input'));
+            
+            state.elementInputs[1].symbol.value = 'O';
+            state.elementInputs[1].percent.value = '88.81';
+            state.elementInputs[1].symbol.dispatchEvent(new Event('input'));
+            state.elementInputs[1].percent.dispatchEvent(new Event('input'));
+            
+            // Set reasonable parameters
+            document.getElementById('tolerance').value = '0.5';
+            document.getElementById('maxCoefficient').value = '10';
+            document.getElementById('maxResults').value = '100';
+            
+            // Select only H and O for unknown elements (water has no unknowns, but for the algorithm)
+            selectNoElements();
+            state.selectedElements.add('H');
+            state.selectedElements.add('O');
+            Object.values(state.periodicTableCells).forEach(cell => {
+                if (cell.dataset.element === 'H' || cell.dataset.element === 'O') {
+                    cell.classList.add('selected');
+                }
+            });
+            updateSelectedElementsCount();
+            
+            updateStatus('Loaded example: Water (H: 11.19%, O: 88.81%)', 0);
+            
+            // Auto-calculate after a short delay
+            setTimeout(() => {
+                calculateAllFormulas();
+            }, 100);
+        }
+
+        function exportAllResults() {
+            if (state.allResults.length === 0) {
+                alert('No results to export!');
+                return;
+            }
+            
+            const csv = convertResultsToCSV(state.allResults);
+            downloadCSV(csv, 'all_formula_combinations.csv');
+            updateStatus(`Exported ${state.allResults.length} formulas`, 100, 'success');
+        }
+
+        function exportCurrentPage() {
+            const start = (state.currentPage - 1) * state.pageSize;
+            const end = start + state.pageSize;
+            const pageResults = state.filteredResults.slice(start, end);
+            
+            if (pageResults.length === 0) {
+                alert('No results on current page to export!');
+                return;
+            }
+            
+            const csv = convertResultsToCSV(pageResults);
+            downloadCSV(csv, `formulas_page_${state.currentPage}.csv`);
+            updateStatus(`Exported ${pageResults.length} formulas from page ${state.currentPage}`, 100, 'success');
+        }
+
+        function convertResultsToCSV(results) {
+            const headers = ['Formula', 'Composition', 'Molar Mass', 'Theoretical %', 'Actual %', 'Difference', 'Unknown Elements', 'Elements without %', 'PubChem Status', 'PubChem CID', 'PubChem Link'];
+            const rows = results.map(result => {
+                const formula = formatFormula(result.formula).replace(/<sub>/g, '').replace(/<\/sub>/g, '');
+                const composition = Object.entries(result.formula)
+                    .map(([elem, coeff]) => `${elem}${coeff}`)
+                    .join('');
+                const molarMass = Object.entries(result.formula)
+                    .reduce((sum, [elem, coeff]) => sum + coeff * ATOMIC_MASSES[elem], 0);
+                
+                const theoretical = Object.entries(result.theoreticalPercentages)
+                    .map(([elem, pct]) => `${elem}:${pct.toFixed(2)}%`)
+                    .join('; ');
+                
+                // Actual percentages (only those with known percentages)
+                const actual = state.elementInputs
+                    .filter(input => input.symbol.value.trim() && input.percent.value.trim())
+                    .map(input => {
+                        const symbol = input.symbol.value;
+                        const formattedSymbol = symbol.length === 2 
+                            ? symbol.charAt(0).toUpperCase() + symbol.charAt(1).toLowerCase()
+                            : symbol.toUpperCase();
+                        return `${formattedSymbol}:${input.percent.value}%`;
+                    })
+                    .join('; ');
+                
+                const unknownElements = result.unknownElements ? result.unknownElements.join(', ') : 'None';
+                const elementsWithoutPercent = result.elementsWithoutPercent ? result.elementsWithoutPercent.join(', ') : 'None';
+                
+                // PubChem verification data
+                const verification = pubchemVerificationState.verifiedFormulas.get(formula);
+                const pubchemStatus = verification ? 
+                    (verification.exists ? 'Real Compound' : 
+                     verification.error ? 'Error' : 'Not Found') : 
+                    'Not Verified';
+                const pubchemCID = verification && verification.exists ? verification.cid : '';
+                const pubchemLink = verification && verification.link ? verification.link : '';
+                
+                return [
+                    formula,
+                    composition,
+                    molarMass.toFixed(2),
+                    theoretical,
+                    actual,
+                    '', // Difference column (empty for CSV)
+                    unknownElements,
+                    elementsWithoutPercent,
+                    pubchemStatus,
+                    pubchemCID,
+                    pubchemLink
+                ];
+            });
+            
+            return [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // EXPORT FUNCTIONS FOR GLOBAL ACCESS
+        // ============================================
+        
+        // Make core functions available globally for testing
+        window.ChemicalFormulaFinder = {
+            ATOMIC_MASSES,
+            ELEMENT_GROUPS,
+            generateCombinations,
+            calculateTheoreticalPercentages,
+            formatFormula,
+            cartesianProduct,
+            PubChemAPI,
+            verifyAllWithPubChem,
+            verifySelectedPageWithPubChem,
+            testPubChemConnection
+        };
+    </script>
+</body>
+</html>

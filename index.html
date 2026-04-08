@@ -235,6 +235,7 @@
         .card-organic    { --c-accent:#10b981; --c-bg:#f0fdf4; --c-dim:#d1fae5; --c-dim2:#a7f3d0; --c-border:#a7f3d0; --c-text:#047857; }
         .card-inorganic  { --c-accent:#8b5cf6; --c-bg:#faf5ff; --c-dim:#ede9fe; --c-dim2:#ddd6fe; --c-border:#ddd6fe; --c-text:#6d28d9; }
         .card-electro    { --c-accent:#f59e0b; --c-bg:#fffbeb; --c-dim:#fef3c7; --c-dim2:#fde68a; --c-border:#fde68a; --c-text:#b45309; }
+        .card-formula    { --c-accent:#0ea5e9; --c-bg:#f0f9ff; --c-dim:#e0f2fe; --c-dim2:#bae6fd; --c-border:#bae6fd; --c-text:#0369a1; }
 
         footer {
             text-align: center; padding: 28px;
@@ -262,33 +263,22 @@
         <a href="labs/organic.html">Organic</a>
         <a href="labs/inorganic.html">Inorganic</a>
         <a href="labs/electrochem.html">Electrochemistry</a>
+        <a href="labs/formula.html">Formula Finder</a>
     </div>
 </nav>
 
 <section class="hero">
     <div class="hero-eyebrow">⚗️ Interactive Chemistry Platform</div>
     <h1>Learn Chemistry<br>by <em>Doing Chemistry</em></h1>
-    <p>Four interactive virtual labs covering titration, organic qualitative analysis, inorganic qualitative analysis, and electrochemistry — with real-time simulation and exam modes.</p>
+    <p>Five interactive virtual labs covering titration, organic and inorganic qualitative analysis, electrochemistry, and chemical formula search — with real-time simulation and exam modes.</p>
 </section>
-
-<!-- NEW LAB HIGHLIGHT -->
-<div style="display:flex; justify-content:center; padding: 0 24px;">
-    <div class="featured-banner">
-        <span class="featured-badge">⚡ New</span>
-        <div class="featured-text">
-            <strong>Electrochemistry Lab just launched</strong>
-            <span>Galvanic cells · Nernst equation · Electrolysis · Concentration cells · Exam mode</span>
-        </div>
-        <a href="labs/electrochem.html" class="featured-link">Open Lab →</a>
-    </div>
-</div>
 
 <div style="display:flex; justify-content:center; padding: 0 24px;">
     <div class="stats-row">
         <div class="stat"><span class="stat-num">100+</span><div class="stat-label">Organic Compounds</div></div>
         <div class="stat"><span class="stat-num">20+</span><div class="stat-label">Cations &amp; Anions</div></div>
         <div class="stat"><span class="stat-num">8</span><div class="stat-label">Titration Types</div></div>
-        <div class="stat"><span class="stat-num">4</span><div class="stat-label">Virtual Labs</div></div>
+        <div class="stat"><span class="stat-num">5</span><div class="stat-label">Virtual Labs</div></div>
     </div>
 </div>
 
@@ -382,6 +372,34 @@
         </div>
     </a>
 
+    <!-- FORMULA FINDER -->
+    <a href="labs/formula.html" class="lab-card card-formula" aria-label="Open Formula Finder">
+        <div class="card-visual">
+            <div class="card-top-line"></div>
+            <svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="20" y="30" width="110" height="90" rx="8" fill="rgba(14,165,233,0.08)" stroke="rgba(14,165,233,0.4)" stroke-width="1.5"/>
+                <rect x="30" y="42" width="90" height="14" rx="4" fill="rgba(14,165,233,0.15)" stroke="rgba(14,165,233,0.3)" stroke-width="1"/>
+                <text x="75" y="53" font-size="9" fill="#0369a1" text-anchor="middle" font-family="monospace" font-weight="600">H₂SO₄  NaCl  CuSO₄</text>
+                <rect x="30" y="63" width="55" height="10" rx="3" fill="rgba(14,165,233,0.1)"/>
+                <rect x="30" y="79" width="70" height="10" rx="3" fill="rgba(14,165,233,0.1)"/>
+                <rect x="30" y="95" width="45" height="10" rx="3" fill="rgba(14,165,233,0.1)"/>
+                <circle cx="118" cy="118" r="16" fill="rgba(14,165,233,0.12)" stroke="rgba(14,165,233,0.45)" stroke-width="1.5"/>
+                <text x="118" y="122" font-size="14" fill="#0369a1" text-anchor="middle">🔍</text>
+            </svg>
+        </div>
+        <div class="card-body">
+            <span class="card-chip">Formula Finder</span>
+            <div class="card-title">Chemical Formula Search</div>
+            <div class="card-desc">Find chemical formulas from element combinations, search by name or CAS number, and explore compound properties with PubChem integration.</div>
+            <div class="card-features">
+                <span class="card-feature">🔍 PubChem search</span>
+                <span class="card-feature">⚗️ All combinations</span>
+                <span class="card-feature">📋 CAS lookup</span>
+            </div>
+            <div class="card-cta">Open Tool <span class="card-cta-arrow">→</span></div>
+        </div>
+    </a>
+
     <!-- ELECTROCHEMISTRY -->
     <a href="labs/electrochem.html" class="lab-card card-electro" aria-label="Open Electrochemistry Lab">
         <div class="card-visual">
@@ -402,7 +420,7 @@
             </svg>
         </div>
         <div class="card-body">
-            <span class="card-chip">⚡ New · Electrochemistry</span>
+            <span class="card-chip">Electrochemistry</span>
             <div class="card-title">Cells, Electrolysis &amp; Nernst</div>
             <div class="card-desc">Build galvanic and electrolytic cells, apply the Nernst equation, calculate Faraday electrolysis, and explore concentration cells with 22 half-reactions.</div>
             <div class="card-features">
